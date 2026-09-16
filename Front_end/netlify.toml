@@ -1,0 +1,28 @@
+# 1. Chuyển hướng truy cập tên miền gốc vào thẳng trang đăng nhập
+[[redirects]]
+  from = "/"
+  to = "/sharedFolder/login.html"
+  status = 200
+
+# 2. Hỗ trợ cả 2 đường dẫn đăng nhập (có và không có đuôi .html)
+[[redirects]]
+  from = "/login"
+  to = "/sharedFolder/login.html"
+  status = 200
+
+[[redirects]]
+  from = "/login.html"
+  to = "/sharedFolder/login.html"
+  status = 200
+
+# 3. Tạo đường dẫn rút gọn cho trang đăng ký
+[[redirects]]
+  from = "/register"
+  to = "/sharedFolder/register.html"
+  status = 200
+
+# 4. Bắt TẤT CẢ các lỗi truy cập sai link và đẩy người dùng về trang đăng nhập
+[[redirects]]
+  from = "/*"
+  to = "/sharedFolder/login.html"
+  status = 404
