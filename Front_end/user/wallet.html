@@ -34,7 +34,7 @@
             }
         }
     </script>
-    <script src="../assets/js/token-formatter.js?v=1789977279"></script>
+    <script src="../assets/js/token-formatter.js?v=1789978195"></script>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 transition-colors text-gray-800 dark:text-gray-100 dark:text-gray-100 h-screen flex overflow-hidden">
     <!-- Sidebar Placeholder -->
@@ -516,77 +516,11 @@
                 if (response.ok) {
                     isDepositSessionActive = true;
                     if (data.type === 'payos') {
-                        // 1. LUỒNG TỰ ĐỘNG PAYOS
-                        const transferDesc = `Nap Token ${data.orderCode}`;
-                        const fallbackUrl = `https://img.vietqr.io/image/MB-0347793976-compact2.png?amount=${amount}&addInfo=${encodeURIComponent(transferDesc)}&accountName=${encodeURIComponent('TRINH HUY HOANG')}`;
-                        const qrUrl = data.qrCode 
-                            ? `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(data.qrCode)}`
-                            : fallbackUrl;
-                        
-                        const qrImg = document.getElementById('qrImage');
-                        const qrModalImg = document.getElementById('qrModalImage');
-                        qrImg.onerror = () => { qrImg.src = fallbackUrl; };
-                        qrModalImg.onerror = () => { qrModalImg.src = fallbackUrl; };
-                        qrImg.src = qrUrl;
-                        qrModalImg.src = qrUrl; 
-                        
-                        document.getElementById('qrAmount').textContent = parseInt(amount).toLocaleString();
-                        document.getElementById('qrModalAmount').textContent = parseInt(amount).toLocaleString();
-                        
-                        document.getElementById('transferContentDisplay').textContent = transferDesc;
-                        document.getElementById('modalTransferContent').textContent = transferDesc;
-                        
-                        const linkDirect = document.getElementById('linkPayosDirect');
-                        if (linkDirect && data.checkoutUrl) {
-                            linkDirect.href = data.checkoutUrl;
-                            linkDirect.classList.remove('hidden');
+                        // CHUYỂN HƯỚNG TRỰC TIẾP TỚI TRANG THANH TOÁN PAYOS
+                        if (data.checkoutUrl) {
+                            window.location.href = data.checkoutUrl;
+                            return;
                         }
-
-                        const statusBtn = document.getElementById('btnCheckStatus');
-                        if (statusBtn) {
-                            statusBtn.className = "bg-indigo-600 text-white px-4 py-2.5 rounded-xl font-bold transition w-full shadow flex justify-center items-center text-xs";
-                            statusBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Đang chờ chuyển khoản (Tự duyệt 100%)...';
-                        }
-
-                        document.getElementById('qrNoticeText').innerHTML = '⚡ <b>Tự động 100%:</b> Quét mã xong tiền sẽ tự động cộng ngay trong 3 giây!';
-
-                        document.getElementById('qrSection').classList.remove('hidden');
-                        disableDepositForm(true);
-                        startCountdown(300);
-
-                        // Bắt đầu Auto-polling tự động kiểm tra mỗi 2.5 giây
-                        const currentOrderCode = data.orderCode;
-                        payosPollingInterval = setInterval(async () => {
-                            try {
-                                const vRes = await fetch(`${API_URL}/api/payment/verify-deposit`, {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ orderCode: currentOrderCode })
-                                });
-                                const vData = await vRes.json();
-                                if (vData.success) {
-                                    // ĐÃ THANH TOÁN THÀNH CÔNG!
-                                    clearInterval(payosPollingInterval);
-                                    if (countdownInterval) clearInterval(countdownInterval);
-                                    isDepositSessionActive = false;
-                                    if (statusBtn) {
-                                        statusBtn.className = "bg-emerald-600 text-white px-4 py-2.5 rounded-xl font-bold transition w-full shadow flex justify-center items-center text-xs";
-                                        statusBtn.innerHTML = '<i class="fas fa-check-circle mr-2"></i> Nạp Thành Công! Đã cộng tiền vào ví.';
-                                    }
-
-                                    alert(`🎉 Chúc mừng! Bạn vừa nạp thành công ${formatTokenHTML(parseInt(amount), false)} vào ví!`);
-                                    loadWallet();
-
-                                    setTimeout(() => {
-                                        document.getElementById('qrSection').classList.add('hidden');
-                                        disableDepositForm(false);
-                                    }, 2000);
-                                }
-                            } catch (err) {
-                                console.warn('Lỗi polling payos verify:', err);
-                            }
-                        }, 2500);
-
                     } else if (data.type === 'manual') {
                         // 2. LUỒNG THỦ CÔNG (ADMIN ĐANG BẬT DUYỆT TAY)
                         const bankId = 'MB';
@@ -1025,7 +959,7 @@
     </div>
     
     <!-- Shared UI Script -->
-    <script src="ui.js?v=1789977279"></script>
+    <script src="ui.js?v=1789978195"></script>
         
     <script>
         // Global Drag and Drop protection
