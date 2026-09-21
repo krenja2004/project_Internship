@@ -331,3 +331,46 @@ document.addEventListener('DOMContentLoaded', () => {
     loadAdminAlerts();
     window.loadAdminAlerts = loadAdminAlerts;
 });
+
+
+// QUẢN LÝ CHẾ ĐỘ RÚT TIỀN TỰ ĐỘNG
+async function loadAutoWithdrawSetting() {
+    try {
+        const response = await fetch(`${API_URL}/api/admin/settings`);
+        if (response.ok) {
+            const data = await response.json();
+            const toggle = document.getElementById('autoWithdrawToggle');
+            if (toggle && data.autoApproveWithdraw !== undefined) {
+                toggle.value = data.autoApproveWithdraw.toString();
+            }
+        }
+    } catch(e) {
+        console.error('Lỗi lấy cài đặt rút tự động:', e);
+    }
+}
+
+window.toggleAutoWithdraw = async function() {
+    const toggle = document.getElementById('autoWithdrawToggle');
+    if (!toggle) return;
+    const isAuto = toggle.value === 'true';
+    
+    try {
+        const response = await fetch(`${API_URL}/api/admin/settings`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ autoApproveWithdraw: isAuto })
+        });
+        if (response.ok) {
+            alert(`Đã chuyển sang chế độ Rút Tiền: ${isAuto ? 'Tự Động' : 'Thủ Công'}`);
+        } else {
+            alert('Lỗi cập nhật cài đặt');
+        }
+    } catch(e) {
+        alert('Lỗi kết nối máy chủ');
+    }
+};
+
+// Gọi khi DOM load
+document.addEventListener('DOMContentLoaded', () => {
+    loadAutoWithdrawSetting();
+});

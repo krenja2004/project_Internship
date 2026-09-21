@@ -172,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             <!-- User Avatar -->
             <a href="profile.html" class="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full border-2 border-indigo-300 dark:border-indigo-500 overflow-hidden shadow-sm hover:border-indigo-500 transition-colors shrink-0 flex items-center justify-center bg-indigo-50" title="Hồ sơ cá nhân">
-                <img id="uiAvatar" src="https://ui-avatars.com/api/?name=${encodeURIComponent(user.full_name || user.name || 'Client')}&background=4f46e5&color=fff" alt="Avatar" class="w-full h-full object-cover">
+                <img id="uiAvatar" referrerpolicy="no-referrer" src="https://ui-avatars.com/api/?name=${encodeURIComponent(user.full_name || user.name || 'Client')}&background=4f46e5&color=fff" alt="Avatar" class="w-full h-full object-cover">
             </a>
         </div>
     </header>`;
@@ -469,6 +469,9 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(() => {
         loadUserNotifications();
         loadGlobalBalance();
+        setInterval(() => {
+            if(user && user.id) loadGlobalBalance();
+        }, 5000);
     }, 5000);
 
     // 10. Global Modern Typography & Sleek Scrollbar Style
@@ -532,6 +535,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Khởi chạy ban đầu
     loadGlobalBalance();
+        setInterval(() => {
+            if(user && user.id) loadGlobalBalance();
+        }, 5000);
     
     loadUserNotifications();
     window.loadUserNotifications = loadUserNotifications;
