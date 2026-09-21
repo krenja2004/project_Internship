@@ -188,7 +188,7 @@
                         <!-- Table -->
                         <div class="overflow-x-auto">
                             <table class="min-w-full text-xs text-left">
-                                <thead class="bg-gray-50 dark:bg-gray-750 text-gray-500 dark:text-gray-400 uppercase font-black">
+                                <thead class="bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 uppercase font-black">
                                     <tr>
                                         <th class="py-3 px-3">Thời gian</th>
                                         <th class="py-3 px-3">Người dùng</th>
@@ -245,7 +245,7 @@
     </div>
 
     <!-- Load Admin UI Framework -->
-    <script src="admin-ui.js?v=1789725908"></script>
+    <script src="admin-ui.js?v=1789959507"></script>
 
     <script>
         const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
@@ -334,7 +334,7 @@
                 }
 
                 return `
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-750 transition">
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition">
                         <td class="py-2.5 px-3 text-gray-400 whitespace-nowrap text-[11px]">${date}</td>
                         <td class="py-2.5 px-3 font-bold">${relatedUser}</td>
                         <td class="py-2.5 px-3">${badge}</td>
@@ -357,7 +357,7 @@
                         else if (log.level === 'SECURITY' || log.level === 'CRITICAL') levelBg = 'bg-red-100 text-red-800 dark:bg-red-950/60 dark:text-red-300';
 
                         return `
-                            <div class="p-3 bg-gray-50 dark:bg-gray-750 rounded-2xl border border-gray-100 dark:border-gray-700 text-xs">
+                            <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-2xl border border-gray-100 dark:border-gray-700 text-xs">
                                 <div class="flex justify-between items-center mb-1">
                                     <span class="${levelBg} px-2 py-0.5 rounded-md font-black text-[10px]">${log.module} • ${log.action}</span>
                                     <span class="text-[9px] text-gray-400">${new Date(log.timestamp).toLocaleTimeString('vi-VN')}</span>

@@ -21,7 +21,7 @@
     </script>
 </head>
 
-<body class="bg-slate-50 dark:bg-dark-950 text-slate-800 dark:text-slate-100 font-sans transition-colors duration-200">
+<body class="bg-slate-50 dark:bg-gray-900 text-slate-800 dark:text-slate-100 font-sans transition-colors duration-200">
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar Navigation -->
         <aside id="sidebar-container" class="shrink-0"></aside>
@@ -123,7 +123,7 @@
 
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm">
-                    <thead class="bg-gray-50 dark:bg-gray-750 text-gray-600 dark:text-gray-300 font-bold uppercase text-xs border-b border-gray-200 dark:border-gray-700">
+                    <thead class="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-bold uppercase text-xs border-b border-gray-200 dark:border-gray-700">
                         <tr>
                             <th class="px-6 py-4">Icon & Tên Danh Mục</th>
                             <th class="px-6 py-4">Thẻ Tags Gợi Ý (Preset)</th>
@@ -241,7 +241,7 @@
                     : '<span class="bg-gray-100 text-gray-500 text-xs font-bold px-2.5 py-1 rounded-full">Đang ẩn</span>';
 
                 return `
-                <tr class="hover:bg-gray-50 dark:hover:bg-gray-750/50 transition">
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
                     <td class="px-6 py-4">
                         <div class="flex items-center space-x-3">
                             <span class="text-2xl">${cat.icon || '📁'}</span>
@@ -393,6 +393,6 @@
 
         loadCategoriesData();
     </script>
-    <script src="admin-ui.js?v=1789725908"></script>
+    <script src="admin-ui.js?v=1789959507"></script>
 </body>
 </html>
