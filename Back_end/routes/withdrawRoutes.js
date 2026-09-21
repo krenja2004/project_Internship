@@ -234,12 +234,14 @@ router.post('/api/withdraw/cancel', async (req, res) => {
     try {
         if (!user_id || !request_id) throw new Error('Thiếu thông tin người dùng hoặc mã lệnh rút');
 
+        // Đổi trạng thái lệnh rút thành 'cancelled' trước để tránh Race Condition (Click nhiều lần)
         const { data: reqData, error: reqErr } = await supabase
             .from('withdraw_requests')
-            .select('*')
+            .update({ status: 'cancelled' })
             .eq('id', request_id)
             .eq('user_id', user_id)
             .eq('status', 'pending')
+            .select('*')
             .single();
 
         if (reqErr || !reqData) throw new Error('Lệnh rút tiền không tồn tại hoặc đã được xử lý trước đó');
@@ -257,9 +259,6 @@ router.post('/api/withdraw/cancel', async (req, res) => {
             locked_balance: newLocked,
             balance: newBalance
         }).eq('user_id', user_id);
-
-        // Đổi trạng thái lệnh rút thành 'cancelled'
-        await supabase.from('withdraw_requests').update({ status: 'cancelled' }).eq('id', request_id);
 
         // Ghi log ví
         await supabase.from('wallet_ledger').insert([{
