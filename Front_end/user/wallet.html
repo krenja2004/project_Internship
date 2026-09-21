@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ví Token Của Tôi - HT Work</title>
+    <title>Ví Token Của Tôi - KGS Work</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
     <style>
@@ -34,6 +34,7 @@
             }
         }
     </script>
+    <script src="../assets/js/token-formatter.js?v=1789725908"></script>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 transition-colors text-gray-800 dark:text-gray-100 dark:text-gray-100 h-screen flex overflow-hidden">
     <!-- Sidebar Placeholder -->
@@ -98,7 +99,7 @@
                         <div>
                             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-1">Nhập số lượng Token muốn nạp:</label>
                             <div class="relative">
-                                <input type="number" id="amount" required min="10000" step="1000" class="block w-full border-2 border-gray-200 dark:border-gray-600 p-3 pl-10 rounded-xl focus:ring-0 focus:border-indigo-500 transition text-lg font-bold text-gray-800 dark:text-gray-100 bg-white dark:bg-gray-700" placeholder="Tối thiểu 10,000" value="10000">
+                                <input type="text" inputmode="numeric" id="amount" oninput="formatNumberInput(this)" required min="10000" step="1000" class="block w-full border-2 border-gray-200 dark:border-gray-600 p-3 pl-10 rounded-xl focus:ring-0 focus:border-indigo-500 transition text-lg font-bold text-gray-800 dark:text-gray-100 bg-white dark:bg-gray-700" placeholder="Tối thiểu 10,000" value="10000">
                                 <i class="fas fa-coins absolute left-3.5 top-4 text-yellow-500"></i>
                             </div>
                             <div class="flex gap-2 mt-2">
@@ -184,7 +185,7 @@
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Nhập số lượng Token muốn rút (Tối thiểu 10,000):</label>
                     <div class="relative">
-                        <input type="number" id="withdrawAmount" required min="10000" step="1000" class="block w-full border-2 border-gray-200 p-3 pl-10 rounded-xl focus:ring-0 focus:border-green-500 transition text-lg font-bold text-gray-700" placeholder="Tối thiểu 10,000">
+                        <input type="text" inputmode="numeric" id="withdrawAmount" oninput="formatNumberInput(this)" required min="10000" step="1000" class="block w-full border-2 border-gray-200 p-3 pl-10 rounded-xl focus:ring-0 focus:border-green-500 transition text-lg font-bold text-gray-700" placeholder="Tối thiểu 10,000">
                         <i class="fas fa-coins absolute left-4 top-4 text-yellow-500"></i>
                     </div>
                     <p id="withdrawErrorMsg" class="text-red-500 text-sm mt-2 hidden"></p>
@@ -309,7 +310,7 @@
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'QR_Thanh_Toan_HTWork.png';
+                a.download = 'QR_Thanh_Toan_KGS Work.png';
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
@@ -321,7 +322,7 @@
         }
         const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
             ? 'http://localhost:5000' 
-            : 'https://htwork-backend.onrender.com';
+            : 'https://kgs work-backend.onrender.com';
 
         let currentUser = null;
         let countdownInterval = null;
@@ -411,8 +412,8 @@
                 
                 if (response.ok && data.wallet) {
                     currentWalletBalance = data.wallet.balance;
-                    document.getElementById('balance').textContent = `${data.wallet.balance.toLocaleString()} Token`;
-                    document.getElementById('locked_balance').textContent = `${data.wallet.locked_balance.toLocaleString()} Token`;
+                    document.getElementById('balance').innerHTML = `${formatTokenHTML(data.wallet.balance)}`;
+                    document.getElementById('locked_balance').innerHTML = `${formatTokenHTML(data.wallet.locked_balance)}`;
                 }
 
                 // Tải lịch sử giao dịch
@@ -441,7 +442,7 @@
                             <tr class="hover:bg-gray-50 border-b">
                                 <td class="px-4 py-3 text-gray-500 dark:text-gray-400">${dateStr}</td>
                                 <td class="px-4 py-3"><span class="bg-gray-100 text-gray-800 dark:text-gray-100 px-2 py-1 rounded text-xs font-bold border">${formatTxType(tx.type)}</span></td>
-                                <td class="px-4 py-3 font-bold ${amountColor}">${amountSign}${parseInt(tx.amount).toLocaleString()}</td>
+                                <td class="px-4 py-3 font-bold ${amountColor}"></td>
                                 <td class="px-4 py-3 text-gray-600 dark:text-gray-300 text-xs">${tx.note || ''}</td>
                                 <td class="px-4 py-3 text-center">
                                     <button onclick="printReceipt('${tx.id}', '${tx.type}', '${tx.amount}', '${dateStr}', '${tx.note || ''}')" class="bg-gray-800 hover:bg-black text-white px-3 py-1 rounded shadow text-xs font-bold transition flex items-center justify-center mx-auto">
@@ -463,8 +464,25 @@
             }
         }
 
+        
+        // Auto-format currency inputs
+        function formatNumberInput(input) {
+            let val = input.value.replace(/[^0-9]/g, '');
+            if (val !== '') {
+                input.value = parseInt(val, 10).toLocaleString('vi-VN').replace(/,/g, '.');
+            } else {
+                input.value = '';
+            }
+        }
+        
+        // Helper to parse formatted string back to integer
+        function parseFormattedNumber(val) {
+            if(!val) return 0;
+            return parseInt(val.toString().replace(/[^0-9]/g, ''), 10);
+        }
+    
         function setQuickAmount(val) {
-            document.getElementById('amount').value = val;
+            document.getElementById('amount').value = parseInt(val).toLocaleString('vi-VN').replace(/,/g, '.');
         }
 
         async function handleDeposit() {
@@ -474,7 +492,7 @@
                 return;
             }
 
-            const amount = document.getElementById('amount').value;
+            const amountStr = document.getElementById('amount').value; const amount = parseFormattedNumber(amountStr);
             if(!amount || amount < 10000) { alert('Số lượng tối thiểu là 10,000 Token'); return; }
 
             const btnSubmit = document.getElementById('btnSubmitDeposit');
@@ -556,7 +574,7 @@
                                         statusBtn.innerHTML = '<i class="fas fa-check-circle mr-2"></i> Nạp Thành Công! Đã cộng tiền vào ví.';
                                     }
 
-                                    alert(`🎉 Chúc mừng! Bạn vừa nạp thành công ${parseInt(amount).toLocaleString()} Token vào ví!`);
+                                    alert(`🎉 Chúc mừng! Bạn vừa nạp thành công ${formatTokenHTML(parseInt(amount), false)} vào ví!`);
                                     loadWallet();
 
                                     setTimeout(() => {
@@ -684,7 +702,7 @@
                     const transferCode = 'HTword ' + req.id.substring(0, 6).toUpperCase();
                     
                     const bankId = 'vietinbank';
-                    const accountNo = 'HTWORKPAY';
+                    const accountNo = 'KGS WORKPAY';
                     const accountName = 'TRINH HUY HOANG_107882187291';
                     const qrUrl = `https://img.vietqr.io/image/${bankId}-${accountNo}-compact2.png?amount=${amount}&addInfo=${encodeURIComponent(transferCode)}&accountName=${encodeURIComponent(accountName)}`;
                     
@@ -794,7 +812,7 @@
 
         document.getElementById('withdrawForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const amount = parseInt(document.getElementById('withdrawAmount').value);
+            const amount = parseFormattedNumber(document.getElementById('withdrawAmount').value);
             const errorMsg = document.getElementById('withdrawErrorMsg');
             const btn = document.getElementById('btnSubmitWithdraw');
             
@@ -859,7 +877,7 @@
                                     <div>
                                         <div class="flex items-center gap-2 mb-1">
                                             <span class="text-base font-black text-amber-600 dark:text-amber-400">
-                                                ${parseInt(req.amount).toLocaleString()} Token
+                                                ${formatTokenHTML(parseInt(req.amount))}
                                             </span>
                                             <span class="bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 text-[10px] font-bold px-2.5 py-0.5 rounded-full">
                                                 ⏳ Đang chờ duyệt
@@ -909,7 +927,7 @@
         // [DEV] CƠ CHẾ RESET VÍ
         // ==========================
         function checkDevMode() {
-            const allowedEmails = ['admin@htwork.com', 'hoanglubo2004@gmail.com', 'burlee2004@gmail.com'];
+            const allowedEmails = ['admin@kgs work.com', 'hoanglubo2004@gmail.com', 'burlee2004@gmail.com'];
             if (currentUser && allowedEmails.includes(currentUser.email)) {
                 document.getElementById('btnDevReset').classList.remove('hidden');
             }
@@ -948,7 +966,7 @@
             document.getElementById('pr_date').innerText = date;
             document.getElementById('pr_name').innerText = currentUser.full_name || currentUser.email;
             document.getElementById('pr_type').innerText = type;
-            document.getElementById('pr_amount').innerText = parseInt(amount).toLocaleString() + ' VNĐ';
+            document.getElementById('pr_amount').innerHTML = formatTokenHTML(parseInt(amount)) + ' VNĐ';
             document.getElementById('pr_note').innerText = note || 'Không có';
             
             // Mở hộp thoại in của trình duyệt
@@ -967,7 +985,7 @@
     <!-- KHU VỰC IN BIÊN LAI (Ẩn trên Web, chỉ hiện khi in PDF) -->
     <div id="printReceiptArea" class="hidden bg-white dark:bg-gray-800 dark:border-gray-700 p-10 text-gray-800 dark:text-gray-100 w-full max-w-3xl mx-auto border-2 border-gray-200">
         <div class="text-center mb-8 border-b-2 border-indigo-600 pb-4">
-            <h1 class="text-4xl font-black text-indigo-700 tracking-wider">HT WORK</h1>
+            <h1 class="text-4xl font-black text-indigo-700 tracking-wider">KGS WORK</h1>
             <p class="text-gray-500 dark:text-gray-400 font-bold mt-1">NỀN TẢNG FREELANCE IT HÀNG ĐẦU VIỆT NAM</p>
         </div>
         
@@ -998,8 +1016,8 @@
         </div>
 
         <div class="text-center text-gray-500 dark:text-gray-400 text-sm border-t pt-4">
-            <p>Chứng từ này được tạo tự động bởi hệ thống HT Work. Có giá trị đối soát trên toàn hệ thống.</p>
-            <p>Trang web: https://htwork.vn | Email hỗ trợ: support@htwork.com</p>
+            <p>Chứng từ này được tạo tự động bởi hệ thống KGS Work. Có giá trị đối soát trên toàn hệ thống.</p>
+            <p>Trang web: https://kgs work.vn | Email hỗ trợ: support@kgs work.com</p>
         </div>
     </div>
 
@@ -1007,8 +1025,19 @@
     </div>
     
     <!-- Shared UI Script -->
-    <script src="ui.js"></script>
-        </body>
+    <script src="ui.js?v=1789725908"></script>
+        
+    <script>
+        // Global Drag and Drop protection
+        window.addEventListener('dragover', function(e) {
+            e.preventDefault();
+        }, false);
+        window.addEventListener('drop', function(e) {
+            e.preventDefault();
+        }, false);
+    </script>
+</body>
+
 </html>
 
 

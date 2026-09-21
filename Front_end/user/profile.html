@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hồ sơ của tôi - Khách hàng | HT Work</title>
+    <title>Hồ sơ của tôi - Khách hàng | KGS Work</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <script>
@@ -12,6 +12,7 @@
             theme: { extend: { colors: { primary: '#4f46e5', dark: '#111827', darkCard: '#1f2937' } } }
         }
     </script>
+    <script src="../assets/js/token-formatter.js?v=1789725908"></script>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 transition-colors text-gray-800 dark:text-gray-100 h-screen flex overflow-hidden">
     <div id="sidebar-container"></div>
@@ -341,7 +342,7 @@
             <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-3 mb-4"><h3 class="font-bold text-gray-900 dark:text-gray-100 text-base flex items-center"><i class="fas fa-envelope-open-text text-indigo-600 mr-2"></i> Xác thực địa chỉ Email</h3><button onclick="closeEmailModal()" class="text-gray-400 hover:text-red-500 text-2xl font-bold">&times;</button></div>
             <div class="space-y-3 text-sm text-gray-600 dark:text-gray-300">
                 <p class="font-semibold text-gray-800 dark:text-gray-200">Tại sao cần xác thực Email?</p>
-                <ul class="list-disc list-inside space-y-1 text-xs text-gray-500 dark:text-gray-400"><li>Nhận thông báo quan trọng khi Freelancer nộp bài / yêu cầu giải ngân.</li><li>Bảo vệ tài khoản và khôi phục mật khẩu khi có sự cố.</li><li>Tăng huy hiệu uy tín trên sàn giao dịch HT Work.</li></ul>
+                <ul class="list-disc list-inside space-y-1 text-xs text-gray-500 dark:text-gray-400"><li>Nhận thông báo quan trọng khi Freelancer nộp bài / yêu cầu giải ngân.</li><li>Bảo vệ tài khoản và khôi phục mật khẩu khi có sự cố.</li><li>Tăng huy hiệu uy tín trên sàn giao dịch KGS Work.</li></ul>
                 <div class="p-3 bg-blue-50 dark:bg-blue-950/40 rounded-xl border border-blue-200 dark:border-blue-800 mt-2"><p class="text-xs text-blue-800 dark:text-blue-300"><b>Email đăng ký của bạn:</b> <span id="modalEmailText" class="font-bold">...</span></p></div>
             </div>
             <div class="mt-6 flex flex-col gap-2">
@@ -409,7 +410,7 @@
     <script>
         const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
             ? 'http://localhost:5000' 
-            : 'https://htwork-backend.onrender.com';
+            : 'https://kgs work-backend.onrender.com';
             
         let currentUser = null;
         let profileData = {};
@@ -452,7 +453,7 @@
                     return;
                 }
             } catch (e) {
-                console.warn('[HT Work] Dùng fallback tỉnh thành:', e);
+                console.warn('[KGS Work] Dùng fallback tỉnh thành:', e);
             }
             selectEl.innerHTML = fallbackProvinces.map(p => `
                 <option value="${p}" ${p === selectedProvince ? 'selected' : ''}>${p}</option>
@@ -802,7 +803,7 @@
             const creditTierBadge = document.getElementById('creditTierBadge');
 
             if (statSpent) {
-                statSpent.innerText = stats.total_spent ? `${stats.total_spent.toLocaleString()} Token` : '0 Token';
+                statSpent.innerHTML = stats.total_spent ? `${formatTokenHTML(stats.total_spent)} Token` : `0 Token`;
             }
             if (statHireRate) {
                 if (stats.jobs_posted > 0) {
@@ -823,7 +824,7 @@
             }
 
             if (creditSpent) {
-                creditSpent.innerText = stats.total_spent ? `${stats.total_spent.toLocaleString()} Token` : '0 Token';
+                creditSpent.innerHTML = stats.total_spent ? `${formatTokenHTML(stats.total_spent)} Token` : `0 Token`;
             }
             if (creditSuccessRate) {
                 creditSuccessRate.innerText = stats.completion_rate || 'Chưa có';
@@ -914,6 +915,17 @@
         loadBanks();
         loadProfile();
     </script>
-    <script src="ui.js"></script>
+    <script src="ui.js?v=1789725908"></script>
+
+    <script>
+        // Global Drag and Drop protection
+        window.addEventListener('dragover', function(e) {
+            e.preventDefault();
+        }, false);
+        window.addEventListener('drop', function(e) {
+            e.preventDefault();
+        }, false);
+    </script>
 </body>
+
 </html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ví & Doanh Thu - HT Work Freelancer</title>
+    <title>Ví & Doanh Thu - KGS Work Freelancer</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
     <script>
@@ -33,6 +33,7 @@
             }
         }
     </style>
+    <script src="../assets/js/token-formatter.js?v=1789725908"></script>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 h-screen flex overflow-hidden font-sans transition-colors">
     <!-- Sidebar Placeholder -->
@@ -244,7 +245,7 @@
                                     <span class="text-[10px] text-gray-400 font-semibold">Tối thiểu: 10,000 Token</span>
                                 </div>
                                 <div class="relative">
-                                    <input type="number" id="withdrawAmount" required min="10000" step="1000" class="w-full pl-11 pr-4 py-3.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-2xl text-base font-black text-emerald-600 dark:text-emerald-400 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Nhập số Token muốn rút...">
+                                    <input type="text" inputmode="numeric" id="withdrawAmount" oninput="formatNumberInput(this)" required min="10000" step="1000" class="w-full pl-11 pr-4 py-3.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-2xl text-base font-black text-emerald-600 dark:text-emerald-400 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Nhập số Token muốn rút...">
                                     <span class="absolute left-4 top-3.5 text-base">💎</span>
                                 </div>
                                 <p id="withdrawErrorMsg" class="text-red-500 text-xs mt-1.5 hidden font-bold"></p>
@@ -325,7 +326,7 @@
     <!-- KHU VỰC IN BIÊN LAI (Ẩn trên Web, chỉ hiện khi in PDF) -->
     <div id="printReceiptArea" class="hidden bg-white p-10 text-gray-800 w-full max-w-3xl mx-auto border-2 border-gray-200">
         <div class="text-center mb-8 border-b-2 border-indigo-600 pb-4">
-            <h1 class="text-4xl font-black text-indigo-700 tracking-wider">HT WORK</h1>
+            <h1 class="text-4xl font-black text-indigo-700 tracking-wider">KGS WORK</h1>
             <p class="text-gray-500 font-bold mt-1">NỀN TẢNG FREELANCE IT & ESCROW HÀNG ĐẦU VIỆT NAM</p>
         </div>
         
@@ -346,18 +347,18 @@
         </div>
 
         <div class="text-center text-gray-500 text-sm border-t pt-4">
-            <p>Chứng từ này được tạo tự động bởi hệ thống HT Work. Có giá trị đối soát toàn hệ thống.</p>
-            <p>Hỗ trợ: support@htwork.com | Website: https://htwork.vn</p>
+            <p>Chứng từ này được tạo tự động bởi hệ thống KGS Work. Có giá trị đối soát toàn hệ thống.</p>
+            <p>Hỗ trợ: support@kgs work.com | Website: https://kgs work.vn</p>
         </div>
     </div>
 
     <!-- Load UI Framework -->
-    <script src="freelancer-ui.js"></script>
+    <script src="freelancer-ui.js?v=1789725908"></script>
 
     <script>
         const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
             ? 'http://localhost:5000' 
-            : 'https://htwork-backend.onrender.com';
+            : 'https://kgs work-backend.onrender.com';
 
         let currentUser = JSON.parse(localStorage.getItem('user'));
         let currentWalletBalance = 0;
@@ -525,7 +526,7 @@
                                         statusBtn.innerHTML = '<i class="fas fa-check-circle mr-2"></i> Nạp Thành Công! Đã cộng tiền vào ví.';
                                     }
 
-                                    alert(`🎉 Chúc mừng! Bạn vừa nạp thành công ${parseInt(amount).toLocaleString()} Token vào ví!`);
+                                    alert(`🎉 Chúc mừng! Bạn vừa nạp thành công ${formatTokenHTML(parseInt(amount), false)} vào ví!`);
                                     loadWalletData();
                                     if (window.loadGlobalBalance) window.loadGlobalBalance();
 
@@ -690,9 +691,9 @@
                 if (response.ok) {
                     const data = await response.json();
                     currentWalletBalance = data.balance || 0;
-                    document.getElementById('balance').textContent = parseInt(data.balance).toLocaleString();
+                    document.getElementById('balance').innerHTML = formatTokenHTML(data.balance);
                     document.getElementById('balanceVND').textContent = `~${parseInt(data.balance).toLocaleString()} VNĐ`;
-                    document.getElementById('locked_balance').textContent = parseInt(data.locked_balance || 0).toLocaleString();
+                    document.getElementById('locked_balance').innerHTML = formatTokenHTML(data.locked_balance || 0);
                 }
             } catch (e) {
                 console.error('Lỗi tải ví:', e);
@@ -746,7 +747,7 @@
                             <div class="p-3.5 bg-amber-50/60 dark:bg-gray-750 rounded-2xl border border-amber-200 dark:border-gray-700 flex justify-between items-center">
                                 <div>
                                     <div class="flex items-center space-x-2">
-                                        <span class="font-black text-sm text-emerald-600 dark:text-emerald-400">💎 ${parseInt(r.amount).toLocaleString()} Token</span>
+                                        <span class="font-black text-sm text-emerald-600 dark:text-emerald-400">💎 ${formatTokenHTML(parseInt(r.amount))}</span>
                                         <span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-md">Đang chờ Admin duyệt</span>
                                     </div>
                                     <span class="text-[10px] text-gray-400 mt-1 block">${new Date(r.created_at).toLocaleString('vi-VN')}</span>
@@ -793,7 +794,7 @@
                                         <span class="text-[10px] text-gray-400">${dateStr}</span>
                                     </div>
                                     <div class="text-right">
-                                        <span class="font-black text-sm ${amountColor} block">${amountSign}${parseInt(tx.amount).toLocaleString()}</span>
+                                        <span class="font-black text-sm ${amountColor} block"></span>
                                         <button onclick="printReceipt('${tx.id}', '${tx.type}', '${tx.amount}', '${dateStr}', '${tx.note || ''}')" class="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold hover:underline cursor-pointer">
                                             Xuất PDF
                                         </button>
@@ -838,7 +839,7 @@
         // Submit Withdraw
         document.getElementById('withdrawForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const amount = parseInt(document.getElementById('withdrawAmount').value);
+            const amount = parseFormattedNumber(document.getElementById('withdrawAmount').value);
             const errorMsg = document.getElementById('withdrawErrorMsg');
             const btn = document.getElementById('btnSubmitWithdraw');
             
@@ -882,12 +883,23 @@
             document.getElementById('pr_date').innerText = date;
             document.getElementById('pr_name').innerText = currentUser.full_name || currentUser.email;
             document.getElementById('pr_type').innerText = type;
-            document.getElementById('pr_amount').innerText = parseInt(amount).toLocaleString() + ' Token (VNĐ)';
-            document.getElementById('pr_note').innerText = note || 'Thanh toán HT Work';
+            document.getElementById('pr_amount').innerHTML = formatTokenHTML(parseInt(amount)) + ' Token (VNĐ)';
+            document.getElementById('pr_note').innerText = note || 'Thanh toán KGS Work';
             window.print();
         }
 
         loadWalletData();
     </script>
+
+    <script>
+        // Global Drag and Drop protection
+        window.addEventListener('dragover', function(e) {
+            e.preventDefault();
+        }, false);
+        window.addEventListener('drop', function(e) {
+            e.preventDefault();
+        }, false);
+    </script>
 </body>
+
 </html>
