@@ -136,13 +136,22 @@ router.post('/api/payment/payos-webhook', async (req, res) => {
                 await supabase.from('wallets').insert([{ user_id: request.user_id, balance: newBalance, locked_balance: 0 }]);
             }
             
-            // 3. Ghi log transactions
+            // 3. Ghi log transactions & wallet_ledger (Lịch sử GD)
             await supabase.from('transactions').insert([{
                 user_id: request.user_id,
                 amount: amount,
                 type: 'deposit',
                 status: 'success',
                 note: 'Nạp tiền tự động qua PayOS'
+            }]);
+            
+            await supabase.from('wallet_ledger').insert([{
+                sender_id: '11111111-1111-1111-1111-111111111111',
+                receiver_id: request.user_id,
+                amount: amount,
+                type: 'DEPOSIT',
+                idempotency_key: `PAYOS_${orderCode}`,
+                note: 'Nạp Token (Tự động PayOS)'
             }]);
 
             if (blockchain.isConfigured()) {
