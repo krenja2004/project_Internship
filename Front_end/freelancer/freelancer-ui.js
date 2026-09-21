@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
         ? 'http://localhost:5000' 
-        : 'https://kgs work-backend.onrender.com';
+        : 'https://project-internship-8z76.onrender.com';
 
     // 1. Khởi tạo Sidebar (Desktop Sidebar + Mobile Drawer Slide-over)
     const sidebarHtml = 
