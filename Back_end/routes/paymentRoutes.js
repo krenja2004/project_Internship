@@ -48,13 +48,11 @@ router.post('/api/payment/create-deposit', async (req, res) => {
         const usePayOS = method === 'payos' || (method !== 'manual' && settingsStore.getAutoApprovePayOS());
 
         if (usePayOS) {
-            let origin = 'http://127.0.0.1:5500';
+            let returnBaseUrl = 'http://127.0.0.1:8080/user/wallet.html';
             if (req.headers.referer) {
-                try {
-                    origin = new URL(req.headers.referer).origin;
-                } catch (e) {}
+                // Sử dụng chính xác URL hiện tại của người dùng (bỏ các tham số query phía sau nếu có)
+                returnBaseUrl = req.headers.referer.split('?')[0];
             }
-            const returnBaseUrl = `${origin}/Front_end/user/wallet.html`;
 
             // Tạo body cho PayOS
             const requestData = {
