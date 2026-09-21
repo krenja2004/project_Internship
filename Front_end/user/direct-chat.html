@@ -34,7 +34,7 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #374151; }
     </style>
-    <script src="../assets/js/token-formatter.js?v=1789980147"></script>
+    <script src="../assets/js/token-formatter.js?v=1789982338"></script>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 transition-colors text-gray-800 dark:text-gray-100 h-screen flex overflow-hidden font-sans">
     
@@ -98,7 +98,7 @@
                 
                 <!-- Chat Window Header -->
                 <div class="p-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between shrink-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm z-10" id="chatHeader">
-                    <div class="flex items-center space-x-3 min-w-0">
+                    <div class="flex items-center space-x-3 min-w-0 flex-1">
                         <button onclick="toggleMobileInbox()" class="md:hidden p-2 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 mr-1">
                             <i class="fas fa-arrow-left"></i>
                         </button>
@@ -767,7 +767,7 @@
     </div>
 
     <!-- UI Core Script for Client -->
-    <script src="ui.js?v=1789980147"></script>
+    <script src="ui.js?v=1789982338"></script>
 
     <!-- Chat Logic -->
     <script>
@@ -1275,6 +1275,10 @@
                 sidebar.classList.remove('flex');
                 chatArea.classList.remove('hidden', 'md:flex');
                 chatArea.classList.add('flex');
+                
+                // Hide bottom nav on mobile to show chat input
+                const bottomNav = document.querySelector('nav.fixed.bottom-0');
+                if(bottomNav) bottomNav.style.display = 'none';
             }
            activePartnerId = partnerId;
 
@@ -1509,6 +1513,10 @@
             sidebar.classList.add('flex');
             chatArea.classList.remove('flex');
             chatArea.classList.add('hidden', 'md:flex');
+            
+            // Show bottom nav again
+            const bottomNav = document.querySelector('nav.fixed.bottom-0');
+            if(bottomNav) bottomNav.style.display = '';
         }
 
         // 4. Tải và Render danh sách tin nhắn 1-1

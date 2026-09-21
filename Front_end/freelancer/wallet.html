@@ -33,7 +33,7 @@
             }
         }
     </style>
-    <script src="../assets/js/token-formatter.js?v=1789980147"></script>
+    <script src="../assets/js/token-formatter.js?v=1789982338"></script>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 h-screen flex overflow-hidden font-sans transition-colors">
     <!-- Sidebar Placeholder -->
@@ -79,7 +79,7 @@
                         <span class="text-xs text-indigo-100 font-bold mt-1 inline-block">Token (Có thể dùng & rút ngay)</span>
                     </div>
                     <div class="mt-4 pt-3 border-t border-white/20 flex justify-between items-center text-[11px] text-indigo-100">
-                        <span>Quy đổi: <b id="balanceVND">~0 VNĐ</b></span>
+                        <span>Quy đổi: <b id="balanceVND">0 VNĐ</b></span>
                         <span class="bg-white/20 px-2 py-0.5 rounded-md font-bold">1 Token = 1 VNĐ</span>
                     </div>
                 </div>
@@ -353,7 +353,7 @@
     </div>
 
     <!-- Load UI Framework -->
-    <script src="freelancer-ui.js?v=1789980147"></script>
+    <script src="freelancer-ui.js?v=1789982338"></script>
 
     <script>
         const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
@@ -627,7 +627,7 @@
                     const data = await response.json();
                     currentWalletBalance = data.balance || 0;
                     document.getElementById('balance').innerHTML = formatTokenHTML(data.balance);
-                    document.getElementById('balanceVND').textContent = `~${parseInt(data.balance).toLocaleString()} VNĐ`;
+                    document.getElementById('balanceVND').textContent = `${parseInt(data.balance).toLocaleString()} VNĐ`;
                     document.getElementById('locked_balance').innerHTML = formatTokenHTML(data.locked_balance || 0);
                 }
             } catch (e) {

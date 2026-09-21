@@ -1,15 +1,9 @@
-
 window.formatTokenHTML = function(amount, isToken = true) {
     if (amount === undefined || amount === null) return isToken ? '0 Token' : '0';
     let num = parseFloat(amount);
     if (isNaN(num)) return '0';
     
-    let str = '';
-    let absNum = Math.abs(num);
-    if (absNum >= 1000000000) str = (num / 1000000000).toFixed(1).replace(/\.0$/, '') + 'B';
-    else if (absNum >= 1000000) str = (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
-    else if (absNum >= 1000) str = (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
-    else str = num.toString();
+    let str = Math.abs(num).toLocaleString('vi-VN');
 
     if (!isToken) return str;
 
@@ -19,5 +13,3 @@ window.formatTokenHTML = function(amount, isToken = true) {
         <i class="fas fa-coins drop-shadow-md" style="font-size: 0.85em; -webkit-text-fill-color: #facc15; color: #facc15;"></i>
     </span>`;
 };
-
-
