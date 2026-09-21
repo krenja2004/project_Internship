@@ -1247,4 +1247,113 @@ router.post(['/reset-password', '/api/auth/reset-password'], async (req, res) =>
     }
 });
 
+
+// ==========================================
+// 🔴 GOOGLE LOGIN & REGISTRATION
+// ==========================================
+const { OAuth2Client } = require('google-auth-library');
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+router.post(['/google-login', '/api/auth/google-login'], async (req, res) => {
+    const { credential, role } = req.body;
+    
+    try {
+        if (!credential) {
+            return res.status(400).json({ error: 'Missing Google credential' });
+        }
+
+        // Verify Google token
+        const ticket = await googleClient.verifyIdToken({
+            idToken: credential,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        });
+        const payload = ticket.getPayload();
+        const { email, name, picture } = payload;
+
+        // Check if user exists
+        const { data: user, error } = await supabase
+            .from('users')
+            .select('*')
+            .eq('email', email)
+            .single();
+
+        if (user) {
+            // LOGIN SUCCESSFUL
+            await logEvent({
+                module: 'AUTH',
+                action: 'GOOGLE_LOGIN_SUCCESS',
+                level: 'INFO',
+                details: `Người dùng ${email} (${user.role.toUpperCase()}) đăng nhập bằng Google thành công.`,
+                user_id: user.id,
+                user_email: email,
+                user_role: user.role
+            });
+            return res.status(200).json({ success: true, user });
+        } else {
+            // USER DOES NOT EXIST -> REGISTRATION REQUIRED
+            if (!role) {
+                // Tell frontend to ask for a role
+                return res.status(200).json({ 
+                    requires_registration: true, 
+                    message: 'Vui lòng chọn vai trò để hoàn tất đăng ký.',
+                    email, 
+                    name, 
+                    picture 
+                });
+            }
+
+            // PROCEED TO REGISTER
+            // Validate role
+            if (!['freelancer', 'client'].includes(role)) {
+                return res.status(400).json({ error: 'Vai trò không hợp lệ!' });
+            }
+
+            // Create a random secure password for Google users
+            const crypto = require('crypto');
+            const randomPassword = crypto.randomBytes(16).toString('hex');
+            const hashedPassword = await bcrypt.hash(randomPassword, 10);
+
+            // Insert into Database
+            const { data: newUser, error: insertError } = await supabase
+                .from('users')
+                .insert([
+                    {
+                        full_name: name,
+                        email: email,
+                        password: hashedPassword,
+                        role: role,
+                        phone: '', 
+                        is_verified: true, // Google email is already verified
+                        avatar_url: picture,
+                        created_at: new Date().toISOString()
+                    }
+                ])
+                .select('*')
+                .single();
+
+            if (insertError) {
+                console.error('Lỗi khi insert user Google:', insertError);
+                throw new Error('Không thể tạo tài khoản từ Google!');
+            }
+
+            await logEvent({
+                module: 'AUTH',
+                action: 'GOOGLE_REGISTER_SUCCESS',
+                level: 'INFO',
+                details: `Tạo tài khoản thành công qua Google cho ${email} (${role.toUpperCase()})`,
+                user_id: newUser.id,
+                user_email: email,
+                user_role: role
+            });
+
+            // LOGIN AFTER REGISTRATION
+            return res.status(200).json({ success: true, user: newUser, message: 'Tạo tài khoản và đăng nhập thành công!' });
+        }
+
+    } catch (err) {
+        console.error('Lỗi Google Auth:', err);
+        return res.status(401).json({ error: 'Xác thực Google thất bại hoặc có lỗi xảy ra.' });
+    }
+});
+
 module.exports = router;
