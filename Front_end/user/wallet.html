@@ -34,7 +34,7 @@
             }
         }
     </script>
-    <script src="../assets/js/token-formatter.js?v=1789979415"></script>
+    <script src="../assets/js/token-formatter.js?v=1789980147"></script>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 transition-colors text-gray-800 dark:text-gray-100 dark:text-gray-100 h-screen flex overflow-hidden">
     <!-- Sidebar Placeholder -->
@@ -442,7 +442,7 @@
                             <tr class="hover:bg-gray-50 border-b">
                                 <td class="px-4 py-3 text-gray-500 dark:text-gray-400">${dateStr}</td>
                                 <td class="px-4 py-3"><span class="bg-gray-100 text-gray-800 dark:text-gray-100 px-2 py-1 rounded text-xs font-bold border">${formatTxType(tx.type)}</span></td>
-                                <td class="px-4 py-3 font-bold ${amountColor}"></td>
+                                <td class="px-4 py-3 font-bold ${amountColor}">${amountSign}${formatTokenHTML(tx.amount)}</td>
                                 <td class="px-4 py-3 text-gray-600 dark:text-gray-300 text-xs">${tx.note || ''}</td>
                                 <td class="px-4 py-3 text-center">
                                     <button onclick="printReceipt('${tx.id}', '${tx.type}', '${tx.amount}', '${dateStr}', '${tx.note || ''}')" class="bg-gray-800 hover:bg-black text-white px-3 py-1 rounded shadow text-xs font-bold transition flex items-center justify-center mx-auto">
@@ -959,7 +959,7 @@
     </div>
     
     <!-- Shared UI Script -->
-    <script src="ui.js?v=1789979415"></script>
+    <script src="ui.js?v=1789980147"></script>
         
     <script>
         // Global Drag and Drop protection
