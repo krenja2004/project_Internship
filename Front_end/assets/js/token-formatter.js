@@ -19,3 +19,5 @@ window.formatTokenHTML = function(amount, isToken = true) {
         <i class="fas fa-coins drop-shadow-md" style="font-size: 0.85em; -webkit-text-fill-color: #facc15; color: #facc15;"></i>
     </span>`;
 };
+
+
