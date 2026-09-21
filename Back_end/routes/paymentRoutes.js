@@ -73,6 +73,9 @@ router.post('/api/payment/create-deposit', async (req, res) => {
                 checkoutUrl: paymentLink.checkoutUrl, 
                 orderCode: orderCode,
                 qrCode: paymentLink.qrCode,
+                bin: paymentLink.bin,
+                accountNumber: paymentLink.accountNumber,
+                accountName: paymentLink.accountName,
                 request_id: data.id
             });
         } else {

@@ -33,7 +33,7 @@
             }
         }
     </style>
-    <script src="../assets/js/token-formatter.js?v=1789976374"></script>
+    <script src="../assets/js/token-formatter.js?v=1789977279"></script>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 h-screen flex overflow-hidden font-sans transition-colors">
     <!-- Sidebar Placeholder -->
@@ -353,7 +353,7 @@
     </div>
 
     <!-- Load UI Framework -->
-    <script src="freelancer-ui.js?v=1789976374"></script>
+    <script src="freelancer-ui.js?v=1789977279"></script>
 
     <script>
         const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
@@ -472,15 +472,14 @@
                     if (data.type === 'payos') {
                         // LUỒNG TỰ ĐỘNG PAYOS
                         const transferDesc = `Nap Token ${data.orderCode}`;
-                        const fallbackUrl = `https://img.vietqr.io/image/MB-0347793976-compact2.png?amount=${amount}&addInfo=${encodeURIComponent(transferDesc)}&accountName=${encodeURIComponent('TRINH HUY HOANG')}`;
-                        const qrUrl = data.qrCode 
-                            ? `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(data.qrCode)}`
-                            : fallbackUrl;
+                        let qrUrl = `https://img.vietqr.io/image/MB-6505105786-compact2.png?amount=${amount}&addInfo=${encodeURIComponent(transferDesc)}&accountName=${encodeURIComponent('TRINH HUY HOANG')}`;
+                        
+                        if (data.bin && data.accountNumber) {
+                            qrUrl = `https://img.vietqr.io/image/${data.bin}-${data.accountNumber}-compact2.png?amount=${amount}&addInfo=${encodeURIComponent(transferDesc)}&accountName=${encodeURIComponent(data.accountName || 'TRINH HUY HOANG')}`;
+                        }
                         
                         const qrImg = document.getElementById('qrImage');
                         const qrModalImg = document.getElementById('qrModalImage');
-                        qrImg.onerror = () => { qrImg.src = fallbackUrl; };
-                        qrModalImg.onerror = () => { qrModalImg.src = fallbackUrl; };
                         qrImg.src = qrUrl;
                         qrModalImg.src = qrUrl; 
                         
