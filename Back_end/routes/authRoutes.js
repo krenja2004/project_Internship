@@ -353,6 +353,25 @@ const uploadImageLocal = multer({
     fileFilter: imageFileFilter 
 });
 
+const cloudinary = require('cloudinary').v2;
+
+// Hàm hỗ trợ upload lên Cloudinary để lưu ảnh vĩnh viễn (tránh mất file khi Render restart/ngủ)
+async function uploadToCloudinary(filePath, folder = 'avatars') {
+    try {
+        if (!process.env.CLOUDINARY_URL && !process.env.CLOUDINARY_CLOUD_NAME) {
+            return null;
+        }
+        const result = await cloudinary.uploader.upload(filePath, {
+            folder: folder,
+            resource_type: 'image'
+        });
+        return result.secure_url;
+    } catch (err) {
+        console.error('[Cloudinary Upload Error]:', err.message);
+        return null;
+    }
+}
+
 // Helper tra cứu MIME Type khi tải/xem tệp tin
 function getMimeType(fileName) {
     if (!fileName) return 'application/octet-stream';
@@ -410,7 +429,7 @@ function writeUploadLog(req, type, status, detail) {
 
 router.post('/upload-image', (req, res) => {
     writeUploadLog(req, '/upload-image', 'START', 'Bắt đầu nhận request');
-    uploadImageLocal.single('image')(req, res, function (localErr) {
+    uploadImageLocal.single('image')(req, res, async function (localErr) {
         if (localErr) {
             writeUploadLog(req, '/upload-image', 'ERROR', localErr.message);
             if (localErr.code === 'LIMIT_FILE_SIZE') {
@@ -437,7 +456,21 @@ router.post('/upload-image', (req, res) => {
 
         const host = req.get('host') || 'localhost:5000';
         const protocol = req.protocol || 'http';
-        const localUrl = `${protocol}://${host}/uploads/${req.file.filename}`;
+        let localUrl = `${protocol}://${host}/uploads/${req.file.filename}`;
+
+        // Đẩy lên Cloudinary để lưu trữ vĩnh viễn (tránh mất file trên Render)
+        try {
+            const cloudUrl = await uploadToCloudinary(req.file.path, 'avatars');
+            if (cloudUrl) {
+                localUrl = cloudUrl;
+                if (fs.existsSync(req.file.path)) {
+                    try { fs.unlinkSync(req.file.path); } catch(e){}
+                }
+            }
+        } catch(cErr) {
+            console.warn('[Upload Image] Cloudinary fallback:', cErr.message);
+        }
+
         writeUploadLog(req, '/upload-image', 'SUCCESS', `Đã lưu file: ${localUrl}`);
         return res.status(200).json({
             message: 'Upload ảnh thành công!',
@@ -475,7 +508,7 @@ router.post('/upload-file', (req, res) => {
 
 router.post('/api/upload/image', (req, res) => {
     writeUploadLog(req, '/api/upload/image', 'START', 'Bắt đầu nhận request');
-    uploadImageLocal.single('file')(req, res, function (localErr) {
+    uploadImageLocal.single('file')(req, res, async function (localErr) {
         if (localErr) {
             writeUploadLog(req, '/api/upload/image', 'ERROR', localErr.message);
             if (localErr.code === 'LIMIT_FILE_SIZE') {
@@ -502,7 +535,21 @@ router.post('/api/upload/image', (req, res) => {
 
         const host = req.get('host') || 'localhost:5000';
         const protocol = req.protocol || 'http';
-        const localUrl = `${protocol}://${host}/uploads/${req.file.filename}`;
+        let localUrl = `${protocol}://${host}/uploads/${req.file.filename}`;
+
+        // Đẩy lên Cloudinary để lưu trữ vĩnh viễn (tránh mất file trên Render)
+        try {
+            const cloudUrl = await uploadToCloudinary(req.file.path, 'avatars');
+            if (cloudUrl) {
+                localUrl = cloudUrl;
+                if (fs.existsSync(req.file.path)) {
+                    try { fs.unlinkSync(req.file.path); } catch(e){}
+                }
+            }
+        } catch(cErr) {
+            console.warn('[API Upload Image] Cloudinary fallback:', cErr.message);
+        }
+
         writeUploadLog(req, '/api/upload/image', 'SUCCESS', `Đã lưu file: ${localUrl}`);
         res.status(200).json({ url: localUrl, imageUrl: localUrl, type: 'image' });
     });
@@ -817,10 +864,13 @@ router.put('/api/users/:id', async (req, res) => {
             portfolios: req.body.portfolios !== undefined ? req.body.portfolios : (existingSkills.portfolios || [])
         });
 
+        const validAvatarUrl = (avatar_url && typeof avatar_url === 'string' && avatar_url.trim() !== '') ? avatar_url.trim() : undefined;
+        const validCoverUrl = (cover_url && typeof cover_url === 'string' && cover_url.trim() !== '') ? cover_url.trim() : undefined;
+
         const updateData = {
             full_name: full_name ? full_name.trim() : undefined,
-            avatar_url,
-            cover_url,
+            avatar_url: validAvatarUrl,
+            cover_url: validCoverUrl,
             bio,
             bank_name,
             bank_account,

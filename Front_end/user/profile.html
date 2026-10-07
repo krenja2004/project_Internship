@@ -528,7 +528,19 @@
         }
 
         // Modal Controls
-        function openEditModal() { document.getElementById('editModal').classList.remove('hidden'); }
+        function openEditModal() { 
+            if (profileData) {
+                if (profileData.avatar_url) {
+                    document.getElementById('avatar_url').value = profileData.avatar_url;
+                    document.getElementById('previewAvatar').src = profileData.avatar_url;
+                }
+                if (profileData.cover_url) {
+                    document.getElementById('cover_url').value = profileData.cover_url;
+                    document.getElementById('previewCover').src = profileData.cover_url;
+                }
+            }
+            document.getElementById('editModal').classList.remove('hidden'); 
+        }
         function closeEditModal() { document.getElementById('editModal').classList.add('hidden'); }
 
         function openEmailModal() { 
@@ -592,13 +604,17 @@
             }
 
             const img = document.getElementById('previewAvatar');
-            const oldSrc = img.src;
+            const mainImg = document.getElementById('avatarContainer');
+            const oldSrc = mainImg.src;
             img.src = 'https://i.gifer.com/ZKZg.gif';
+            mainImg.src = 'https://i.gifer.com/ZKZg.gif';
             try {
                 const url = await uploadImageFile(file);
                 img.src = url;
+                mainImg.src = url;
                 document.getElementById('avatar_url').value = url;
-                document.getElementById('avatarContainer').src = url;
+                if (profileData) profileData.avatar_url = url;
+                
                 await fetch(`${API_URL}/api/users/${currentUser.id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
@@ -606,9 +622,12 @@
                 });
                 currentUser.avatar_url = url;
                 localStorage.setItem('user', JSON.stringify(currentUser));
+                const uiAvt = document.getElementById('uiAvatar');
+                if (uiAvt) uiAvt.src = url;
                 alert('✅ Đổi ảnh đại diện thành công!');
             } catch (err) {
                 img.src = oldSrc;
+                mainImg.src = oldSrc;
                 alert('❌ ' + err.message);
             } finally {
                 e.target.value = '';
@@ -626,16 +645,22 @@
                 return;
             }
 
+            const previewCover = document.getElementById('previewCover');
+            const coverContainer = document.getElementById('coverContainer');
             try {
                 const url = await uploadImageFile(file);
                 document.getElementById('cover_url').value = url;
-                document.getElementById('previewCover').src = url;
-                document.getElementById('coverContainer').style.backgroundImage = `url('${url}')`;
+                if (profileData) profileData.cover_url = url;
+                if (previewCover) previewCover.src = url;
+                if (coverContainer) coverContainer.style.backgroundImage = `url('${url}')`;
+
                 await fetch(`${API_URL}/api/users/${currentUser.id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ cover_url: url })
                 });
+                currentUser.cover_url = url;
+                localStorage.setItem('user', JSON.stringify(currentUser));
                 alert('✅ Đổi ảnh bìa thành công!');
             } catch (err) {
                 alert('❌ ' + err.message);
@@ -796,10 +821,25 @@
             if (data.avatar_url) {
                 document.getElementById('avatarContainer').src = data.avatar_url;
                 document.getElementById('previewAvatar').src = data.avatar_url;
+                document.getElementById('avatar_url').value = data.avatar_url;
+                const uiAvt = document.getElementById('uiAvatar');
+                if (uiAvt) uiAvt.src = data.avatar_url;
+            } else {
+                const nameInitials = encodeURIComponent(name);
+                const defaultAvatar = `https://ui-avatars.com/api/?name=${nameInitials}&background=4f46e5&color=fff`;
+                document.getElementById('avatarContainer').src = defaultAvatar;
+                document.getElementById('previewAvatar').src = defaultAvatar;
+                document.getElementById('avatar_url').value = '';
+                const uiAvt = document.getElementById('uiAvatar');
+                if (uiAvt) uiAvt.src = defaultAvatar;
             }
+
             if (data.cover_url) {
                 document.getElementById('coverContainer').style.backgroundImage = `url('${data.cover_url}')`;
                 document.getElementById('previewCover').src = data.cover_url;
+                document.getElementById('cover_url').value = data.cover_url;
+            } else {
+                document.getElementById('cover_url').value = '';
             }
 
             // Email verification badge
@@ -922,10 +962,22 @@
                 bio: document.getElementById('bio').value.trim(),
                 bank_name: document.getElementById('bank_name').value,
                 bank_account: document.getElementById('bank_account').value.trim(),
-                bank_owner: document.getElementById('bank_owner').value.trim().toUpperCase(),
-                avatar_url: document.getElementById('avatar_url').value,
-                cover_url: document.getElementById('cover_url').value
+                bank_owner: document.getElementById('bank_owner').value.trim().toUpperCase()
             };
+
+            const avatarVal = document.getElementById('avatar_url').value.trim();
+            if (avatarVal) {
+                payload.avatar_url = avatarVal;
+            } else if (profileData && profileData.avatar_url) {
+                payload.avatar_url = profileData.avatar_url;
+            }
+
+            const coverVal = document.getElementById('cover_url').value.trim();
+            if (coverVal) {
+                payload.cover_url = coverVal;
+            } else if (profileData && profileData.cover_url) {
+                payload.cover_url = profileData.cover_url;
+            }
 
             try {
                 const res = await fetch(`${API_URL}/api/users/${currentUser.id}`, {
