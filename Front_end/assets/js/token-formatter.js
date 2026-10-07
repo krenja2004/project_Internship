@@ -13,3 +13,18 @@ window.formatTokenHTML = function(amount, isToken = true) {
         <i class="fas fa-coins drop-shadow-md" style="font-size: 0.85em; -webkit-text-fill-color: #facc15; color: #facc15;"></i>
     </span>`;
 };
+
+window.formatNumberInput = function(input) {
+    if (!input) return;
+    let val = input.value.replace(/[^0-9]/g, '');
+    if (val !== '') {
+        input.value = parseInt(val, 10).toLocaleString('vi-VN').replace(/,/g, '.');
+    } else {
+        input.value = '';
+    }
+};
+
+window.parseFormattedNumber = function(val) {
+    if (!val) return 0;
+    return parseInt(val.toString().replace(/[^0-9]/g, ''), 10) || 0;
+};
