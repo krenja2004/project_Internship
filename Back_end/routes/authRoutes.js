@@ -1271,11 +1271,12 @@ router.post(['/google-login', '/api/auth/google-login'], async (req, res) => {
         const { email, name, picture } = payload;
 
         // Check if user exists
-        const { data: user, error } = await supabase
+        const normalizedEmail = (email || '').trim().toLowerCase();
+        const { data: user, error: userFindError } = await supabase
             .from('users')
             .select('*')
-            .eq('email', email)
-            .single();
+            .ilike('email', normalizedEmail)
+            .maybeSingle();
 
         if (user) {
             // LOGIN SUCCESSFUL
@@ -1283,9 +1284,9 @@ router.post(['/google-login', '/api/auth/google-login'], async (req, res) => {
                 module: 'AUTH',
                 action: 'GOOGLE_LOGIN_SUCCESS',
                 level: 'INFO',
-                details: `Người dùng ${email} (${user.role.toUpperCase()}) đăng nhập bằng Google thành công.`,
+                details: `Người dùng ${normalizedEmail} (${user.role ? user.role.toUpperCase() : 'CLIENT'}) đăng nhập bằng Google thành công.`,
                 user_id: user.id,
-                user_email: email,
+                user_email: normalizedEmail,
                 user_role: user.role
             });
             return res.status(200).json({ success: true, user });
@@ -1296,7 +1297,7 @@ router.post(['/google-login', '/api/auth/google-login'], async (req, res) => {
                 return res.status(200).json({ 
                     requires_registration: true, 
                     message: 'Vui lòng chọn vai trò để hoàn tất đăng ký.',
-                    email, 
+                    email: normalizedEmail, 
                     name, 
                     picture 
                 });
@@ -1312,19 +1313,20 @@ router.post(['/google-login', '/api/auth/google-login'], async (req, res) => {
             const crypto = require('crypto');
             const randomPassword = crypto.randomBytes(16).toString('hex');
             const hashedPassword = await bcrypt.hash(randomPassword, 10);
+            const userFullName = (name || normalizedEmail.split('@')[0]).trim();
 
-            // Insert into Database
+            // Insert into Database with valid schema columns
             const { data: newUser, error: insertError } = await supabase
                 .from('users')
                 .insert([
                     {
-                        full_name: name,
-                        email: email,
+                        full_name: userFullName,
+                        email: normalizedEmail,
                         password: hashedPassword,
                         role: role,
-                        phone: '', 
-                        is_verified: true, // Google email is already verified
-                        avatar_url: picture,
+                        phone_number: null, 
+                        is_email_verified: true, // Google email is already verified
+                        avatar_url: picture || null,
                         created_at: new Date().toISOString()
                     }
                 ])
@@ -1333,16 +1335,50 @@ router.post(['/google-login', '/api/auth/google-login'], async (req, res) => {
 
             if (insertError) {
                 console.error('Lỗi khi insert user Google:', insertError);
-                throw new Error('Không thể tạo tài khoản từ Google!');
+                return res.status(500).json({ error: `Không thể tạo tài khoản từ Google: ${insertError.message}` });
+            }
+
+            // Tự động khởi tạo ví cho tài khoản mới
+            try {
+                const { error: walletError } = await supabase
+                    .from('wallets')
+                    .insert([{
+                        user_id: newUser.id,
+                        balance: 0,
+                        locked_balance: 0
+                    }]);
+                if (walletError && walletError.code !== '23505') {
+                    console.warn('[Google Register] Wallet Create Notice:', walletError.message);
+                }
+            } catch (wErr) {
+                console.warn('[Google Register] Wallet error:', wErr.message);
+            }
+
+            // Nếu vai trò là freelancer, tạo bản ghi freelancer_profiles
+            if (role === 'freelancer') {
+                try {
+                    const { error: profileError } = await supabase
+                        .from('freelancer_profiles')
+                        .insert([{
+                            user_id: newUser.id,
+                            main_category: 'Other',
+                            skills: []
+                        }]);
+                    if (profileError && profileError.code !== '23505') {
+                        console.warn('[Google Register] Profile Create Notice:', profileError.message);
+                    }
+                } catch (pErr) {
+                    console.warn('[Google Register] Profile error:', pErr.message);
+                }
             }
 
             await logEvent({
                 module: 'AUTH',
                 action: 'GOOGLE_REGISTER_SUCCESS',
                 level: 'INFO',
-                details: `Tạo tài khoản thành công qua Google cho ${email} (${role.toUpperCase()})`,
+                details: `Tạo tài khoản thành công qua Google cho ${normalizedEmail} (${role.toUpperCase()})`,
                 user_id: newUser.id,
-                user_email: email,
+                user_email: normalizedEmail,
                 user_role: role
             });
 
