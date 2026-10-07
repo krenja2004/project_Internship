@@ -260,13 +260,13 @@
                             <label class="font-bold text-gray-800 dark:text-gray-200 text-sm block mb-2">Ảnh đại diện</label>
                             <div class="flex justify-center mb-3"><img id="previewAvatar" src="https://ui-avatars.com/api/?name=User&background=4f46e5&color=fff" class="w-20 h-20 rounded-full border-2 border-indigo-500 object-cover shadow"></div>
                             <label for="avatarUpload" class="inline-block bg-indigo-50 dark:bg-gray-700 hover:bg-indigo-100 text-indigo-600 dark:text-indigo-300 text-xs font-bold px-3 py-1.5 rounded-lg cursor-pointer transition"><i class="fas fa-upload mr-1"></i> Đổi ảnh Avatar</label>
-                            <input type="file" id="avatarUpload" class="hidden" accept="image/*"><input type="hidden" id="avatar_url">
+                            <input type="file" id="avatarUpload" class="hidden" accept="image/png, image/jpeg, image/jpg, image/webp, image/gif, image/svg+xml"><input type="hidden" id="avatar_url">
                         </div>
                         <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-xl text-center">
                             <label class="font-bold text-gray-800 dark:text-gray-200 text-sm block mb-2">Ảnh bìa Cover</label>
                             <div class="flex justify-center mb-3"><img id="previewCover" src="https://via.placeholder.com/600x200" class="w-full h-20 rounded-lg border object-cover shadow"></div>
                             <label for="coverUpload" class="inline-block bg-indigo-50 dark:bg-gray-700 hover:bg-indigo-100 text-indigo-600 dark:text-indigo-300 text-xs font-bold px-3 py-1.5 rounded-lg cursor-pointer transition"><i class="fas fa-upload mr-1"></i> Đổi ảnh Cover</label>
-                            <input type="file" id="coverUpload" class="hidden" accept="image/*"><input type="hidden" id="cover_url">
+                            <input type="file" id="coverUpload" class="hidden" accept="image/png, image/jpeg, image/jpg, image/webp, image/gif, image/svg+xml"><input type="hidden" id="cover_url">
                         </div>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -551,8 +551,27 @@
             document.getElementById('phoneStepInput').classList.remove('hidden');
         }
 
-        // 1. Upload Helper
+        // 1. Image Validation & Upload Helper
+        function isValidImageFile(file) {
+            if (!file) return false;
+            const validExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.bmp'];
+            const fileName = (file.name || '').toLowerCase();
+            const hasValidExt = validExtensions.some(ext => fileName.endsWith(ext));
+            const hasValidMime = file.type && file.type.startsWith('image/');
+
+            // Chặn rõ ràng các định dạng tài liệu phổ biến (docx, csv, xlsx, pdf...)
+            const invalidDocExts = ['.docx', '.doc', '.csv', '.xlsx', '.xls', '.pdf', '.zip', '.rar', '.txt', '.json'];
+            if (invalidDocExts.some(ext => fileName.endsWith(ext))) {
+                return false;
+            }
+
+            return hasValidExt && (hasValidMime || !file.type);
+        }
+
         async function uploadImageFile(file) {
+            if (!isValidImageFile(file)) {
+                throw new Error('File không hợp lệ! Ảnh chỉ chấp nhận các định dạng hình ảnh (JPG, PNG, GIF, WEBP...). Không hỗ trợ các định dạng tài liệu như DOCX, CSV, PDF...');
+            }
             const formData = new FormData();
             formData.append('file', file);
             const res = await fetch(`${API_URL}/api/upload/image`, { method: 'POST', body: formData });
@@ -564,6 +583,14 @@
         document.getElementById('avatarUpload').addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
+
+            // Kiểm tra định dạng ảnh
+            if (!isValidImageFile(file)) {
+                alert(`❌ File không hợp lệ!\nẢnh đại diện chỉ chấp nhận các tệp định dạng hình ảnh (JPG, PNG, GIF, WEBP...).\nFile "${file.name}" không phải là định dạng ảnh.`);
+                e.target.value = '';
+                return;
+            }
+
             const img = document.getElementById('previewAvatar');
             const oldSrc = img.src;
             img.src = 'https://i.gifer.com/ZKZg.gif';
@@ -583,12 +610,22 @@
             } catch (err) {
                 img.src = oldSrc;
                 alert('❌ ' + err.message);
+            } finally {
+                e.target.value = '';
             }
         });
 
         document.getElementById('coverUpload').addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
+
+            // Kiểm tra định dạng ảnh
+            if (!isValidImageFile(file)) {
+                alert(`❌ File không hợp lệ!\nẢnh bìa chỉ chấp nhận các tệp định dạng hình ảnh (JPG, PNG, GIF, WEBP...).\nFile "${file.name}" không phải là định dạng ảnh.`);
+                e.target.value = '';
+                return;
+            }
+
             try {
                 const url = await uploadImageFile(file);
                 document.getElementById('cover_url').value = url;
@@ -602,6 +639,8 @@
                 alert('✅ Đổi ảnh bìa thành công!');
             } catch (err) {
                 alert('❌ ' + err.message);
+            } finally {
+                e.target.value = '';
             }
         });
 

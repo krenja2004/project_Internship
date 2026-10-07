@@ -330,6 +330,29 @@ const localDiskStorage = multer.diskStorage({
 });
 const uploadLocal = multer({ storage: localDiskStorage, limits: { fileSize: 50 * 1024 * 1024 } });
 
+// Danh sách định dạng ảnh hợp lệ
+const allowedImageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.bmp'];
+
+// Bộ lọc multer chỉ cho phép upload file ảnh (chặn hoàn toàn docx, csv, pdf, txt, ...)
+const imageFileFilter = (req, file, cb) => {
+    const ext = path.extname(file.originalname || '').toLowerCase();
+    const isImageMime = file.mimetype && file.mimetype.startsWith('image/');
+    const isImageExt = allowedImageExtensions.includes(ext);
+
+    if (isImageMime && isImageExt) {
+        return cb(null, true);
+    }
+    const err = new Error('File không hợp lệ! Ảnh chỉ chấp nhận các định dạng hình ảnh (JPG, PNG, GIF, WEBP...). Không hỗ trợ các file tài liệu như DOCX, CSV, PDF...');
+    err.code = 'INVALID_IMAGE_TYPE';
+    return cb(err, false);
+};
+
+const uploadImageLocal = multer({ 
+    storage: localDiskStorage, 
+    limits: { fileSize: 20 * 1024 * 1024 },
+    fileFilter: imageFileFilter 
+});
+
 // Helper tra cứu MIME Type khi tải/xem tệp tin
 function getMimeType(fileName) {
     if (!fileName) return 'application/octet-stream';
@@ -387,11 +410,14 @@ function writeUploadLog(req, type, status, detail) {
 
 router.post('/upload-image', (req, res) => {
     writeUploadLog(req, '/upload-image', 'START', 'Bắt đầu nhận request');
-    uploadLocal.single('image')(req, res, function (localErr) {
+    uploadImageLocal.single('image')(req, res, function (localErr) {
         if (localErr) {
             writeUploadLog(req, '/upload-image', 'ERROR', localErr.message);
             if (localErr.code === 'LIMIT_FILE_SIZE') {
-                return res.status(400).json({ error: 'File đã vượt quá 50MB' });
+                return res.status(400).json({ error: 'File ảnh đã vượt quá 20MB' });
+            }
+            if (localErr.code === 'INVALID_IMAGE_TYPE') {
+                return res.status(400).json({ error: localErr.message });
             }
             return res.status(400).json({ error: 'Không thể upload ảnh: ' + localErr.message });
         }
@@ -399,6 +425,16 @@ router.post('/upload-image', (req, res) => {
             writeUploadLog(req, '/upload-image', 'ERROR', 'Thiếu file ảnh');
             return res.status(400).json({ error: 'Thiếu file ảnh' });
         }
+
+        // Kiểm tra bảo mật định dạng file ảnh
+        const ext = path.extname(req.file.originalname || '').toLowerCase();
+        if (!req.file.mimetype.startsWith('image/') || !allowedImageExtensions.includes(ext)) {
+            if (fs.existsSync(req.file.path)) {
+                try { fs.unlinkSync(req.file.path); } catch(e){}
+            }
+            return res.status(400).json({ error: 'File không hợp lệ! Ảnh đại diện chỉ chấp nhận các định dạng hình ảnh (JPG, PNG, GIF, WEBP...).' });
+        }
+
         const host = req.get('host') || 'localhost:5000';
         const protocol = req.protocol || 'http';
         const localUrl = `${protocol}://${host}/uploads/${req.file.filename}`;
@@ -439,11 +475,14 @@ router.post('/upload-file', (req, res) => {
 
 router.post('/api/upload/image', (req, res) => {
     writeUploadLog(req, '/api/upload/image', 'START', 'Bắt đầu nhận request');
-    uploadLocal.single('file')(req, res, function (localErr) {
+    uploadImageLocal.single('file')(req, res, function (localErr) {
         if (localErr) {
             writeUploadLog(req, '/api/upload/image', 'ERROR', localErr.message);
             if (localErr.code === 'LIMIT_FILE_SIZE') {
-                return res.status(400).json({ error: 'File đã vượt quá 50MB' });
+                return res.status(400).json({ error: 'File ảnh đã vượt quá 20MB' });
+            }
+            if (localErr.code === 'INVALID_IMAGE_TYPE') {
+                return res.status(400).json({ error: localErr.message });
             }
             return res.status(400).json({ error: 'Không thể upload ảnh: ' + localErr.message });
         }
@@ -451,6 +490,16 @@ router.post('/api/upload/image', (req, res) => {
             writeUploadLog(req, '/api/upload/image', 'ERROR', 'Không thể upload ảnh (thiếu file)');
             return res.status(400).json({ error: 'Không thể upload ảnh' });
         }
+
+        // Kiểm tra bảo mật định dạng file ảnh
+        const ext = path.extname(req.file.originalname || '').toLowerCase();
+        if (!req.file.mimetype.startsWith('image/') || !allowedImageExtensions.includes(ext)) {
+            if (fs.existsSync(req.file.path)) {
+                try { fs.unlinkSync(req.file.path); } catch(e){}
+            }
+            return res.status(400).json({ error: 'File không hợp lệ! Ảnh đại diện chỉ chấp nhận các định dạng hình ảnh (JPG, PNG, GIF, WEBP...).' });
+        }
+
         const host = req.get('host') || 'localhost:5000';
         const protocol = req.protocol || 'http';
         const localUrl = `${protocol}://${host}/uploads/${req.file.filename}`;
@@ -736,6 +785,21 @@ router.put('/api/users/:id', async (req, res) => {
     const { full_name, avatar_url, cover_url, bio, bank_name, bank_account, bank_owner, phone_number, location, nickname, primary_category, skills } = req.body;
     console.log(`\n📝 [API PUT /api/users/${id}] Cập nhật hồ sơ: ${full_name}`);
     
+    // Kiểm tra định dạng nếu có gửi avatar_url hoặc cover_url
+    const invalidDocExts = ['.docx', '.doc', '.csv', '.xlsx', '.xls', '.pdf', '.zip', '.rar', '.txt', '.json'];
+    if (avatar_url) {
+        const cleanAvt = avatar_url.toLowerCase().split('?')[0];
+        if (invalidDocExts.some(ext => cleanAvt.endsWith(ext))) {
+            return res.status(400).json({ error: 'Ảnh đại diện không hợp lệ! Chỉ chấp nhận các tệp định dạng hình ảnh (JPG, PNG, GIF, WEBP...).' });
+        }
+    }
+    if (cover_url) {
+        const cleanCover = cover_url.toLowerCase().split('?')[0];
+        if (invalidDocExts.some(ext => cleanCover.endsWith(ext))) {
+            return res.status(400).json({ error: 'Ảnh bìa không hợp lệ! Chỉ chấp nhận các tệp định dạng hình ảnh (JPG, PNG, GIF, WEBP...).' });
+        }
+    }
+
     try {
         // Lấy thông tin user hiện tại để merge JSON
         const { data: currentUser } = await supabase.from('users').select('skills').eq('id', id).single();
