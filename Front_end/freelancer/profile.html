@@ -46,13 +46,13 @@
                 </div>
                 
                 <!-- Profile Header Details -->
-                <div class="px-4 sm:px-8 pb-5 pt-0 relative z-10 -mt-14 sm:-mt-16">
-                    <div class="flex flex-col xl:flex-row justify-between items-center xl:items-end gap-4">
-                        <!-- Left: Avatar + Details Block (Nằm cạnh nhau, đầy đặn, không bị trống) -->
+                <div class="px-5 sm:px-8 pb-6 pt-3">
+                    <div class="flex flex-col lg:flex-row justify-between items-center lg:items-end gap-4">
+                        <!-- Left: Avatar + Details Block (Nằm ngang hàng, đầy đặn, không có ô trắng thừa, cực kỳ sang trọng) -->
                         <div class="flex flex-col sm:flex-row items-center sm:items-end text-center sm:text-left gap-4 sm:gap-5 flex-1 min-w-0 w-full sm:w-auto">
-                            <!-- Avatar -->
-                            <div class="relative group shrink-0">
-                                <img id="avatarContainer" referrerpolicy="no-referrer" src="https://ui-avatars.com/api/?name=Freelancer&background=4f46e5&color=fff" alt="Avatar" class="w-28 h-28 sm:w-36 sm:h-36 rounded-2xl border-4 border-white dark:border-gray-800 shadow-xl object-cover bg-white dark:bg-gray-700">
+                            <!-- Avatar (Chỉ riêng avatar vươn lên ảnh bìa 50%) -->
+                            <div class="relative group shrink-0 -mt-16 sm:-mt-20">
+                                <img id="avatarContainer" referrerpolicy="no-referrer" src="https://ui-avatars.com/api/?name=Freelancer&background=4f46e5&color=fff" alt="Avatar" class="w-32 h-32 sm:w-36 sm:h-36 rounded-2xl border-4 border-white dark:border-gray-800 shadow-xl object-cover bg-white dark:bg-gray-700">
                                 <label for="avatarUpload" class="absolute inset-0 bg-black/40 rounded-2xl flex items-center justify-center text-white opacity-0 group-hover:opacity-100 cursor-pointer transition">
                                     <i class="fas fa-camera text-xl"></i>
                                 </label>
@@ -60,10 +60,10 @@
                                 <span class="absolute bottom-1 right-1 w-4 h-4 bg-emerald-500 border-2 border-white dark:border-gray-800 rounded-full shadow" title="Đang online"></span>
                             </div>
 
-                            <!-- Name & Info Container (Nền kính mờ Glassmorphism sang trọng, bảo đảm chữ đen hay trắng đều cực kỳ rõ nét) -->
-                            <div class="bg-white/95 dark:bg-gray-800/95 backdrop-blur-md rounded-2xl p-3 sm:px-5 sm:py-3 border border-white/80 dark:border-gray-700/80 shadow-md min-w-0 flex-1 w-full sm:w-auto">
+                            <!-- Name, Badges, Headline (Nằm tự nhiên cạnh Avatar trên nền thẻ chuẩn, không cần ô trắng rời rạc) -->
+                            <div class="space-y-1 pb-1 min-w-0 flex-1">
                                 <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                                    <h1 id="displayName" class="text-xl sm:text-2xl font-black text-gray-900 dark:text-white tracking-tight">Đang tải...</h1>
+                                    <h1 id="displayName" class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tight">Đang tải...</h1>
                                     
                                     <!-- Email Verified Badge -->
                                     <span id="emailVerifiedBadge" class="bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 text-xs font-black px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800 flex items-center shadow-sm">
@@ -74,9 +74,9 @@
                                     <span id="phoneVerifiedBadge"></span>
                                 </div>
 
-                                <p id="displayHeadline" class="text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-300 mt-1">Chuyên gia Lập trình & Phát triển Phần mềm</p>
+                                <p id="displayHeadline" class="text-sm font-semibold text-gray-600 dark:text-gray-300">Chuyên gia Lập trình & Phát triển Phần mềm</p>
 
-                                <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-2">
+                                <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-0.5">
                                     <span id="displayCategoryBadge"></span>
                                     <span class="bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 text-xs font-bold px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800 flex items-center">
                                         <span class="w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span> Sẵn sàng nhận việc
@@ -85,12 +85,12 @@
                             </div>
                         </div>
 
-                        <!-- Right: Action Buttons (LUÔN NẰM NGANG NHAU, KHÔNG BỊ RỚT DÒNG CÁI TRÊN CÁI DƯỚI) -->
-                        <div class="flex flex-row items-center justify-center xl:justify-end gap-2.5 shrink-0 flex-nowrap w-full sm:w-auto pb-1">
-                            <button onclick="openPhoneVerifyModal()" id="btnQuickVerifyPhone" class="hidden bg-sky-500 hover:bg-sky-600 text-white font-bold py-2.5 px-3.5 sm:px-4 rounded-xl shadow-md shadow-sky-500/20 transition flex items-center text-xs sm:text-sm whitespace-nowrap">
+                        <!-- Right: Action Buttons (Luôn nằm ngang hàng cạnh nhau) -->
+                        <div class="flex flex-row items-center justify-center lg:justify-end gap-2.5 shrink-0 flex-nowrap w-full sm:w-auto pb-1">
+                            <button onclick="openPhoneVerifyModal()" id="btnQuickVerifyPhone" class="hidden bg-sky-500 hover:bg-sky-600 text-white font-bold py-2.5 px-3.5 sm:px-4 rounded-xl shadow-sm transition flex items-center text-xs sm:text-sm whitespace-nowrap">
                                 <i class="fab fa-telegram mr-1.5 text-base"></i> Xác thực SĐT qua Telegram
                             </button>
-                            <button onclick="openEditModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-4 sm:px-5 rounded-xl shadow-md shadow-indigo-600/20 transition flex items-center text-xs sm:text-sm whitespace-nowrap">
+                            <button onclick="openEditModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-4 sm:px-5 rounded-xl shadow-sm transition flex items-center text-xs sm:text-sm whitespace-nowrap">
                                 <i class="fas fa-edit mr-1.5"></i> Chỉnh sửa Hồ sơ
                             </button>
                         </div>
