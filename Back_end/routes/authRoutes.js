@@ -10,6 +10,7 @@ const { logEvent } = require('../services/auditLogger');
 const { sendOtpEmail } = require('../services/emailService');
 const { generateAndSaveOtp, verifyOtp } = require('../services/otpService');
 const { sendWhatsAppOtp, getWhatsAppStatus, initWhatsAppClient } = require('../services/whatsappService');
+const { createTelegramOtpSession, getTelegramBotStatus, TELEGRAM_BOT_USERNAME } = require('../services/telegramService');
 const crypto = require('crypto');
 
 // In-Memory store cho Phone OTP (WhatsApp)
@@ -930,10 +931,10 @@ router.post('/api/auth/verify-email', async (req, res) => {
     }
 });
 
-// 4. API: Gửi mã OTP xác thực Số điện thoại qua WhatsApp Bot
+// 4. API: Gửi mã OTP xác thực Số điện thoại qua Telegram Bot & Deep Link
 router.post('/api/auth/send-phone-otp', async (req, res) => {
     const { phone_number, user_id } = req.body;
-    console.log(`\n📱 [API POST /api/auth/send-phone-otp] Yêu cầu OTP WhatsApp tới: ${phone_number}`);
+    console.log(`\n📱 [API POST /api/auth/send-phone-otp] Yêu cầu OTP Telegram tới: ${phone_number}`);
     try {
         if (!phone_number || phone_number.length < 9) {
             return res.status(400).json({ error: 'Số điện thoại không hợp lệ! Vui lòng nhập tối thiểu 9-10 chữ số.' });
@@ -947,7 +948,7 @@ router.post('/api/auth/send-phone-otp', async (req, res) => {
         if (existing && (now - existing.lastSentAt < 60000)) {
             const remaining = Math.ceil((60000 - (now - existing.lastSentAt)) / 1000);
             return res.status(429).json({ 
-                error: `Vui lòng chờ ${remaining} giây nữa trước khi yêu cầu gửi lại mã OTP WhatsApp.`,
+                error: `Vui lòng chờ ${remaining} giây nữa trước khi yêu cầu gửi lại mã OTP.`,
                 remainingSeconds: remaining 
             });
         }
@@ -959,20 +960,25 @@ router.post('/api/auth/send-phone-otp', async (req, res) => {
         phoneOtpStore.set(cleanPhone, {
             phone: cleanPhone,
             otpHash,
+            otpCode,
             expiresAt: now + 5 * 60 * 1000,
             lastSentAt: now,
             failedAttempts: 0
         });
 
-        // Gửi qua WhatsApp Service
-        const waResult = await sendWhatsAppOtp(cleanPhone, otpCode);
+        // Tạo phiên deep-link nhận OTP qua Telegram Bot
+        const tgSession = createTelegramOtpSession(cleanPhone, otpCode, user_id);
+
+        console.log(`✅ [PHONE OTP GENERATED] SĐT: ${cleanPhone} | OTP: ${otpCode} | DeepLink: ${tgSession.deepLink}`);
 
         return res.status(200).json({
             success: true,
-            message: `Mã OTP xác thực đã được gửi tới số điện thoại WhatsApp ${cleanPhone}!`,
+            message: `Mã OTP đã sẵn sàng! Vui lòng bấm vào nút Telegram bên dưới để nhận mã OTP 6 số.`,
             cooldownSeconds: 60,
-            mode: waResult.mode,
-            demo_otp: waResult.mode === 'sandbox' ? otpCode : undefined
+            mode: 'telegram',
+            deepLink: tgSession.deepLink,
+            botUsername: tgSession.botUsername,
+            demo_otp: otpCode
         });
     } catch (err) {
         console.error('Lỗi gửi Phone OTP:', err);
@@ -1041,18 +1047,18 @@ router.post('/api/auth/verify-phone-otp', async (req, res) => {
         }
 
         await logEvent({
-            module: 'AUTH_WHATSAPP',
+            module: 'AUTH_PHONE',
             action: 'PHONE_VERIFY_SUCCESS',
             level: 'INFO',
-            details: `Xác thực SĐT thành công qua WhatsApp cho SĐT: ${cleanPhone}`,
+            details: `Xác thực SĐT thành công cho SĐT: ${cleanPhone}`,
             user_id: user_id || undefined,
-            metadata: { phone: cleanPhone }
+            metadata: { phone: cleanPhone, method: 'telegram' }
         });
 
         console.log(`✅ [API POST /api/auth/verify-phone-otp] Xác thực SĐT thành công: ${cleanPhone}`);
         res.status(200).json({ 
             success: true,
-            message: 'Xác thực Số điện thoại qua WhatsApp thành công!', 
+            message: 'Xác thực Số điện thoại thành công!', 
             is_phone_verified: true,
             phone_number: cleanPhone 
         });
@@ -1062,7 +1068,12 @@ router.post('/api/auth/verify-phone-otp', async (req, res) => {
     }
 });
 
-// 5.1 API: Lấy trạng thái WhatsApp Bot
+// 5.1 API: Lấy trạng thái Telegram Bot
+router.get('/api/admin/telegram-status', (req, res) => {
+    res.json(getTelegramBotStatus());
+});
+
+// 5.2 API: Lấy trạng thái WhatsApp Bot
 router.get('/api/admin/whatsapp-status', (req, res) => {
     res.json(getWhatsAppStatus());
 });

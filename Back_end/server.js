@@ -41,8 +41,12 @@ app.use(require('./routes/adminRoutes'));
 app.use(require('./routes/connectionRoutes'));
 app.use(require('./routes/testRoutes'));
 
-// 4. Khởi chạy Server (Tích hợp AI Groq Llama 3.3)
+// 4. Khởi chạy Server (Tích hợp AI Groq Llama 3.3 & Telegram OTP Bot)
+const { initTelegramBot } = require('./services/telegramService');
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`✅ Server đang chạy tại http://localhost:${PORT}`);
+    // Khởi động bot Telegram lắng nghe tin nhắn OTP
+    initTelegramBot();
 });

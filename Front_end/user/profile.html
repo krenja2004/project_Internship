@@ -352,12 +352,12 @@
         </div>
     </div>
 
-    <!-- MODAL 3: PHONE OTP WHATSAPP -->
+    <!-- MODAL 3: PHONE OTP TELEGRAM -->
     <div id="phoneModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl max-w-md w-full p-6 border border-gray-100 dark:border-gray-700 animate-in zoom-in-95 duration-150">
             <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-3 mb-4">
                 <h3 class="font-bold text-gray-900 dark:text-gray-100 text-base flex items-center">
-                    <i class="fab fa-whatsapp text-emerald-500 text-lg mr-2"></i> Xác Thực SĐT Qua WhatsApp
+                    <i class="fab fa-telegram text-sky-500 text-xl mr-2"></i> Xác Thực SĐT Qua Telegram Bot
                 </h3>
                 <button onclick="closePhoneModal()" class="text-gray-400 hover:text-red-500 text-2xl font-bold">&times;</button>
             </div>
@@ -365,32 +365,41 @@
             <div class="space-y-4 text-sm">
                 <!-- Step 1: Input phone & Send OTP -->
                 <div id="phoneStepInput">
-                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Số điện thoại WhatsApp của bạn:</label>
+                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Số điện thoại của bạn:</label>
                     <div class="flex space-x-2 mb-2">
-                        <input type="tel" id="otpPhoneNumber" class="flex-1 border border-gray-300 dark:border-gray-600 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 bg-gray-50 dark:bg-gray-700 font-mono font-bold" placeholder="VD: 0834779397">
-                        <button type="button" onclick="sendPhoneOtp()" id="btnSendOtp" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-md shrink-0 transition flex items-center">
-                            <span>Gửi mã OTP</span>
+                        <input type="tel" id="otpPhoneNumber" class="flex-1 border border-gray-300 dark:border-gray-600 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-sky-500 bg-gray-50 dark:bg-gray-700 font-mono font-bold" placeholder="VD: 0834779397">
+                        <button type="button" onclick="sendPhoneOtp()" id="btnSendOtp" class="bg-sky-500 hover:bg-sky-600 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-md shrink-0 transition flex items-center">
+                            <span>Lấy mã OTP</span>
                         </button>
                     </div>
                     <p class="text-[11px] text-gray-400">
-                        ⚡ Hệ thống sẽ tự động gửi mã OTP 6 số trực tiếp vào tin nhắn WhatsApp của bạn (hoàn toàn miễn phí).
+                        ⚡ Nhận mã OTP 6 số tức thì qua Telegram Bot (<b>@kgswork_hoang_otp_bot</b>) hoàn toàn miễn phí & bảo mật 100%.
                     </p>
                 </div>
 
                 <!-- Step 2: Enter OTP -->
                 <div id="otpInputSection" class="hidden space-y-3 pt-2 border-t border-gray-100 dark:border-gray-700">
-                    <div class="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 rounded-xl text-xs text-emerald-800 dark:text-emerald-300 flex items-center justify-between">
-                        <span>Đã gửi mã OTP tới: <strong id="dispTargetPhone" class="font-mono">...</strong></span>
-                        <button type="button" onclick="resetPhoneStep()" class="text-[11px] text-emerald-600 font-bold hover:underline">Đổi SĐT</button>
+                    <div class="p-3 bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800/60 rounded-xl text-xs text-sky-900 dark:text-sky-200 flex items-center justify-between">
+                        <span>Đang xác thực SĐT: <strong id="dispTargetPhone" class="font-mono text-sky-600 dark:text-sky-400 font-bold">...</strong></span>
+                        <button type="button" onclick="resetPhoneStep()" class="text-[11px] text-sky-600 dark:text-sky-400 font-bold hover:underline">Đổi SĐT</button>
                     </div>
 
+                    <!-- Direct Open Telegram Button -->
+                    <a id="btnOpenTelegramUser" href="#" target="_blank" class="w-full py-3 px-4 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white font-bold rounded-xl shadow-lg shadow-sky-500/25 transition text-xs flex items-center justify-center space-x-2 text-center">
+                        <i class="fab fa-telegram-plane text-base"></i>
+                        <span>👉 BẤM ĐÂY ĐỂ MỞ TELEGRAM NHẬN MÃ OTP 👈</span>
+                    </a>
+                    <p class="text-[11px] text-gray-500 dark:text-gray-400 text-center">
+                        Bấm nút trên để mở Telegram & bấm <b>START</b>, Bot sẽ gửi mã OTP 6 số cho bạn ngay!
+                    </p>
+
                     <div>
-                        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Nhập mã OTP 6 số:</label>
-                        <input type="text" id="otpCode" maxlength="6" class="w-full text-center tracking-widest text-2xl font-black font-mono border-2 border-emerald-300 dark:border-emerald-700 rounded-xl py-2.5 focus:ring-2 focus:ring-emerald-500 bg-gray-50 dark:bg-gray-700" placeholder="123456">
+                        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Nhập mã OTP 6 số từ Telegram:</label>
+                        <input type="text" id="otpCode" maxlength="6" class="w-full text-center tracking-widest text-2xl font-black font-mono border-2 border-sky-300 dark:border-sky-700 rounded-xl py-2.5 focus:ring-2 focus:ring-sky-500 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="123456">
                     </div>
 
                     <div class="flex items-center justify-between text-xs text-gray-400">
-                        <span>⏱️ Hết hạn sau: <strong id="phoneOtpTimer" class="font-mono text-emerald-600 font-bold">05:00</strong></span>
+                        <span>⏱️ Hết hạn sau: <strong id="phoneOtpTimer" class="font-mono text-sky-600 dark:text-sky-400 font-bold">05:00</strong></span>
                         <button type="button" id="btnResendPhoneOtp" onclick="sendPhoneOtp()" disabled class="text-xs font-bold text-gray-400 cursor-not-allowed">Gửi lại (60s)</button>
                     </div>
 
@@ -695,7 +704,7 @@
             }
         }
 
-        // 3. Phone OTP WhatsApp
+        // 3. Phone OTP Telegram
         async function sendPhoneOtp() {
             const phone = document.getElementById('otpPhoneNumber').value.trim();
             if (!phone || phone.length < 9) {
@@ -705,7 +714,7 @@
 
             const btn = document.getElementById('btnSendOtp');
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Đang gửi...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Đang kết nối...';
 
             try {
                 const res = await fetch(`${API_URL}/api/auth/send-phone-otp`, {
@@ -719,20 +728,28 @@
                     document.getElementById('dispTargetPhone').innerText = phone;
                     document.getElementById('phoneStepInput').classList.add('hidden');
                     document.getElementById('otpInputSection').classList.remove('hidden');
+
+                    if (data.deepLink) {
+                        const tgBtn = document.getElementById('btnOpenTelegramUser');
+                        if (tgBtn) tgBtn.href = data.deepLink;
+                        // Tự động mở link Telegram nhận mã
+                        window.open(data.deepLink, '_blank');
+                    }
+
                     document.getElementById('otpCode').focus();
 
                     startPhoneTimer(300);
                     startPhoneCooldown(60);
 
-                    alert(`✅ ${data.message}`);
+                    alert(`✅ ${data.message || 'Mã OTP đã sẵn sàng! Đang mở Telegram...'}`);
                 } else {
-                    alert('❌ Lỗi: ' + (data.error || 'Không thể gửi mã OTP WhatsApp'));
+                    alert('❌ Lỗi: ' + (data.error || 'Không thể tạo mã OTP Telegram'));
                 }
             } catch (err) {
                 alert('Lỗi kết nối máy chủ!');
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = '<span>Gửi mã OTP</span>';
+                btn.innerHTML = '<span>Lấy mã OTP</span>';
             }
         }
 
@@ -793,7 +810,7 @@
                 const data = await res.json();
 
                 if (res.ok) {
-                    alert(`🎉 XÁC THỰC THÀNH CÔNG!\n\nSố điện thoại WhatsApp [${phone}] đã được liên kết chính chủ.`);
+                    alert(`🎉 XÁC THỰC THÀNH CÔNG!\n\nSố điện thoại [${phone}] đã được liên kết chính chủ.`);
                     closePhoneModal();
                     loadProfile();
                 } else {
@@ -857,8 +874,8 @@
             const phoneBadge = document.getElementById('phoneBadgeContainer');
             const phoneAction = document.getElementById('phoneActionContainer');
             if (data.is_phone_verified && data.phone_number) {
-                phoneBadge.innerHTML = `<span class="bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 text-[11px] font-bold px-2 py-0.5 rounded-full"><i class="fab fa-whatsapp mr-1"></i>Đã xác thực</span>`;
-                phoneAction.innerHTML = `<span class="text-xs text-emerald-600 font-bold">✓ WhatsApp đã kết nối</span>`;
+                phoneBadge.innerHTML = `<span class="bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 text-[11px] font-bold px-2 py-0.5 rounded-full"><i class="fas fa-check-circle mr-1"></i>Đã xác thực</span>`;
+                phoneAction.innerHTML = `<span class="text-xs text-emerald-600 font-bold">✓ SĐT đã xác thực</span>`;
             } else {
                 phoneBadge.innerHTML = `<span class="bg-yellow-100 text-yellow-800 text-[11px] font-bold px-2 py-0.5 rounded-full">Chưa xác thực</span>`;
                 phoneAction.innerHTML = `<button onclick="openPhoneModal()" class="text-xs text-indigo-600 dark:text-indigo-400 font-bold hover:underline"><i class="fas fa-shield-alt mr-1"></i> Xác thực OTP SĐT</button>`;

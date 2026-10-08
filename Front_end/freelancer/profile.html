@@ -76,9 +76,8 @@
                         </div>
                     </div>
 
-                    <div class="flex flex-wrap gap-2.5 mb-2 w-full sm:w-auto justify-center">
-                        <button onclick="openPhoneVerifyModal()" id="btnQuickVerifyPhone" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-2xl shadow-md transition flex items-center text-xs sm:text-sm">
-                            <i class="fab fa-whatsapp mr-1.5 text-base"></i> Xác thực WhatsApp
+                        <button onclick="openPhoneVerifyModal()" id="btnQuickVerifyPhone" class="hidden bg-sky-500 hover:bg-sky-600 text-white font-bold py-2.5 px-4 rounded-2xl shadow-md transition flex items-center text-xs sm:text-sm">
+                            <i class="fab fa-telegram mr-1.5 text-base"></i> Xác thực Telegram
                         </button>
                         <button onclick="openEditModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-5 rounded-2xl shadow-md transition flex items-center text-xs sm:text-sm">
                             <i class="fas fa-edit mr-2"></i> Chỉnh sửa Hồ sơ
@@ -279,18 +278,18 @@
                         </div>
                     </div>
 
-                    <!-- Số Điện Thoại & Xác Thực WhatsApp -->
+                    <!-- Số Điện Thoại & Xác Thực Telegram -->
                     <div class="border-t border-gray-100 dark:border-gray-700 pt-4">
                         <label class="font-bold text-xs text-gray-700 dark:text-gray-300 block mb-1.5 flex items-center justify-between">
-                            <span><i class="fab fa-whatsapp text-emerald-500 mr-1.5"></i> Số điện thoại liên hệ</span>
+                            <span><i class="fab fa-telegram text-sky-500 mr-1.5"></i> Số điện thoại liên hệ</span>
                             <span id="formPhoneVerifiedNotice" class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 hidden">
-                                <i class="fas fa-check-circle"></i> Đã xác thực WhatsApp
+                                <i class="fas fa-check-circle"></i> Đã xác thực Telegram
                             </span>
                         </label>
                         <div class="flex space-x-2">
                             <input type="text" id="phone_number" placeholder="VD: 0834779397" class="flex-1 border border-gray-200 dark:border-gray-600 rounded-xl px-3.5 py-2 text-sm bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white font-mono">
-                            <button type="button" onclick="openPhoneVerifyModal()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center flex-shrink-0">
-                                <i class="fab fa-whatsapp mr-1"></i> <span>Xác thực WhatsApp</span>
+                            <button type="button" onclick="openPhoneVerifyModal()" class="px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white rounded-xl text-xs font-bold transition flex items-center flex-shrink-0">
+                                <i class="fab fa-telegram mr-1"></i> <span>Xác thực Telegram</span>
                             </button>
                         </div>
                     </div>
@@ -367,11 +366,12 @@
     </div>
 
     <!-- MODAL XÁC THỰC SỐ ĐIỆN THOẠI QUA WHATSAPP -->
+    <!-- Modal Xác thực Số điện thoại Telegram -->
     <div id="phoneVerifyModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-3 sm:p-4">
         <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-100 dark:border-gray-700">
             <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
                 <h3 class="text-base font-black text-gray-900 dark:text-white flex items-center">
-                    <i class="fab fa-whatsapp text-emerald-500 text-lg mr-2"></i> Xác Thực SĐT Qua WhatsApp
+                    <i class="fab fa-telegram text-sky-500 text-xl mr-2"></i> Xác Thực SĐT Qua Telegram Bot
                 </h3>
                 <button onclick="closePhoneVerifyModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-lg w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
                     &times;
@@ -381,36 +381,46 @@
             <div class="p-6 space-y-4">
                 <!-- Step 1: Nhập SĐT & Gửi OTP -->
                 <div id="phoneStepInput">
-                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Số điện thoại WhatsApp của bạn:</label>
+                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Số điện thoại của bạn:</label>
                     <div class="flex space-x-2 mb-3">
-                        <input type="text" id="targetPhoneInput" placeholder="VD: 0834779397" class="flex-1 border border-gray-200 dark:border-gray-600 rounded-xl px-3.5 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white font-mono font-bold focus:ring-2 focus:ring-emerald-500 outline-none">
-                        <button type="button" id="btnSendPhoneOtp" onclick="requestPhoneOtp()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black shadow-md transition flex items-center flex-shrink-0">
-                            <span>Gửi mã OTP</span>
+                        <input type="text" id="targetPhoneInput" placeholder="VD: 0834779397" class="flex-1 border border-gray-200 dark:border-gray-600 rounded-xl px-3.5 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white font-mono font-bold focus:ring-2 focus:ring-sky-500 outline-none">
+                        <button type="button" id="btnSendPhoneOtp" onclick="requestPhoneOtp()" class="px-4 py-2.5 bg-sky-500 hover:bg-sky-600 text-white rounded-xl text-xs font-black shadow-md transition flex items-center flex-shrink-0">
+                            <span>Lấy mã OTP</span>
                         </button>
                     </div>
                     <p class="text-[11px] text-gray-400">
-                        ⚡ Hệ thống sẽ tự động gửi mã OTP 6 số trực tiếp vào tài khoản WhatsApp của bạn (hoàn toàn miễn phí).
+                        ⚡ Nhận mã OTP 6 số tức thì qua Telegram Bot (<b>@kgswork_hoang_otp_bot</b>) hoàn toàn miễn phí & bảo mật 100%.
                     </p>
                 </div>
 
-                <!-- Step 2: Nhập OTP WhatsApp (Ẩn mặc định) -->
+                <!-- Step 2: Nhập OTP Telegram (Ẩn mặc định) -->
                 <div id="phoneStepOtp" class="hidden space-y-4 pt-3 border-t border-gray-100 dark:border-gray-700">
-                    <div class="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 rounded-xl text-xs text-emerald-800 dark:text-emerald-300 flex items-center justify-between">
-                        <span>Đã gửi mã OTP tới: <strong id="dispTargetPhone" class="font-mono">...</strong></span>
-                        <button type="button" onclick="resetPhoneStep()" class="text-[11px] text-emerald-600 font-bold hover:underline">Đổi SĐT</button>
+                    <div class="p-3 bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800/60 rounded-xl text-xs text-sky-900 dark:text-sky-200 flex items-center justify-between">
+                        <span>Đang xác thực SĐT: <strong id="dispTargetPhone" class="font-mono text-sky-600 dark:text-sky-400 font-bold">...</strong></span>
+                        <button type="button" onclick="resetPhoneStep()" class="text-[11px] text-sky-600 dark:text-sky-400 font-bold hover:underline">Đổi SĐT</button>
                     </div>
 
+                    <!-- Direct Open Telegram Button -->
+                    <a id="btnOpenTelegramFreelancer" href="#" target="_blank" class="w-full py-3 px-4 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white font-bold rounded-xl shadow-lg shadow-sky-500/25 transition text-xs flex items-center justify-center space-x-2 text-center decoration-none">
+                        <i class="fab fa-telegram-plane text-base"></i>
+                        <span>👉 BẤM ĐÂY ĐỂ MỞ TELEGRAM NHẬN MÃ OTP 👈</span>
+                    </a>
+                    <p class="text-[11px] text-gray-500 dark:text-gray-400 text-center">
+                        Mở Telegram & bấm <b>START</b>, Bot sẽ gửi mã OTP 6 số cho bạn ngay lập tức!
+                    </p>
+
                     <div>
-                        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Nhập mã OTP 6 chữ số:</label>
-                        <input type="text" id="inputPhoneOtp" maxlength="6" placeholder="123456" class="w-full text-center text-2xl font-mono font-black tracking-widest border-2 border-emerald-300 dark:border-emerald-700 rounded-xl py-2.5 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none">
+                        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Nhập mã OTP 6 chữ số từ Telegram:</label>
+                        <input type="text" id="inputPhoneOtp" maxlength="6" placeholder="123456" class="w-full text-center text-2xl font-mono font-black tracking-widest border-2 border-sky-300 dark:border-sky-700 rounded-xl py-2.5 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-sky-500 outline-none">
                     </div>
 
                     <div class="flex items-center justify-between text-xs text-gray-400">
-                        <span>⏱️ Hết hạn sau: <strong id="phoneOtpTimer" class="font-mono text-emerald-600 font-bold">05:00</strong></span>
+                        <span>⏱️ Hết hạn sau: <strong id="phoneOtpTimer" class="font-mono text-sky-600 dark:text-sky-400 font-bold">05:00</strong></span>
                         <button type="button" id="btnResendPhoneOtp" onclick="requestPhoneOtp()" disabled class="text-xs font-bold text-gray-400 cursor-not-allowed">Gửi lại (60s)</button>
                     </div>
 
                     <button type="button" id="btnConfirmPhoneOtp" onclick="submitPhoneOtpVerification()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-black shadow-lg shadow-emerald-600/30 transition flex items-center justify-center space-x-2">
+                        <i class="fas fa-check-circle mr-2"></i>
                         <span>Xác nhận & Kích hoạt SĐT</span>
                     </button>
                 </div>
@@ -706,7 +716,7 @@
             const formPhoneNotice = document.getElementById('formPhoneVerifiedNotice');
 
             if (data.is_phone_verified && data.phone_number) {
-                phoneBadge.innerHTML = `<span class="bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-xs font-black px-3 py-1 rounded-full border border-emerald-200 dark:border-emerald-800 flex items-center shadow-sm"><i class="fab fa-whatsapp mr-1.5 text-emerald-600"></i> ${data.phone_number} (Đã xác minh)</span>`;
+                phoneBadge.innerHTML = `<span class="bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-xs font-black px-3 py-1 rounded-full border border-emerald-200 dark:border-emerald-800 flex items-center shadow-sm"><i class="fas fa-check-circle mr-1.5 text-emerald-600"></i> ${data.phone_number} (Đã xác minh)</span>`;
                 btnQuickVerify.classList.add('hidden');
                 formPhoneNotice.classList.remove('hidden');
             } else {
@@ -988,7 +998,7 @@
             }
         });
 
-        // 6. Xử lý Gửi & Xác thực OTP WhatsApp
+        // 6. Xử lý Gửi & Xác thực OTP Telegram
         async function requestPhoneOtp() {
             const phone = document.getElementById('targetPhoneInput').value.trim();
             if (!phone || phone.length < 9) {
@@ -998,7 +1008,7 @@
 
             const btn = document.getElementById('btnSendPhoneOtp');
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Đang gửi...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Đang kết nối...';
 
             try {
                 const res = await fetch(`${API_URL}/api/auth/send-phone-otp`, {
@@ -1012,21 +1022,29 @@
                     document.getElementById('dispTargetPhone').innerText = phone;
                     document.getElementById('phoneStepInput').classList.add('hidden');
                     document.getElementById('phoneStepOtp').classList.remove('hidden');
+
+                    if (data.deepLink) {
+                        const tgBtn = document.getElementById('btnOpenTelegramFreelancer');
+                        if (tgBtn) tgBtn.href = data.deepLink;
+                        // Tự động mở link Telegram nhận mã
+                        window.open(data.deepLink, '_blank');
+                    }
+
                     document.getElementById('inputPhoneOtp').focus();
 
                     // Khởi động đếm ngược 5 phút
                     startPhoneTimer(300);
                     startPhoneCooldown(60);
 
-                    alert(`✅ ${data.message}`);
+                    alert(`✅ ${data.message || 'Mã OTP đã sẵn sàng! Đang mở Telegram...'}`);
                 } else {
-                    alert('❌ Lỗi: ' + (data.error || 'Không thể gửi mã OTP WhatsApp'));
+                    alert('❌ Lỗi: ' + (data.error || 'Không thể tạo mã OTP Telegram'));
                 }
             } catch (err) {
                 alert('Lỗi kết nối máy chủ!');
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = '<span>Gửi mã OTP</span>';
+                btn.innerHTML = '<span>Lấy mã OTP</span>';
             }
         }
 
@@ -1092,7 +1110,7 @@
                 const data = await res.json();
 
                 if (res.ok) {
-                    alert(`🎉 XÁC THỰC THÀNH CÔNG!\n\nSố điện thoại WhatsApp [${phone}] của bạn đã được xác minh chính chủ.`);
+                    alert(`🎉 XÁC THỰC THÀNH CÔNG!\n\nSố điện thoại [${phone}] của bạn đã được xác minh chính chủ.`);
                     closePhoneVerifyModal();
                     loadProfile();
                 } else {

@@ -311,7 +311,7 @@
             const phoneBadge = document.getElementById('phoneVerifiedBadge');
             if (phoneBadge) {
                 if (data.is_phone_verified && data.phone_number) {
-                    phoneBadge.innerHTML = `<span class="bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-xs font-black px-3 py-1 rounded-full border border-emerald-200 dark:border-emerald-800 flex items-center shadow-sm"><i class="fab fa-whatsapp mr-1.5 text-emerald-600"></i> ${data.phone_number} (Đã xác minh)</span>`;
+                    phoneBadge.innerHTML = `<span class="bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-xs font-black px-3 py-1 rounded-full border border-emerald-200 dark:border-emerald-800 flex items-center shadow-sm"><i class="fas fa-check-circle mr-1.5 text-emerald-600"></i> ${data.phone_number} (Đã xác minh)</span>`;
                 } else {
                     phoneBadge.innerHTML = `<span class="bg-gray-100 dark:bg-gray-800 text-gray-500 text-xs font-bold px-3 py-1 rounded-full border border-gray-200 dark:border-gray-700 flex items-center"><i class="fas fa-phone mr-1.5 text-gray-400"></i> Chưa xác thực SĐT</span>`;
                 }
