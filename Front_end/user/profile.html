@@ -40,7 +40,7 @@
                                     <span id="displayNickname" class="bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 text-xs font-bold px-2.5 py-0.5 rounded-full">@client</span>
                                 </div>
                                 <div class="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-1 text-sm text-gray-500 dark:text-gray-400 mt-1.5">
-                                    <span class="flex items-center text-blue-600 dark:text-blue-400 font-medium"><i class="fas fa-briefcase mr-1.5"></i>Khách hàng Tuyển dụng VIP</span>
+                                    <span id="displayClientTier" class="flex items-center text-blue-600 dark:text-blue-400 font-medium"><i class="fas fa-user-check mr-1.5"></i>Client Basic</span>
                                     <span id="displayLocation" class="flex items-center"><i class="fas fa-map-marker-alt text-red-500 mr-1.5"></i>TP. Hồ Chí Minh, VN</span>
                                     <span id="displayJoinDate" class="flex items-center"><i class="far fa-calendar-alt mr-1.5"></i>Thành viên từ 2026</span>
                                 </div>
@@ -935,6 +935,20 @@
             if (creditTierBadge) {
                 const tierName = stats.credit_tier || 'Khách mới';
                 creditTierBadge.innerHTML = `<i class="fas fa-certificate mr-1.5 text-emerald-400"></i> ${tierName}`;
+            }
+
+            // Client Tier Display in Header
+            const clientTierEl = document.getElementById('displayClientTier');
+            if (clientTierEl) {
+                const isVip = (stats.total_spent && stats.total_spent >= 2000) || 
+                              (stats.credit_tier && (stats.credit_tier.includes('VIP') || stats.credit_tier.includes('Hạng A')));
+                if (isVip) {
+                    clientTierEl.innerHTML = `<i class="fas fa-crown text-amber-500 mr-1.5"></i>Client VIP`;
+                    clientTierEl.className = 'flex items-center text-amber-600 dark:text-amber-400 font-bold';
+                } else {
+                    clientTierEl.innerHTML = `<i class="fas fa-user-check text-blue-600 dark:text-blue-400 mr-1.5"></i>Client Basic`;
+                    clientTierEl.className = 'flex items-center text-blue-600 dark:text-blue-400 font-medium';
+                }
             }
 
             // Form inputs
