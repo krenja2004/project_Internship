@@ -44,45 +44,50 @@
                 </div>
                 
                 <!-- Profile Header Details -->
-                <div class="px-4 sm:px-8 pb-6 flex flex-col md:flex-row justify-between items-center md:items-end -mt-16 sm:-mt-20 relative z-10 gap-4">
-                    <div class="flex flex-col sm:flex-row items-center sm:items-end text-center sm:text-left gap-4">
+                <div class="px-5 sm:px-8 pb-6">
+                    <!-- Top Action Bar: Avatar on Left (overlapping cover), Action Buttons on Right (horizontal on white card) -->
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end -mt-16 sm:-mt-20 gap-4 mb-4">
+                        <!-- Avatar -->
                         <div class="relative group">
                             <img id="avatarContainer" referrerpolicy="no-referrer" src="https://ui-avatars.com/api/?name=Freelancer&background=4f46e5&color=fff" alt="Avatar" class="w-32 h-32 sm:w-36 sm:h-36 rounded-2xl border-4 border-white dark:border-gray-800 shadow-xl object-cover bg-white dark:bg-gray-700">
                             <label for="avatarUpload" class="absolute inset-0 bg-black/40 rounded-2xl flex items-center justify-center text-white opacity-0 group-hover:opacity-100 cursor-pointer transition">
                                 <i class="fas fa-camera text-xl"></i>
                             </label>
                             <input type="file" id="avatarUpload" class="hidden" accept="image/png, image/jpeg, image/jpg, image/webp, image/gif, image/svg+xml">
-                            <span class="absolute bottom-1 right-1 w-4 h-4 bg-emerald-500 border-2 border-white dark:border-gray-800 rounded-full" title="Đang online"></span>
+                            <span class="absolute bottom-1 right-1 w-4 h-4 bg-emerald-500 border-2 border-white dark:border-gray-800 rounded-full shadow" title="Đang online"></span>
                         </div>
-                        <div class="mb-1">
-                            <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                                <h1 id="displayName" class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">Đang tải...</h1>
-                                
-                                <!-- Email Verified Badge -->
-                                <span id="emailVerifiedBadge" class="bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 text-xs font-black px-3 py-1 rounded-full border border-emerald-200 dark:border-emerald-800 flex items-center shadow-sm">
-                                    <i class="fas fa-check-circle mr-1.5 text-emerald-600"></i> Email đã xác thực
-                                </span>
 
-                                <!-- Phone Verified / WhatsApp Badge -->
-                                <span id="phoneVerifiedBadge"></span>
-                            </div>
-                            <p id="displayHeadline" class="text-sm font-semibold text-gray-600 dark:text-gray-300 mt-1">Chuyên gia Lập trình & Phát triển Phần mềm</p>
-                            <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-2">
-                                <span id="displayCategoryBadge"></span>
-                                <span class="bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 text-xs font-bold px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800 flex items-center">
-                                    <span class="w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span> Sẵn sàng nhận việc
-                                </span>
-                            </div>
+                        <!-- Action Buttons (Nằm ngang hàng, thẳng thớm và chuyên nghiệp bên phải) -->
+                        <div class="flex flex-wrap items-center gap-2.5 sm:self-end">
+                            <button onclick="openPhoneVerifyModal()" id="btnQuickVerifyPhone" class="hidden bg-sky-500 hover:bg-sky-600 text-white font-bold py-2.5 px-4 rounded-xl shadow-sm transition flex items-center text-xs sm:text-sm">
+                                <i class="fab fa-telegram mr-1.5 text-base"></i> Xác thực SĐT qua Telegram
+                            </button>
+                            <button onclick="openEditModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-5 rounded-xl shadow-sm transition flex items-center text-xs sm:text-sm">
+                                <i class="fas fa-edit mr-2"></i> Chỉnh sửa Hồ sơ
+                            </button>
                         </div>
                     </div>
 
-                    <div class="flex flex-wrap gap-2.5 mb-2 w-full sm:w-auto justify-center">
-                        <button onclick="openPhoneVerifyModal()" id="btnQuickVerifyPhone" class="hidden bg-sky-500 hover:bg-sky-600 text-white font-bold py-2.5 px-4 rounded-2xl shadow-md transition flex items-center text-xs sm:text-sm">
-                            <i class="fab fa-telegram mr-1.5 text-base"></i> Xác thực SĐT qua Telegram
-                        </button>
-                        <button onclick="openEditModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-5 rounded-2xl shadow-md transition flex items-center text-xs sm:text-sm">
-                            <i class="fas fa-edit mr-2"></i> Chỉnh sửa Hồ sơ
-                        </button>
+                    <!-- Bottom Details: Tên, Huy hiệu, Chức danh (100% trên nền trắng/tối bên dưới, cực kỳ rõ nét) -->
+                    <div class="space-y-1.5">
+                        <div class="flex flex-wrap items-center gap-2.5">
+                            <h1 id="displayName" class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">Đang tải...</h1>
+                            
+                            <!-- Email Verified Badge -->
+                            <span id="emailVerifiedBadge" class="bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 text-xs font-black px-3 py-1 rounded-full border border-emerald-200 dark:border-emerald-800 flex items-center shadow-sm">
+                                <i class="fas fa-check-circle mr-1.5 text-emerald-600"></i> Email đã xác thực
+                            </span>
+
+                            <!-- Phone Verified Badge -->
+                            <span id="phoneVerifiedBadge"></span>
+                        </div>
+                        <p id="displayHeadline" class="text-sm font-semibold text-gray-600 dark:text-gray-300">Chuyên gia Lập trình & Phát triển Phần mềm</p>
+                        <div class="flex flex-wrap items-center gap-2 pt-1">
+                            <span id="displayCategoryBadge"></span>
+                            <span class="bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 text-xs font-bold px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800 flex items-center">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span> Sẵn sàng nhận việc
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
