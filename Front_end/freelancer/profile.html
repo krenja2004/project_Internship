@@ -392,21 +392,44 @@
 
             <div class="p-6 space-y-4">
                 <!-- Step 1: Nhập SĐT & Gửi OTP -->
-                <div id="phoneStepInput">
-                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Số điện thoại của bạn:</label>
-                    <div class="flex space-x-2 mb-3">
-                        <input type="text" id="targetPhoneInput" placeholder="VD: 0834779397" class="flex-1 border border-gray-200 dark:border-gray-600 rounded-xl px-3.5 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white font-mono font-bold focus:ring-2 focus:ring-sky-500 outline-none">
-                        <button type="button" id="btnSendPhoneOtp" onclick="requestPhoneOtp()" class="px-4 py-2.5 bg-sky-500 hover:bg-sky-600 text-white rounded-xl text-xs font-black shadow-md transition flex items-center flex-shrink-0">
-                            <span>Lấy mã OTP</span>
-                        </button>
+                <div id="phoneStepInput" class="space-y-3">
+                    <!-- Hướng dẫn 3 bước nhanh gọn -->
+                    <div class="bg-sky-50/80 dark:bg-sky-950/40 border border-sky-100 dark:border-sky-900/60 rounded-2xl p-3 text-xs space-y-2">
+                        <div class="font-bold flex items-center text-sky-700 dark:text-sky-300">
+                            <i class="fas fa-info-circle mr-1.5 text-sky-500"></i> Hướng dẫn 3 bước nhận OTP qua Telegram:
+                        </div>
+                        <div class="space-y-1.5 text-[12px] text-gray-600 dark:text-gray-300">
+                            <div class="flex items-start">
+                                <span class="w-4 h-4 rounded-full bg-sky-200 dark:bg-sky-800 text-sky-800 dark:text-sky-200 text-[10px] font-black inline-flex items-center justify-center mr-2 shrink-0 mt-0.5">1</span>
+                                <span>Nhập số điện thoại của bạn rồi bấm <b>"Lấy mã OTP"</b>.</span>
+                            </div>
+                            <div class="flex items-start">
+                                <span class="w-4 h-4 rounded-full bg-sky-200 dark:bg-sky-800 text-sky-800 dark:text-sky-200 text-[10px] font-black inline-flex items-center justify-center mr-2 shrink-0 mt-0.5">2</span>
+                                <span>Bấm nút <b>"Mở Telegram"</b> 👉 Trong chat với bot, bấm <b>START (Bắt đầu)</b>.</span>
+                            </div>
+                            <div class="flex items-start">
+                                <span class="w-4 h-4 rounded-full bg-sky-200 dark:bg-sky-800 text-sky-800 dark:text-sky-200 text-[10px] font-black inline-flex items-center justify-center mr-2 shrink-0 mt-0.5">3</span>
+                                <span>Bot gửi ngay mã 6 chữ số, bạn nhập mã vào đây và bấm <b>Xác nhận</b> là xong!</span>
+                            </div>
+                        </div>
                     </div>
-                    <p class="text-[11px] text-gray-400">
-                        ⚡ Nhận mã OTP 6 số tức thì qua Telegram Bot (<b>@kgswork_hoang_otp_bot</b>) hoàn toàn miễn phí & bảo mật 100%.
-                    </p>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Số điện thoại của bạn:</label>
+                        <div class="flex space-x-2 mb-2">
+                            <input type="text" id="targetPhoneInput" placeholder="VD: 0834779397" class="flex-1 border border-gray-200 dark:border-gray-600 rounded-xl px-3.5 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white font-mono font-bold focus:ring-2 focus:ring-sky-500 outline-none">
+                            <button type="button" id="btnSendPhoneOtp" onclick="requestPhoneOtp()" class="px-4 py-2.5 bg-sky-500 hover:bg-sky-600 text-white rounded-xl text-xs font-black shadow-md transition flex items-center flex-shrink-0">
+                                <span>Lấy mã OTP</span>
+                            </button>
+                        </div>
+                        <p class="text-[11px] text-gray-400">
+                            ⚡ Nhận mã OTP 6 số tức thì qua Telegram Bot (<b>@kgswork_hoang_otp_bot</b>) hoàn toàn miễn phí & bảo mật 100%.
+                        </p>
+                    </div>
                 </div>
 
                 <!-- Step 2: Nhập OTP Telegram (Ẩn mặc định) -->
-                <div id="phoneStepOtp" class="hidden space-y-4 pt-3 border-t border-gray-100 dark:border-gray-700">
+                <div id="phoneStepOtp" class="hidden space-y-3 pt-3 border-t border-gray-100 dark:border-gray-700">
                     <div class="p-3 bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800/60 rounded-xl text-xs text-sky-900 dark:text-sky-200 flex items-center justify-between">
                         <span>Đang xác thực SĐT: <strong id="dispTargetPhone" class="font-mono text-sky-600 dark:text-sky-400 font-bold">...</strong></span>
                         <button type="button" onclick="resetPhoneStep()" class="text-[11px] text-sky-600 dark:text-sky-400 font-bold hover:underline">Đổi SĐT</button>
@@ -417,9 +440,14 @@
                         <i class="fab fa-telegram-plane text-base"></i>
                         <span>👉 BẤM ĐÂY ĐỂ MỞ TELEGRAM NHẬN MÃ OTP 👈</span>
                     </a>
-                    <p class="text-[11px] text-gray-500 dark:text-gray-400 text-center">
-                        Mở Telegram & bấm <b>START</b>, Bot sẽ gửi mã OTP 6 số cho bạn ngay lập tức!
-                    </p>
+
+                    <!-- Tip bấm START rõ ràng -->
+                    <div class="bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 rounded-xl p-2.5 text-xs text-amber-800 dark:text-amber-200 flex items-start space-x-2">
+                        <i class="fas fa-hand-pointer text-amber-500 text-sm mt-0.5 shrink-0"></i>
+                        <span class="leading-relaxed">
+                            <b>Lưu ý quan trọng:</b> Khi màn hình Telegram mở lên, bạn chỉ cần bấm nút <b>START</b> (hoặc <b>BẮT ĐẦU</b>) ở cạnh dưới cuộc trò chuyện, Bot sẽ lập tức gửi mã OTP 6 số cho bạn!
+                        </span>
+                    </div>
 
                     <div>
                         <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Nhập mã OTP 6 chữ số từ Telegram:</label>
@@ -1048,7 +1076,7 @@
                     startPhoneTimer(300);
                     startPhoneCooldown(60);
 
-                    alert(`✅ ${data.message || 'Mã OTP đã sẵn sàng! Đang mở Telegram...'}`);
+                    alert('✅ Đã tạo liên kết OTP thành công!\n\n👉 Khi màn hình Telegram mở lên, bạn chỉ cần bấm nút START (hoặc BẮT ĐẦU) ở góc dưới để Bot gửi ngay mã 6 số về nhé!');
                 } else {
                     alert('❌ Lỗi: ' + (data.error || 'Không thể tạo mã OTP Telegram'));
                 }
