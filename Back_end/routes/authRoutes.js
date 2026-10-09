@@ -1117,8 +1117,8 @@ router.get('/api/freelancers', async (req, res) => {
                 }
             }
 
-            // Đếm số dự án đã làm
-            const fApps = (completedApps || []).filter(a => a.freelancer_id === f.id);
+            // Đếm số dự án đã làm (chỉ tính dự án đã hoàn thành)
+            const fApps = (completedApps || []).filter(a => a.freelancer_id === f.id && a.job?.status === 'completed');
             const completedCount = fApps.length;
 
             // Tính điểm đánh giá thực tế từ reviews.json
@@ -1130,10 +1130,10 @@ router.get('/api/freelancers', async (req, res) => {
                 if (fs.existsSync(reviewPath)) {
                     const rawRev = fs.readFileSync(reviewPath, 'utf-8').replace(/^\uFEFF/, '').trim();
                     const allRev = rawRev ? JSON.parse(rawRev) : [];
-                    const fRev = allRev.filter(r => r.freelancer_id === f.id);
+                    const fRev = allRev.filter(r => r.freelancer_id === f.id && r.freelancer_id !== 'null');
                     if (fRev.length > 0) {
                         reviewCount = fRev.length;
-                        const sumScore = fRev.reduce((acc, cur) => acc + (cur.rating || 5), 0);
+                        const sumScore = fRev.reduce((acc, cur) => acc + (parseFloat(cur.rating) || 5), 0);
                         ratingScore = Math.round((sumScore / fRev.length) * 10) / 10;
                         ratingDisplay = `${ratingScore.toFixed(1)} / 5.0`;
                     }
