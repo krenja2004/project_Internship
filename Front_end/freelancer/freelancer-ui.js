@@ -155,7 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             <!-- User Avatar -->
             <a href="profile.html" class="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full border-2 border-indigo-300 dark:border-indigo-500 overflow-hidden shadow-sm hover:border-indigo-500 transition-colors shrink-0 flex items-center justify-center bg-indigo-50" title="Xem hồ sơ năng lực">
-                <img id="uiAvatar" referrerpolicy="no-referrer" src="https://ui-avatars.com/api/?name=${encodeURIComponent(user.full_name || 'Freelancer')}&background=4f46e5&color=fff" alt="Avatar" class="w-full h-full object-cover">
+                <img id="uiAvatar" referrerpolicy="no-referrer" src="https://ui-avatars.com/api/?name=${encodeURIComponent(user.full_name || 'Freelancer')}&background=4f46e5&color=fff" alt="Avatar" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(user.full_name || 'Freelancer')}&background=4f46e5&color=fff';" class="w-full h-full object-cover">
             </a>
         </div>
     </header>`;
@@ -291,7 +291,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 7. User Avatar & Logout
     const uiAvatar = document.getElementById('uiAvatar');
-    if (uiAvatar && user.avatar_url) uiAvatar.src = user.avatar_url;
+    if (uiAvatar) {
+        const fallbackAvt = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.full_name || 'Freelancer')}&background=4f46e5&color=fff`;
+        uiAvatar.onerror = function() {
+            this.onerror = null;
+            this.src = fallbackAvt;
+        };
+        if (user.avatar_url && !user.avatar_url.includes('onrender.com/uploads/')) {
+            uiAvatar.src = user.avatar_url;
+        } else {
+            uiAvatar.src = fallbackAvt;
+        }
+    }
 
     const handleLogout = () => {
         localStorage.removeItem('user');

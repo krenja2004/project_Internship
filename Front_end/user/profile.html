@@ -31,7 +31,7 @@
                     <div class="px-6 md:px-8 pb-6 pt-0 flex flex-col md:flex-row justify-between items-start md:items-end -mt-16 md:-mt-20 relative z-10 gap-4">
                         <div class="flex flex-col sm:flex-row items-center sm:items-end gap-5">
                             <div class="relative shrink-0">
-                                <img id="avatarContainer" referrerpolicy="no-referrer" src="https://ui-avatars.com/api/?name=User&background=4f46e5&color=fff" alt="Avatar" class="w-28 h-28 md:w-36 md:h-36 rounded-full border-4 border-white dark:border-gray-800 shadow-xl object-cover bg-white dark:bg-gray-800">
+                                <img id="avatarContainer" referrerpolicy="no-referrer" src="https://ui-avatars.com/api/?name=User&background=4f46e5&color=fff" alt="Avatar" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=' + encodeURIComponent(document.getElementById('displayName')?.innerText || 'User') + '&background=4f46e5&color=fff';" class="w-28 h-28 md:w-36 md:h-36 rounded-full border-4 border-white dark:border-gray-800 shadow-xl object-cover bg-white dark:bg-gray-800">
                                 <span class="absolute bottom-2 right-2 w-5 h-5 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full shadow" title="Đang hoạt động"></span>
                             </div>
                             <div class="text-center sm:text-left mb-1">
@@ -863,28 +863,36 @@
             document.getElementById('displayEmail').innerText = data.email || currentUser.email;
             document.getElementById('displayPhone').innerText = data.phone_number || 'Chưa cập nhật';
 
-            if (data.avatar_url) {
-                document.getElementById('avatarContainer').src = data.avatar_url;
-                document.getElementById('previewAvatar').src = data.avatar_url;
+            const nameInitials = encodeURIComponent(name);
+            const defaultAvatar = `https://ui-avatars.com/api/?name=${nameInitials}&background=4f46e5&color=fff`;
+
+            const mainAvt = document.getElementById('avatarContainer');
+            const prevAvt = document.getElementById('previewAvatar');
+            const uiAvt = document.getElementById('uiAvatar');
+
+            if (mainAvt) mainAvt.onerror = function() { this.onerror = null; this.src = defaultAvatar; };
+            if (prevAvt) prevAvt.onerror = function() { this.onerror = null; this.src = defaultAvatar; };
+            if (uiAvt) uiAvt.onerror = function() { this.onerror = null; this.src = defaultAvatar; };
+
+            if (data.avatar_url && !data.avatar_url.includes('onrender.com/uploads/')) {
+                if (mainAvt) mainAvt.src = data.avatar_url;
+                if (prevAvt) prevAvt.src = data.avatar_url;
                 document.getElementById('avatar_url').value = data.avatar_url;
-                const uiAvt = document.getElementById('uiAvatar');
                 if (uiAvt) uiAvt.src = data.avatar_url;
             } else {
-                const nameInitials = encodeURIComponent(name);
-                const defaultAvatar = `https://ui-avatars.com/api/?name=${nameInitials}&background=4f46e5&color=fff`;
-                document.getElementById('avatarContainer').src = defaultAvatar;
-                document.getElementById('previewAvatar').src = defaultAvatar;
+                if (mainAvt) mainAvt.src = defaultAvatar;
+                if (prevAvt) prevAvt.src = defaultAvatar;
                 document.getElementById('avatar_url').value = '';
-                const uiAvt = document.getElementById('uiAvatar');
                 if (uiAvt) uiAvt.src = defaultAvatar;
             }
 
-            if (data.cover_url) {
+            if (data.cover_url && !data.cover_url.includes('onrender.com/uploads/')) {
                 document.getElementById('coverContainer').style.backgroundImage = `url('${data.cover_url}')`;
                 document.getElementById('previewCover').src = data.cover_url;
                 document.getElementById('cover_url').value = data.cover_url;
             } else {
-                document.getElementById('cover_url').value = '';
+                document.getElementById('coverContainer').style.backgroundImage = 'none';
+                document.getElementById('previewCover').src = '';
             }
 
             // Email verification badge
