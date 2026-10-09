@@ -297,10 +297,18 @@ document.addEventListener('DOMContentLoaded', () => {
             this.onerror = null;
             this.src = fallbackAvt;
         };
-        if (user.avatar_url && !user.avatar_url.includes('onrender.com/uploads/')) {
-            uiAvatar.src = user.avatar_url;
-        } else {
-            uiAvatar.src = fallbackAvt;
+        uiAvatar.src = user.avatar_url || fallbackAvt;
+
+        // Tự động đồng bộ avatar mới nhất từ server nếu có
+        if (user.id) {
+            fetch(`${API_URL}/api/users/${user.id}`).then(r => r.json()).then(data => {
+                if (data && data.avatar_url && data.avatar_url !== user.avatar_url) {
+                    user.avatar_url = data.avatar_url;
+                    if (data.full_name) user.full_name = data.full_name;
+                    localStorage.setItem('user', JSON.stringify(user));
+                    uiAvatar.src = data.avatar_url;
+                }
+            }).catch(() => {});
         }
     }
 

@@ -998,11 +998,7 @@
                     this.onerror = null;
                     this.src = fallbackAvatar;
                 };
-                if (data.avatar_url && !data.avatar_url.includes('onrender.com/uploads/')) {
-                    avtEl.src = data.avatar_url;
-                } else {
-                    avtEl.src = fallbackAvatar;
-                }
+                avtEl.src = data.avatar_url || fallbackAvatar;
             }
             const uiAvt = document.getElementById('uiAvatar');
             if (uiAvt) {
@@ -1010,18 +1006,24 @@
                     this.onerror = null;
                     this.src = fallbackAvatar;
                 };
-                if (data.avatar_url && !data.avatar_url.includes('onrender.com/uploads/')) {
-                    uiAvt.src = data.avatar_url;
-                } else {
-                    uiAvt.src = fallbackAvatar;
-                }
+                uiAvt.src = data.avatar_url || fallbackAvatar;
             }
 
-            if (data.cover_url && !data.cover_url.includes('onrender.com/uploads/')) {
+            if (data.cover_url) {
                 document.getElementById('coverContainer').style.backgroundImage = `url('${data.cover_url}')`;
             } else {
                 document.getElementById('coverContainer').style.backgroundImage = 'none';
             }
+
+            // Đồng bộ lại user vào localStorage để luôn cập nhật ảnh mới nhất
+            try {
+                if (user && data) {
+                    if (data.avatar_url) user.avatar_url = data.avatar_url;
+                    if (data.cover_url) user.cover_url = data.cover_url;
+                    if (data.full_name) user.full_name = data.full_name;
+                    localStorage.setItem('user', JSON.stringify(user));
+                }
+            } catch(e) {}
 
             // Phone Verified Badge & Form State
             const phoneBadge = document.getElementById('phoneVerifiedBadge');

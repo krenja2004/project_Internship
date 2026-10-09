@@ -874,7 +874,7 @@
             if (prevAvt) prevAvt.onerror = function() { this.onerror = null; this.src = defaultAvatar; };
             if (uiAvt) uiAvt.onerror = function() { this.onerror = null; this.src = defaultAvatar; };
 
-            if (data.avatar_url && !data.avatar_url.includes('onrender.com/uploads/')) {
+            if (data.avatar_url) {
                 if (mainAvt) mainAvt.src = data.avatar_url;
                 if (prevAvt) prevAvt.src = data.avatar_url;
                 document.getElementById('avatar_url').value = data.avatar_url;
@@ -886,7 +886,7 @@
                 if (uiAvt) uiAvt.src = defaultAvatar;
             }
 
-            if (data.cover_url && !data.cover_url.includes('onrender.com/uploads/')) {
+            if (data.cover_url) {
                 document.getElementById('coverContainer').style.backgroundImage = `url('${data.cover_url}')`;
                 document.getElementById('previewCover').src = data.cover_url;
                 document.getElementById('cover_url').value = data.cover_url;
@@ -894,6 +894,16 @@
                 document.getElementById('coverContainer').style.backgroundImage = 'none';
                 document.getElementById('previewCover').src = '';
             }
+
+            // Đồng bộ dữ liệu mới nhất vào localStorage
+            try {
+                if (currentUser && data) {
+                    if (data.avatar_url) currentUser.avatar_url = data.avatar_url;
+                    if (data.cover_url) currentUser.cover_url = data.cover_url;
+                    if (data.full_name) currentUser.full_name = data.full_name;
+                    localStorage.setItem('user', JSON.stringify(currentUser));
+                }
+            } catch(e) {}
 
             // Email verification badge
             const emailBadge = document.getElementById('emailBadgeContainer');

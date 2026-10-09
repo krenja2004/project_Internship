@@ -4,11 +4,10 @@ const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const multer = require('multer');
 
-if (!process.env.CLOUDINARY_URL) {
-  process.env.CLOUDINARY_URL = 'cloudinary://765156369761244:FC_Xk4fgmtXzMFijGqi6YSAOoXk@burlee2004';
-}
 cloudinary.config({
-  cloudinary_url: process.env.CLOUDINARY_URL
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'burlee2004',
+  api_key: process.env.CLOUDINARY_API_KEY || '765156369761244',
+  api_secret: process.env.CLOUDINARY_API_SECRET || 'FC_Xk4fgmtXzMFijGqi6YSAOoXk'
 });
 
 // Cấu hình Storage cho Multer

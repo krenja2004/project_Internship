@@ -355,19 +355,15 @@ const uploadImageLocal = multer({
 });
 
 const cloudinary = require('cloudinary').v2;
-if (!process.env.CLOUDINARY_URL) {
-    process.env.CLOUDINARY_URL = 'cloudinary://765156369761244:FC_Xk4fgmtXzMFijGqi6YSAOoXk@burlee2004';
-}
 cloudinary.config({
-    cloudinary_url: process.env.CLOUDINARY_URL
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'burlee2004',
+    api_key: process.env.CLOUDINARY_API_KEY || '765156369761244',
+    api_secret: process.env.CLOUDINARY_API_SECRET || 'FC_Xk4fgmtXzMFijGqi6YSAOoXk'
 });
 
 // Hàm hỗ trợ upload lên Cloudinary để lưu ảnh vĩnh viễn (tránh mất file khi Render restart/ngủ)
 async function uploadToCloudinary(filePath, folder = 'avatars') {
     try {
-        if (!process.env.CLOUDINARY_URL) {
-            process.env.CLOUDINARY_URL = 'cloudinary://765156369761244:FC_Xk4fgmtXzMFijGqi6YSAOoXk@burlee2004';
-        }
         const result = await cloudinary.uploader.upload(filePath, {
             folder: folder,
             resource_type: 'auto'

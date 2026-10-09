@@ -594,7 +594,7 @@
 
             grid.innerHTML = filtered.map(f => {
                 const fallbackAvt = `https://ui-avatars.com/api/?name=${encodeURIComponent(f.full_name)}&background=4f46e5&color=fff`;
-                const avatar = (f.avatar_url && !f.avatar_url.includes('onrender.com/uploads/')) ? f.avatar_url : fallbackAvt;
+                const avatar = f.avatar_url || fallbackAvt;
                 
                 const skillBadges = (f.skills || []).slice(0, 3).map(s => 
                     `<span class="bg-indigo-50 dark:bg-gray-700 text-indigo-700 dark:text-indigo-300 text-[10px] font-bold px-2 py-0.5 rounded-md mr-1 mb-1 inline-block border border-indigo-100 dark:border-gray-600">${s}</span>`
@@ -686,7 +686,7 @@
                     activeProfileFreelancer = f;
 
                     const fallbackAvt = `https://ui-avatars.com/api/?name=${encodeURIComponent(f.full_name)}&background=4f46e5&color=fff`;
-                    const avatar = (f.avatar_url && !f.avatar_url.includes('onrender.com/uploads/')) ? f.avatar_url : fallbackAvt;
+                    const avatar = f.avatar_url || fallbackAvt;
                     const mAvtEl = document.getElementById('mAvatar');
                     if (mAvtEl) {
                         mAvtEl.onerror = function() { this.onerror = null; this.src = fallbackAvt; };
