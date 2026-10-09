@@ -38,6 +38,7 @@ app.use(require('./routes/categoryRoutes'));
 app.use(require('./routes/reviewRoutes'));
 app.use(require('./routes/aiRoutes'));
 app.use(require('./routes/adminRoutes'));
+app.use(require('./routes/supportRoutes'));
 app.use(require('./routes/connectionRoutes'));
 app.use(require('./routes/testRoutes'));
 

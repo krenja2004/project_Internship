@@ -50,6 +50,9 @@ document.addEventListener('DOMContentLoaded', () => {
             <a href="profile.html" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-indigo-400 font-semibold transition-colors">
                 <i class="fas fa-user-circle w-5 text-purple-500"></i> <span>Hồ sơ năng lực</span>
             </a>
+            <a href="support.html" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-indigo-400 font-semibold transition-colors">
+                <i class="fas fa-headset w-5 text-rose-500"></i> <span>Trung tâm Hỗ trợ</span>
+            </a>
         </nav>
         
         <div class="p-4 border-t border-gray-200 dark:border-gray-700">
@@ -95,6 +98,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 </a>
                 <a href="profile.html" class="drawer-item flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-gray-700 font-semibold">
                     <i class="fas fa-user-circle w-5 text-purple-500"></i> <span>Hồ sơ năng lực</span>
+                </a>
+                <a href="support.html" class="drawer-item flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-gray-700 font-semibold">
+                    <i class="fas fa-headset w-5 text-rose-500"></i> <span>Trung tâm Hỗ trợ</span>
                 </a>
             </nav>
             

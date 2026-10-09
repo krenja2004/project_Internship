@@ -67,6 +67,15 @@ document.addEventListener('DOMContentLoaded', () => {
 <a href="blockchain-audit.html" class="nav-item flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-300 hover:bg-gray-800 hover:text-white font-semibold transition text-xs sm:text-sm">
                 <i class="fas fa-shield-alt w-5 text-cyan-400"></i> <span>Kiểm toán Blockchain</span>
             </a>
+            <a href="support-tickets.html" class="nav-item flex items-center justify-between px-3.5 py-2.5 rounded-xl text-gray-300 hover:bg-gray-800 hover:text-white font-semibold transition text-xs sm:text-sm">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-headset w-5 text-amber-400"></i> <span>Hỗ trợ & Yêu cầu</span>
+                </div>
+                <span id="navSupportBadge" class="hidden bg-amber-500 text-white text-[10px] px-2 py-0.5 rounded-full font-black animate-pulse">0</span>
+            </a>
+            <a href="../user/direct-chat.html" class="nav-item flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-300 hover:bg-gray-800 hover:text-white font-semibold transition text-xs sm:text-sm" title="Mở hộp thư trực tuyến 1-1 với người dùng">
+                <i class="fas fa-comments w-5 text-teal-400"></i> <span>Chat Trực Tuyến</span>
+            </a>
             
         </nav>
         
@@ -123,8 +132,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 
 
-                        <a href="blockchain-audit.html" class="drawer-item flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-300 hover:bg-gray-800 font-semibold">
+                <a href="blockchain-audit.html" class="drawer-item flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-300 hover:bg-gray-800 font-semibold">
                     <i class="fas fa-shield-alt w-5 text-cyan-400"></i> <span>Kiểm toán Blockchain</span>
+                </a>
+                <a href="support-tickets.html" class="drawer-item flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-300 hover:bg-gray-800 font-semibold">
+                    <i class="fas fa-headset w-5 text-amber-400"></i> <span>Hỗ trợ & Yêu cầu</span>
+                </a>
+                <a href="../user/direct-chat.html" class="drawer-item flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-300 hover:bg-gray-800 font-semibold">
+                    <i class="fas fa-comments w-5 text-teal-400"></i> <span>Chat Trực Tuyến</span>
                 </a>
                 
             </nav>
@@ -370,7 +385,48 @@ window.toggleAutoWithdraw = async function() {
     }
 };
 
+// 9. Admin Heartbeat (Giữ trạng thái Online cho hệ thống Live Support)
+function sendAdminHeartbeat() {
+    try {
+        let adminUser = null;
+        try { adminUser = JSON.parse(localStorage.getItem('user')); } catch(e){}
+        if (!adminUser || adminUser.role !== 'admin') return;
+
+        fetch(`${API_URL}/api/admin/heartbeat`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                admin_id: adminUser.id || '11111111-1111-1111-1111-111111111111', 
+                admin_name: adminUser.full_name || 'Quản Trị Viên KGS Work' 
+            })
+        }).catch(() => {});
+    } catch(e) {}
+}
+
+// 10. Cập nhật số lượng Ticket chờ xử lý trên Menu
+async function updatePendingSupportBadge() {
+    try {
+        const res = await fetch(`${API_URL}/api/admin/support/tickets?status=pending`);
+        if (res.ok) {
+            const data = await res.json();
+            const badge = document.getElementById('navSupportBadge');
+            if (badge) {
+                if (data.total > 0) {
+                    badge.innerText = data.total;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            }
+        }
+    } catch(e) {}
+}
+
 // Gọi khi DOM load
 document.addEventListener('DOMContentLoaded', () => {
     loadAutoWithdrawSetting();
+    sendAdminHeartbeat();
+    setInterval(sendAdminHeartbeat, 60000); // 1 phút / lần
+    updatePendingSupportBadge();
+    setInterval(updatePendingSupportBadge, 30000); // 30s / lần
 });
