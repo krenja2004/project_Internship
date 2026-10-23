@@ -15,13 +15,29 @@
   to = "/sharedFolder/login.html"
   status = 200
 
-# 3. Tạo đường dẫn rút gọn cho trang đăng ký
+# 3. Tạo đường dẫn cho trang đăng ký (hỗ trợ cả /register và /register.html)
 [[redirects]]
   from = "/register"
   to = "/sharedFolder/register.html"
   status = 200
 
-# 4. Bắt TẤT CẢ các lỗi truy cập sai link và đẩy người dùng về trang đăng nhập
+[[redirects]]
+  from = "/register.html"
+  to = "/sharedFolder/register.html"
+  status = 200
+
+# 4. Quên mật khẩu
+[[redirects]]
+  from = "/forgot-password"
+  to = "/sharedFolder/forgot-password.html"
+  status = 200
+
+[[redirects]]
+  from = "/forgot-password.html"
+  to = "/sharedFolder/forgot-password.html"
+  status = 200
+
+# 5. Bắt TẤT CẢ các lỗi truy cập sai link và đẩy người dùng về trang đăng nhập
 [[redirects]]
   from = "/*"
   to = "/sharedFolder/login.html"

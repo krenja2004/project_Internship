@@ -629,6 +629,7 @@ router.get('/api/users/:id', async (req, res) => {
         let primary_category = '';
         let rawSkills = user.skills || '';
         let portfolios = [];
+        let freelancer_type = "Cá nhân";
         if (user.skills) {
             try {
                 const parsed = JSON.parse(user.skills);
@@ -637,6 +638,7 @@ router.get('/api/users/:id', async (req, res) => {
                 primary_category = parsed.primary_category || '';
                 rawSkills = parsed.skills || parsed.skillsText || '';
                 portfolios = parsed.portfolios || [];
+                freelancer_type = parsed.freelancer_type || "Cá nhân";
             } catch (e) {
                 // If not JSON, it's raw text
                 rawSkills = user.skills;
@@ -805,6 +807,7 @@ router.get('/api/users/:id', async (req, res) => {
             nickname,
             primary_category,
             portfolios,
+            freelancer_type,
             recent_jobs: recentJobs,
             stats: {
                 total_spent: totalSpent,
@@ -832,7 +835,7 @@ router.get('/api/users/:id', async (req, res) => {
 // 2. Cập nhật Hồ sơ cá nhân (Hỗ trợ Tỉnh Thành, Nickname, Chuyên Môn, Ngân hàng, SĐT)
 router.put('/api/users/:id', async (req, res) => {
     const { id } = req.params;
-    const { full_name, avatar_url, cover_url, bio, bank_name, bank_account, bank_owner, phone_number, location, nickname, primary_category, skills } = req.body;
+    const { full_name, avatar_url, cover_url, bio, bank_name, bank_account, bank_owner, phone_number, location, nickname, primary_category, skills, freelancer_type } = req.body;
     console.log(`\n📝 [API PUT /api/users/${id}] Cập nhật hồ sơ: ${full_name}`);
     
     // Kiểm tra định dạng nếu có gửi avatar_url hoặc cover_url
@@ -864,7 +867,8 @@ router.put('/api/users/:id', async (req, res) => {
             nickname: nickname !== undefined ? nickname : (existingSkills.nickname || ''),
             primary_category: primary_category !== undefined ? primary_category : (existingSkills.primary_category || ''),
             skills: skills !== undefined ? skills : (existingSkills.skills || existingSkills.skillsText || ''),
-            portfolios: req.body.portfolios !== undefined ? req.body.portfolios : (existingSkills.portfolios || [])
+            portfolios: req.body.portfolios !== undefined ? req.body.portfolios : (existingSkills.portfolios || []),
+            freelancer_type: freelancer_type !== undefined ? freelancer_type : (existingSkills.freelancer_type || "Cá nhân")
         });
 
         const validAvatarUrl = (avatar_url && typeof avatar_url === 'string' && avatar_url.trim() !== '') ? avatar_url.trim() : undefined;
@@ -902,7 +906,8 @@ router.put('/api/users/:id', async (req, res) => {
                 skills: skills || '',
                 location: location || 'TP. Hồ Chí Minh',
                 nickname: nickname || '',
-                primary_category: primary_category || ''
+                primary_category: primary_category || '',
+                freelancer_type: freelancer_type || 'Cá nhân'
             }
         });
     } catch (err) {

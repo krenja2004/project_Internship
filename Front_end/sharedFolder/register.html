@@ -96,7 +96,7 @@
             </button>
             <div class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                 Đã có tài khoản? 
-                <a href="login.html" class="font-bold text-indigo-600 dark:text-indigo-400 hover:underline ml-0.5">Đăng nhập</a>
+                <a href="/sharedFolder/login.html" class="font-bold text-indigo-600 dark:text-indigo-400 hover:underline ml-0.5">Đăng nhập</a>
             </div>
         </div>
     </header>
@@ -315,7 +315,7 @@
 
                 <p class="mt-4 text-center text-xs text-gray-500 dark:text-gray-400">
                     Đã có tài khoản? 
-                    <a href="login.html" class="font-bold text-indigo-600 dark:text-indigo-400 hover:underline">Đăng nhập</a>
+                    <a href="/sharedFolder/login.html" class="font-bold text-indigo-600 dark:text-indigo-400 hover:underline">Đăng nhập</a>
                 </p>
             </div>
         </div>
@@ -813,7 +813,7 @@
                     clearInterval(resendCooldownInterval);
 
                     alert(`🎉 CHÚC MỪNG BẠN!\n\nTài khoản ${pendingRegistration.role === 'client' ? '[Client Hub]' : '[Freelancer Hub]'} của bạn đã được xác thực Email và kích hoạt thành công!\n\nHệ thống sẽ chuyển bạn đến trang đăng nhập ngay.`);
-                    window.location.href = 'login.html';
+                    window.location.href = '/sharedFolder/login.html';
                 } else {
                     showOtpError(data.error || 'Mã OTP không chính xác hoặc đã hết hạn!');
                     // Tự động clear input để nhập lại nếu sai

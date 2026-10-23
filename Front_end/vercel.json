@@ -3,6 +3,30 @@
     {
       "source": "/",
       "destination": "/sharedFolder/login.html"
+    },
+    {
+      "source": "/login",
+      "destination": "/sharedFolder/login.html"
+    },
+    {
+      "source": "/login.html",
+      "destination": "/sharedFolder/login.html"
+    },
+    {
+      "source": "/register",
+      "destination": "/sharedFolder/register.html"
+    },
+    {
+      "source": "/register.html",
+      "destination": "/sharedFolder/register.html"
+    },
+    {
+      "source": "/forgot-password",
+      "destination": "/sharedFolder/forgot-password.html"
+    },
+    {
+      "source": "/forgot-password.html",
+      "destination": "/sharedFolder/forgot-password.html"
     }
   ]
 }
