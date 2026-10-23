@@ -610,6 +610,12 @@
                 if (response.ok) {
                     // Chuyển sang Màn hình Step 3: Nhập OTP
                     showOtpStep(email);
+                    if (data.demo_otp) {
+                        alert(`ℹ️ [Chế độ thử nghiệm / Sandbox]:\nMã OTP xác thực của bạn là: ${data.demo_otp}`);
+                        const digits = String(data.demo_otp).split('');
+                        const inps = document.querySelectorAll('.otp-input');
+                        digits.forEach((d, i) => { if (inps[i]) inps[i].value = d; });
+                    }
                 } else {
                     showFormError(data.error || 'Không thể gửi mã OTP xác thực. Vui lòng thử lại!');
                 }
@@ -713,7 +719,14 @@
                     hideOtpError();
                     startExpiryTimer(300);
                     startCooldownTimer(60);
-                    alert(`✅ Mã OTP mới đã được gửi tới email: ${pendingRegistration.email}`);
+                    if (data.demo_otp) {
+                        alert(`ℹ️ [Chế độ thử nghiệm / Sandbox]:\nMã OTP gửi lại của bạn là: ${data.demo_otp}`);
+                        const digits = String(data.demo_otp).split('');
+                        const inps = document.querySelectorAll('.otp-input');
+                        digits.forEach((d, i) => { if (inps[i]) inps[i].value = d; });
+                    } else {
+                        alert(`✅ Mã OTP mới đã được gửi tới email: ${pendingRegistration.email}\n\nVui lòng kiểm tra hộp thư (kể cả thư mục Spam/Thư rác)!`);
+                    }
                 } else {
                     showOtpError(data.error || 'Không thể gửi lại mã OTP lúc này!');
                     if (data.remainingSeconds) {

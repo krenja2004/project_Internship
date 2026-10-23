@@ -6,8 +6,8 @@ function createTransporter() {
     const host = (process.env.SMTP_HOST || 'smtp.gmail.com').trim();
     const port = parseInt(process.env.SMTP_PORT || '587');
     const secure = process.env.SMTP_SECURE === 'true' || port === 465;
-    const user = (process.env.SMTP_USER || '').trim();
-    const pass = (process.env.SMTP_PASS || '').replace(/\s+/g, ''); // Tự động làm sạch mọi dấu cách từ Google App Password
+    const user = (process.env.SMTP_USER || 'htworkcompany@gmail.com').trim();
+    const pass = (process.env.SMTP_PASS || 'vezjmttuipykqzre').replace(/\s+/g, ''); // Tự động làm sạch mọi dấu cách từ Google App Password
 
     if (!user || !pass || user.includes('your_email') || pass.includes('your_app_password')) {
         return null; // Chế độ DEV/Sandbox (chưa cấu hình mail thật)
@@ -114,12 +114,12 @@ async function sendOtpEmail(email, fullName, otpCode) {
             metadata: { email, fullName, sandbox: true }
         });
 
-        return { success: true, mode: 'sandbox', message: 'Mã OTP đã được tạo (Sandbox Mode)' };
+        return { success: true, mode: 'sandbox', demo_otp: otpCode, message: 'Mã OTP đã được tạo (Sandbox Mode)' };
     }
 
     // 2. Chế độ Gửi Thật qua SMTP (Gmail / Resend / SendGrid)
     try {
-        const fromEmail = process.env.EMAIL_FROM || `KGS Work <${process.env.SMTP_USER}>`;
+        const fromEmail = process.env.EMAIL_FROM || `KGS Work <${process.env.SMTP_USER || 'htworkcompany@gmail.com'}>`;
         
         // Gửi mail bất đồng bộ
         const mailOptions = {
@@ -157,7 +157,7 @@ async function sendOtpEmail(email, fullName, otpCode) {
             metadata: { error: error.message }
         });
 
-        return { success: false, error: error.message, fallbackOtp: otpCode };
+        return { success: false, mode: 'error', error: error.message, demo_otp: otpCode, fallbackOtp: otpCode };
     }
 }
 
@@ -217,7 +217,7 @@ async function sendResetPasswordEmail(email, fullName, otpCode) {
         return { success: true, mode: 'sandbox', demo_otp: otpCode };
     }
     try {
-        const fromEmail = process.env.EMAIL_FROM || `KGS Work <${process.env.SMTP_USER}>`;
+        const fromEmail = process.env.EMAIL_FROM || `KGS Work <${process.env.SMTP_USER || 'htworkcompany@gmail.com'}>`;
         const mailOptions = {
             from: fromEmail,
             to: email,
@@ -228,7 +228,7 @@ async function sendResetPasswordEmail(email, fullName, otpCode) {
         return { success: true, mode: 'smtp', messageId: info.messageId };
     } catch (error) {
         console.error('Lỗi gửi email reset', error);
-        return { success: false, error: error.message, fallbackOtp: otpCode };
+        return { success: false, mode: 'error', error: error.message, demo_otp: otpCode, fallbackOtp: otpCode };
     }
 }
 module.exports.sendResetPasswordEmail = sendResetPasswordEmail;

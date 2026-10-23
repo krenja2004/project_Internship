@@ -49,18 +49,16 @@ router.post(['/send-otp', '/api/auth/send-otp'], async (req, res) => {
             });
         }
 
-        // Gửi email OTP (Bất đồng bộ trong background - Phản hồi ngay < 100ms)
-        sendOtpEmail(email.trim().toLowerCase(), full_name || 'Quý khách', otpResult.plainOtp)
-            .then(mailRes => {
-                console.log(`[AUTH BG EMAIL] Đã xử lý gửi OTP tới ${email} (Mode: ${mailRes.mode})`);
-            })
-            .catch(mailErr => {
-                console.error(`[AUTH BG EMAIL ERROR] Lỗi gửi OTP tới ${email}:`, mailErr.message);
-            });
+        // Gửi email OTP
+        const mailRes = await sendOtpEmail(email.trim().toLowerCase(), full_name || 'Quý khách', otpResult.plainOtp);
+        console.log(`[AUTH EMAIL] Đã xử lý gửi OTP tới ${email} (Mode: ${mailRes.mode})`);
 
         return res.status(200).json({
             success: true,
-            message: `Mã OTP xác thực đã được gửi đến email ${email}!`,
+            message: mailRes.mode === 'sandbox'
+                ? `Mã OTP thử nghiệm (Sandbox): ${otpResult.plainOtp}`
+                : `Mã OTP xác thực đã được gửi đến email ${email}! Vui lòng kiểm tra hộp thư (kể cả Thư rác/Spam).`,
+            demo_otp: mailRes.demo_otp || (mailRes.mode === 'sandbox' ? otpResult.plainOtp : undefined),
             cooldownSeconds: otpResult.cooldownSeconds,
             expiresAt: otpResult.expiresAt
         });
@@ -87,14 +85,16 @@ router.post(['/resend-otp', '/api/auth/resend-otp'], async (req, res) => {
             });
         }
 
-        // Dispatch email trong background
-        sendOtpEmail(email.trim().toLowerCase(), full_name || 'Quý khách', otpResult.plainOtp)
-            .then(mailRes => console.log(`[RESEND BG EMAIL] Đã gửi lại tới ${email}: ${mailRes.mode}`))
-            .catch(mailErr => console.error(`[RESEND BG EMAIL ERROR]:`, mailErr.message));
+        // Gửi lại email OTP
+        const mailRes = await sendOtpEmail(email.trim().toLowerCase(), full_name || 'Quý khách', otpResult.plainOtp);
+        console.log(`[RESEND EMAIL] Đã gửi lại tới ${email}: ${mailRes.mode}`);
 
         return res.status(200).json({
             success: true,
-            message: `Đã gửi lại mã OTP mới tới email ${email}!`,
+            message: mailRes.mode === 'sandbox'
+                ? `Mã OTP gửi lại (Sandbox): ${otpResult.plainOtp}`
+                : `Đã gửi lại mã OTP mới tới email ${email}! Vui lòng kiểm tra hộp thư (kể cả Thư rác/Spam).`,
+            demo_otp: mailRes.demo_otp || (mailRes.mode === 'sandbox' ? otpResult.plainOtp : undefined),
             cooldownSeconds: otpResult.cooldownSeconds
         });
     } catch (error) {
