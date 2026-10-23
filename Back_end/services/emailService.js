@@ -1,7 +1,7 @@
 const nodemailer = require('nodemailer');
 const { logEvent } = require('./auditLogger');
 
-// Khởi tạo Transporter cho Nodemailer
+// Khởi tạo Transporter cho Nodemailer (Hỗ trợ chuẩn STARTTLS Port 587 chống nghẽn Cloud)
 function createTransporter() {
     const host = (process.env.SMTP_HOST || 'smtp.gmail.com').trim();
     const port = parseInt(process.env.SMTP_PORT || '587');
@@ -13,22 +13,18 @@ function createTransporter() {
         return null; // Chế độ DEV/Sandbox (chưa cấu hình mail thật)
     }
 
-    // Tối ưu riêng cho Gmail SMTP
-    if (host.includes('gmail') || host.includes('google')) {
-        return nodemailer.createTransport({
-            service: 'gmail',
-            auth: { user, pass }
-        });
-    }
-
+    // Kết nối trực tiếp qua Host + Port 587 với Timeout nghiêm ngặt, tuyệt đối không dùng service:'gmail' vì port 465 bị firewall chặn
     return nodemailer.createTransport({
-        host,
-        port,
-        secure,
+        host: host || 'smtp.gmail.com',
+        port: port || 587,
+        secure: secure, // false cho 587 STARTTLS
         auth: { user, pass },
-        pool: true,
-        maxConnections: 5,
-        maxMessages: 100
+        connectionTimeout: 3500, // 3.5s tối đa kết nối socket
+        greetingTimeout: 3000,   // 3s chào hỏi SMTP
+        socketTimeout: 4000,     // 4s truyền dữ liệu
+        tls: {
+            rejectUnauthorized: false
+        }
     });
 }
 
