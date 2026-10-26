@@ -115,7 +115,7 @@ router.post('/api/milestones/submit', async (req, res) => {
 });
 
 // 9. API: Khách hàng xem danh sách Job cần quản lý (Duyệt kế hoạch HOẶC duyệt bài)
-router.get('/api/client/:client_id/pending-actions', async (req, res) => {
+router.get(['/api/client/:client_id/pending-actions', '/api/clients/:client_id/pending-actions'], async (req, res) => {
     const { client_id } = req.params;
     console.log(`\n📋 [API GET /api/client/pending-actions] Lấy danh sách tiến độ cho Client ID: ${client_id}`);
     try {
