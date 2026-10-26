@@ -329,21 +329,35 @@ document.addEventListener('DOMContentLoaded', () => {
     const drawerLogoutBtn = document.getElementById('uiDrawerLogoutBtn');
     if (drawerLogoutBtn) drawerLogoutBtn.addEventListener('click', handleLogout);
 
-    // 8. Fetch Global Balance
+    // 8. Fetch Global Balance (Hỗ trợ LocalStorage Cache tải tức thì 0ms)
     async function loadGlobalBalance() {
+        const balanceElement = document.getElementById('uiBalanceDisplay');
+        if (!balanceElement) return;
+
+        // Đọc ngay từ cache để UI hiển thị số dư tức thì, không bị khựng ở "-- Token"
+        const cachedBal = localStorage.getItem('cached_wallet_balance');
+        if (cachedBal !== null && balanceElement.innerText.trim() === '-- Token') {
+            const num = parseFloat(cachedBal) || 0;
+            balanceElement.innerHTML = typeof window.formatTokenHTML === "function" 
+                ? window.formatTokenHTML(num) 
+                : num.toLocaleString() + " Token";
+        }
+
         try {
             const response = await fetch(`${API_URL}/api/wallet/${user.id}`);
-            const balanceElement = document.getElementById('uiBalanceDisplay');
             if (response.ok) {
                 const data = await response.json();
-                if (balanceElement) {
-                    balanceElement.innerHTML = typeof window.formatTokenHTML === "function" ? window.formatTokenHTML((data.balance || 0)) : ((data.balance || 0)).toLocaleString() + " Token";
+                const bal = data.balance || 0;
+                localStorage.setItem('cached_wallet_balance', bal.toString());
+                if (data.locked_balance !== undefined) {
+                    localStorage.setItem('cached_locked_balance', data.locked_balance.toString());
                 }
-            } else {
-                if (balanceElement) balanceElement.innerText = '0 Token';
+                balanceElement.innerHTML = typeof window.formatTokenHTML === "function" 
+                    ? window.formatTokenHTML(bal) 
+                    : bal.toLocaleString() + " Token";
             }
         } catch (error) {
-            console.error('Lỗi lấy số dư:', error);
+            console.warn('Lỗi lấy số dư:', error);
         }
     }
 
@@ -472,15 +486,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // Realtime polling setup
-    setInterval(() => {
-        loadFreelancerNotifications();
-        loadGlobalBalance();
-        setInterval(() => {
-            if(user && user.id) loadGlobalBalance();
-        }, 5000);
-    }, 5000);
-
     // 10. Global Modern Typography & Sleek Scrollbar Style
     if (!document.getElementById('kgs work-global-style')) {
         const fontLink = document.createElement('link');
@@ -542,10 +547,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Khởi chạy ban đầu
     loadGlobalBalance();
-        setInterval(() => {
-            if(user && user.id) loadGlobalBalance();
-        }, 5000);
     loadFreelancerNotifications();
     window.loadFreelancerNotifications = loadFreelancerNotifications;
     window.loadGlobalBalance = loadGlobalBalance;
+
+    // Polling định kỳ hợp lý (15s/lần) không gây nghẽn mạng và chống tràn bộ nhớ
+    setInterval(() => {
+        if (user && user.id) {
+            loadGlobalBalance();
+            loadFreelancerNotifications();
+        }
+    }, 15000);
 });

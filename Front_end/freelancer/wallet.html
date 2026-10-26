@@ -639,12 +639,26 @@
                 }
             }
 
+            // 0. Đọc ngay từ Cache để hiển thị lập tức 0ms, không bị nhấp nháy 0 Token
+            const cachedBal = localStorage.getItem('cached_wallet_balance');
+            const cachedLocked = localStorage.getItem('cached_locked_balance');
+            if (cachedBal !== null) {
+                currentWalletBalance = parseFloat(cachedBal) || 0;
+                document.getElementById('balance').innerHTML = formatTokenHTML(currentWalletBalance);
+                document.getElementById('balanceVND').textContent = `${parseInt(currentWalletBalance).toLocaleString()} VNĐ`;
+            }
+            if (cachedLocked !== null) {
+                document.getElementById('locked_balance').innerHTML = formatTokenHTML(parseFloat(cachedLocked) || 0);
+            }
+
             // 1. Lấy thông tin ví
             try {
                 const response = await fetch(`${API_URL}/api/wallet/${currentUser.id}`);
                 if (response.ok) {
                     const data = await response.json();
                     currentWalletBalance = data.balance || 0;
+                    localStorage.setItem('cached_wallet_balance', currentWalletBalance.toString());
+                    localStorage.setItem('cached_locked_balance', (data.locked_balance || 0).toString());
                     document.getElementById('balance').innerHTML = formatTokenHTML(data.balance);
                     document.getElementById('balanceVND').textContent = `${parseInt(data.balance).toLocaleString()} VNĐ`;
                     document.getElementById('locked_balance').innerHTML = formatTokenHTML(data.locked_balance || 0);
