@@ -391,6 +391,32 @@ async function uploadToCloudinary(filePath, folder = 'avatars') {
     }
 }
 
+// Upload file lên Supabase Storage (Hỗ trợ PDF, ZIP, code, tài liệu công khai vĩnh viễn, không bị lỗi 401 ACL)
+async function uploadToSupabaseStorage(filePath, originalName) {
+    try {
+        if (!fs.existsSync(filePath)) return null;
+        const fileBuffer = fs.readFileSync(filePath);
+        const safeName = `${Date.now()}-${Math.round(Math.random() * 1e9)}-${(originalName || 'file').replace(/[^a-zA-Z0-9.\-_]/g, '_')}`;
+        const contentType = getMimeType(originalName);
+
+        const { data, error } = await supabase.storage.from('deliverables').upload(safeName, fileBuffer, {
+            contentType: contentType,
+            upsert: true
+        });
+
+        if (error) {
+            console.error('[Supabase Storage Error]:', error.message);
+            return null;
+        }
+
+        const { data: publicData } = supabase.storage.from('deliverables').getPublicUrl(safeName);
+        return publicData?.publicUrl || null;
+    } catch (err) {
+        console.error('[Supabase Storage Exception]:', err.message);
+        return null;
+    }
+}
+
 // Helper tra cứu MIME Type khi tải/xem tệp tin
 function getMimeType(fileName) {
     if (!fileName) return 'application/octet-stream';
@@ -517,14 +543,17 @@ router.post('/upload-file', (req, res) => {
         const protocol = req.protocol || 'http';
         let localUrl = `${protocol}://${host}/uploads/${req.file.filename}`;
 
-        // Đẩy lên Cloudinary để lưu trữ vĩnh viễn (tránh mất file trên Render khi restart)
+        // Ưu tiên đẩy lên Supabase Storage (hỗ trợ hoàn hảo PDF, Code, Zip, Document không bị lỗi 401 ACL)
         try {
-            const cloudUrl = await uploadToCloudinary(req.file.path, 'deliverables');
-            if (cloudUrl) {
-                localUrl = cloudUrl;
+            const supabaseUrl = await uploadToSupabaseStorage(req.file.path, req.file.originalname);
+            if (supabaseUrl) {
+                localUrl = supabaseUrl;
+            } else {
+                const cloudUrl = await uploadToCloudinary(req.file.path, 'deliverables');
+                if (cloudUrl) localUrl = cloudUrl;
             }
         } catch (cErr) {
-            console.warn('[Upload File] Cloudinary fallback:', cErr.message);
+            console.warn('[Upload File] Storage fallback:', cErr.message);
         }
 
         writeUploadLog(req, '/upload-file', 'SUCCESS', `Đã lưu file: ${localUrl}`);
@@ -606,14 +635,17 @@ router.post('/api/upload/file', (req, res) => {
         if (req.file.mimetype && req.file.mimetype.startsWith('video/')) type = 'video';
         else if (req.file.mimetype && req.file.mimetype.startsWith('audio/')) type = 'audio';
 
-        // Đẩy lên Cloudinary để lưu trữ vĩnh viễn (tránh mất file trên Render khi restart)
+        // Ưu tiên đẩy lên Supabase Storage (hỗ trợ hoàn hảo PDF, Code, Zip, Document không bị lỗi 401 ACL)
         try {
-            const cloudUrl = await uploadToCloudinary(req.file.path, 'deliverables');
-            if (cloudUrl) {
-                localUrl = cloudUrl;
+            const supabaseUrl = await uploadToSupabaseStorage(req.file.path, req.file.originalname);
+            if (supabaseUrl) {
+                localUrl = supabaseUrl;
+            } else {
+                const cloudUrl = await uploadToCloudinary(req.file.path, 'deliverables');
+                if (cloudUrl) localUrl = cloudUrl;
             }
         } catch (cErr) {
-            console.warn('[API Upload File] Cloudinary fallback:', cErr.message);
+            console.warn('[API Upload File] Storage fallback:', cErr.message);
         }
 
         writeUploadLog(req, '/api/upload/file', 'SUCCESS', `Đã lưu file: ${localUrl}`);
