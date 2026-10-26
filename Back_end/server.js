@@ -18,6 +18,13 @@ if (!fs.existsSync(uploadsDir)) {
 }
 app.use('/uploads', express.static(uploadsDir));
 
+// Fallback chuyển hướng sang Cloudinary nếu file cục bộ bị xóa trên Render
+app.get('/uploads/:filename', (req, res) => {
+    const filename = req.params.filename;
+    console.log(`[Uploads Fallback] Redirecting to Cloudinary for file: ${filename}`);
+    return res.redirect(`https://res.cloudinary.com/burlee2004/raw/upload/deliverables/${filename}`);
+});
+
 // 2. Route kiểm tra trạng thái Server
 app.get('/', (req, res) => {
     res.send('KGS Work Backend is running in Modular Architecture!');

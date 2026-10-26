@@ -501,7 +501,7 @@ router.post('/upload-image', (req, res) => {
 
 router.post('/upload-file', (req, res) => {
     writeUploadLog(req, '/upload-file', 'START', 'Bắt đầu nhận request');
-    uploadLocal.single('file')(req, res, function (localErr) {
+    uploadLocal.single('file')(req, res, async function (localErr) {
         if (localErr) {
             writeUploadLog(req, '/upload-file', 'ERROR', localErr.message);
             if (localErr.code === 'LIMIT_FILE_SIZE') {
@@ -515,7 +515,18 @@ router.post('/upload-file', (req, res) => {
         }
         const host = req.get('host') || 'localhost:5000';
         const protocol = req.protocol || 'http';
-        const localUrl = `${protocol}://${host}/uploads/${req.file.filename}`;
+        let localUrl = `${protocol}://${host}/uploads/${req.file.filename}`;
+
+        // Đẩy lên Cloudinary để lưu trữ vĩnh viễn (tránh mất file trên Render khi restart)
+        try {
+            const cloudUrl = await uploadToCloudinary(req.file.path, 'deliverables');
+            if (cloudUrl) {
+                localUrl = cloudUrl;
+            }
+        } catch (cErr) {
+            console.warn('[Upload File] Cloudinary fallback:', cErr.message);
+        }
+
         writeUploadLog(req, '/upload-file', 'SUCCESS', `Đã lưu file: ${localUrl}`);
         return res.status(200).json({
             message: 'Upload file thành công!',
@@ -576,7 +587,7 @@ router.post('/api/upload/image', (req, res) => {
 
 router.post('/api/upload/file', (req, res) => {
     writeUploadLog(req, '/api/upload/file', 'START', 'Bắt đầu nhận request');
-    uploadLocal.single('file')(req, res, function (localErr) {
+    uploadLocal.single('file')(req, res, async function (localErr) {
         if (localErr) {
             writeUploadLog(req, '/api/upload/file', 'ERROR', localErr.message);
             if (localErr.code === 'LIMIT_FILE_SIZE') {
@@ -590,10 +601,21 @@ router.post('/api/upload/file', (req, res) => {
         }
         const host = req.get('host') || 'localhost:5000';
         const protocol = req.protocol || 'http';
-        const localUrl = `${protocol}://${host}/uploads/${req.file.filename}`;
+        let localUrl = `${protocol}://${host}/uploads/${req.file.filename}`;
         let type = 'document';
         if (req.file.mimetype && req.file.mimetype.startsWith('video/')) type = 'video';
         else if (req.file.mimetype && req.file.mimetype.startsWith('audio/')) type = 'audio';
+
+        // Đẩy lên Cloudinary để lưu trữ vĩnh viễn (tránh mất file trên Render khi restart)
+        try {
+            const cloudUrl = await uploadToCloudinary(req.file.path, 'deliverables');
+            if (cloudUrl) {
+                localUrl = cloudUrl;
+            }
+        } catch (cErr) {
+            console.warn('[API Upload File] Cloudinary fallback:', cErr.message);
+        }
+
         writeUploadLog(req, '/api/upload/file', 'SUCCESS', `Đã lưu file: ${localUrl}`);
         return res.status(200).json({ url: localUrl, fileUrl: localUrl, type: type });
     });

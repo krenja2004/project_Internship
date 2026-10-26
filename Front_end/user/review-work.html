@@ -726,9 +726,15 @@
                         ${m.proof_urls.map((u, i) => {
                             let linkUrl = typeof u === 'string' ? u : u.url;
                             let linkName = typeof u === 'string' ? `Tệp Báo Cáo #${i+1}` : (u.name || `Tệp Báo Cáo #${i+1}`);
+                            if (linkUrl && linkUrl.startsWith('http://project-internship-8z76.onrender.com')) {
+                                linkUrl = linkUrl.replace('http://', 'https://');
+                            }
+                            const isGit = linkUrl.includes('github.com') || linkUrl.includes('.git');
+                            const iconClass = isGit ? 'fab fa-github' : (linkUrl.endsWith('.py') ? 'fab fa-python' : 'fas fa-download');
+                            const downloadAttr = isGit ? '' : `download="${linkName}"`;
                             return `
-                            <a href="${linkUrl}" target="_blank" title="${linkUrl}" class="inline-flex items-center text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 px-3 py-1.5 rounded-xl border border-indigo-200 dark:border-indigo-800 transition truncate max-w-[200px] sm:max-w-xs">
-                                <i class="fas fa-external-link-alt mr-1.5 shrink-0"></i> <span class="truncate">${linkName}</span>
+                            <a href="${linkUrl}" target="_blank" ${downloadAttr} title="Tải xuống / Mở: ${linkUrl}" class="inline-flex items-center text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 px-3 py-1.5 rounded-xl border border-indigo-200 dark:border-indigo-800 transition truncate max-w-[220px] sm:max-w-xs shadow-sm">
+                                <i class="${iconClass} mr-1.5 shrink-0 text-indigo-500"></i> <span class="truncate">${linkName}</span>
                             </a>
                             `;
                         }).join('')}
