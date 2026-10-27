@@ -2,7 +2,19 @@
   "rewrites": [
     {
       "source": "/",
-      "destination": "/sharedFolder/login.html"
+      "destination": "/index.html"
+    },
+    {
+      "source": "/jobs",
+      "destination": "/explore-jobs.html"
+    },
+    {
+      "source": "/freelancers",
+      "destination": "/explore-freelancers.html"
+    },
+    {
+      "source": "/how-it-works",
+      "destination": "/how-it-works.html"
     },
     {
       "source": "/login",
