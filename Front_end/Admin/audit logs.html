@@ -165,7 +165,7 @@
 
                     <!-- Logs Table -->
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm" id="auditTable">
+                        <table class="w-full min-w-[800px] text-left text-sm whitespace-nowrap" id="auditTable">
                             <thead class="bg-slate-50 dark:bg-gray-800 text-slate-500 dark:text-slate-400 uppercase text-[11px] font-bold border-b border-slate-200 dark:border-slate-800">
                                 <tr>
                                     <th class="py-3.5 px-4 w-36">Thời Gian</th>
@@ -312,7 +312,7 @@
     <script>
         const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
             ? 'http://localhost:5000' 
-            : 'https://htwork-backend.onrender.com';
+            : 'https://project-internship-8z76.onrender.com';
 
         let allLogs = [];
         let currentModule = 'ALL';

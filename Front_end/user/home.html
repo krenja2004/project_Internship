@@ -109,11 +109,13 @@
 
             <!-- Danh Sách Freelancer (Talent Cards Grid) -->
             <div>
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-bold text-gray-900 dark:text-white flex items-center" id="gridSectionTitle">
-                        <i class="fas fa-user-astronaut mr-2 text-indigo-600"></i> Danh Sách Chuyên Gia Phù Hợp
-                        <span id="freelancerCountBadge" class="ml-2.5 bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 text-xs font-bold px-2.5 py-0.5 rounded-full">--</span>
-                    </h2>
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1.5 mb-4">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <h2 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white flex items-center" id="gridSectionTitle">
+                            <i class="fas fa-user-astronaut mr-2 text-indigo-600"></i> Danh Sách Chuyên Gia Phù Hợp
+                        </h2>
+                        <span id="freelancerCountBadge" class="bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 text-xs font-bold px-2.5 py-0.5 rounded-full">--</span>
+                    </div>
                     <span class="text-xs text-gray-400">Bấm vào hồ sơ để xem lịch sử dự án</span>
                 </div>
 
@@ -506,10 +508,10 @@
 
             if (isViewingOnlyFriends) {
                 btn.className = "bg-yellow-400 text-gray-900 font-black px-4 py-2.5 rounded-xl transition flex items-center text-xs sm:text-sm shadow-md";
-                title.innerHTML = `<i class="fas fa-heart mr-2 text-rose-500"></i> Danh Sách Mối Ruột Của Bạn <span id="freelancerCountBadge" class="ml-2.5 bg-yellow-100 text-yellow-800 text-xs font-bold px-2.5 py-0.5 rounded-full">${myConnections.total_friends} Mối Ruột</span>`;
+                title.innerHTML = `<i class="fas fa-heart mr-2 text-rose-500"></i> Danh Sách Mối Ruột Của Bạn`; const b1 = document.getElementById("freelancerCountBadge"); if (b1) { b1.className = "bg-yellow-100 text-yellow-800 text-xs font-bold px-2.5 py-0.5 rounded-full"; b1.innerText = `${myConnections.total_friends} Mối Ruột`; }
             } else {
                 btn.className = "bg-white/10 hover:bg-white/20 text-white border border-white/20 font-bold px-4 py-2.5 rounded-xl transition flex items-center text-xs sm:text-sm backdrop-blur-sm";
-                title.innerHTML = `<i class="fas fa-user-astronaut mr-2 text-indigo-600"></i> Danh Sách Chuyên Gia Phù Hợp <span id="freelancerCountBadge" class="ml-2.5 bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 text-xs font-bold px-2.5 py-0.5 rounded-full">${allFreelancers.length}</span>`;
+                title.innerHTML = `<i class="fas fa-user-astronaut mr-2 text-indigo-600"></i> Danh Sách Chuyên Gia Phù Hợp`; const b2 = document.getElementById("freelancerCountBadge"); if (b2) { b2.className = "bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 text-xs font-bold px-2.5 py-0.5 rounded-full"; b2.innerText = `${allFreelancers.length} Chuyên gia`; }
             }
 
             renderFreelancerGrid();

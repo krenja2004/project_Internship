@@ -39,3 +39,14 @@
 - [x] Kiểm tra liên kết từ trang chủ đến các trang con và dẫn sang `sharedFolder/login.html`, `sharedFolder/register.html`.
 - [x] Đã cập nhật `netlify.toml` và `vercel.json` phục vụ `index.html` làm Landing Page thay vì ép chuyển sang `login.html`.
 - [x] Đảm bảo tương thích trên cả Localhost lẫn khi deploy lên Internet (Render / Netlify / Vercel).
+
+### Bước 6: Xây dựng Bộ 6 Sơ đồ Tuần tự StarUML (`Report_file/Diagram`)
+- [x] Xóa bỏ các định dạng `.puml` và `.svg` không tương thích mở trực tiếp trong StarUML.
+- [x] Khởi tạo 6 file mô hình StarUML chuẩn (`.mdj`) có thể nhấp đúp mở trực tiếp bằng StarUML:
+  * `sequence_1_Auth_DangKy_OTP.mdj`
+  * `sequence_2_Client_KyQuy_EscrowLock.mdj`
+  * `sequence_3_UngTuyen_DauThau_HopDong.mdj`
+  * `sequence_4_Freelancer_BanGiao_Milestone.mdj`
+  * `sequence_5_Client_NghiemThu_EscrowRelease.mdj`
+  * `sequence_6_Admin_PhanXu_TranhChap.mdj`
+- [x] Đồng bộ 6 file ảnh độ phân giải cao (`.png`) để phục vụ chèn vào file Word báo cáo tốt nghiệp.

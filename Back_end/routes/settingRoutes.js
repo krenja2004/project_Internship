@@ -8,7 +8,7 @@ router.get('/api/admin/settings', (req, res) => {
 });
 
 router.post('/api/admin/settings', (req, res) => {
-    const { autoApprovePayOS, autoApproveWithdraw } = req.body;
+    const { autoApprovePayOS, autoApproveWithdraw } = req.body || {};
     if (typeof autoApprovePayOS === 'boolean') {
         settingsStore.setAutoApprovePayOS(autoApprovePayOS);
     }
