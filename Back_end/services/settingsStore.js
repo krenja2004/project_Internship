@@ -57,13 +57,13 @@ const settingsStore = {
         saveSettings();
         return currentSettings.autoApproveWithdraw;
     },
-    getGoogleSheetWebhook: () => currentSettings.googleSheetWebhook || '',
+    getGoogleSheetWebhook: () => currentSettings.googleSheetWebhook || process.env.GOOGLE_SHEET_LOG_WEBHOOK || '',
     setGoogleSheetWebhook: (url) => {
         currentSettings.googleSheetWebhook = (url || '').trim();
         saveSettings();
         return currentSettings.googleSheetWebhook;
     },
-    getFirebaseDbUrl: () => currentSettings.firebaseDbUrl || '',
+    getFirebaseDbUrl: () => currentSettings.firebaseDbUrl || process.env.FIREBASE_DATABASE_URL || '',
     setFirebaseDbUrl: (url) => {
         currentSettings.firebaseDbUrl = (url || '').trim().replace(/\/+$/, ''); // bỏ dấu / ở cuối nếu có
         saveSettings();
