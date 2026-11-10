@@ -29,43 +29,43 @@
 <body class="bg-slate-50 dark:bg-gray-950 text-gray-800 dark:text-gray-100 min-h-screen flex flex-col transition-colors duration-200 antialiased selection:bg-indigo-500 selection:text-white">
 
     <!-- NAVIGATION HEADER -->
-    <header class="w-full px-4 sm:px-8 py-3.5 border-b border-gray-200/80 dark:border-gray-800/80 bg-white/85 dark:bg-gray-900/85 backdrop-blur-md sticky top-0 z-40">
+    <header class="w-full px-4 sm:px-8 py-3.5 border-b border-slate-200/80 dark:border-slate-800/80 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md sticky top-0 z-40 transition-colors">
         <div class="max-w-7xl mx-auto flex items-center justify-between">
             <a href="index.html" class="flex items-center space-x-3 group">
-                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center shadow-md shadow-indigo-500/20 overflow-hidden text-white font-bold transition-transform group-hover:scale-105">
-                    <img src="assets/logo.png" onerror="this.src='user/logo.png'" alt="KGS" class="w-full h-full object-cover">
+                <div class="w-9 h-9 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-950 flex items-center justify-center font-black text-sm shadow-sm transition-transform group-hover:scale-105">
+                    HT
                 </div>
                 <div>
-                    <span class="font-black text-xl text-gray-900 dark:text-white tracking-tight">KGS <span class="text-indigo-600 dark:text-indigo-400">Work</span></span>
-                    <span class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 block -mt-1 tracking-wider uppercase">Sàn IT & Escrow Hub</span>
+                    <span class="font-black text-lg text-slate-900 dark:text-white tracking-tight">KGS <span class="text-indigo-600 dark:text-indigo-400">Work</span></span>
+                    <span class="text-[10px] font-semibold text-slate-400 dark:text-slate-400 block -mt-1 tracking-wider uppercase">Escrow Protocol</span>
                 </div>
             </a>
 
             <!-- Nav Links -->
-            <nav class="hidden md:flex items-center space-x-1 lg:space-x-2 text-sm font-bold text-gray-600 dark:text-gray-300">
-                <a href="index.html" class="px-3 py-2 rounded-xl hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
-                    <i class="fas fa-home mr-1.5"></i> Trang Chủ
+            <nav class="hidden md:flex items-center space-x-1 text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-300">
+                <a href="index.html" class="px-3.5 py-2 rounded-xl hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition">
+                    Trang Chủ
                 </a>
-                <a href="explore-jobs.html" class="px-3 py-2 rounded-xl text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 font-black">
-                    <i class="fas fa-briefcase mr-1.5 text-indigo-500"></i> Việc Làm IT
+                <a href="explore-jobs.html" class="px-3.5 py-2 rounded-xl text-indigo-600 dark:text-indigo-400 bg-indigo-50/80 dark:bg-indigo-950/60 font-bold transition">
+                    Việc Làm IT
                 </a>
-                <a href="explore-freelancers.html" class="px-3 py-2 rounded-xl hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
-                    <i class="fas fa-users mr-1.5 text-purple-500"></i> Chuyên Gia IT
+                <a href="explore-freelancers.html" class="px-3.5 py-2 rounded-xl hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition">
+                    Chuyên Gia IT
                 </a>
-                <a href="how-it-works.html" class="px-3 py-2 rounded-xl hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
-                    <i class="fas fa-shield-alt mr-1.5 text-emerald-500"></i> Cơ Chế Escrow
+                <a href="how-it-works.html" class="px-3.5 py-2 rounded-xl hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition">
+                    Cơ Chế Escrow
                 </a>
             </nav>
 
             <div class="flex items-center space-x-2 sm:space-x-3">
-                <button id="themeToggle" class="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 flex items-center justify-center transition shadow-sm" title="Chuyển chế độ Sáng / Tối">
-                    <i class="fas fa-moon dark:hidden text-sm"></i>
-                    <i class="fas fa-sun hidden dark:block text-sm text-yellow-400"></i>
+                <button id="themeToggle" class="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white flex items-center justify-center transition" title="Chuyển chế độ Sáng / Tối">
+                    <i class="fas fa-moon dark:hidden text-xs"></i>
+                    <i class="fas fa-sun hidden dark:block text-xs text-amber-400"></i>
                 </button>
-                <a href="sharedFolder/login.html" class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                <a href="sharedFolder/login.html" class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition">
                     Đăng nhập
                 </a>
-                <button onclick="openOnboardingModal('freelancer')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-black bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/20 transition">
+                <button onclick="openOnboardingModal('freelancer')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-slate-900 hover:bg-black dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 transition shadow-sm hover:shadow">
                     Đăng ký ứng tuyển
                 </button>
             </div>
@@ -400,31 +400,90 @@
             const budgetNum = parseFloat(job.budget) || 0;
             const formattedBudget = budgetNum.toLocaleString('vi-VN') + ' Token';
             const clientName = (job.users && job.users.full_name) ? job.users.full_name : 'Doanh nghiệp tuyển dụng';
+            const catName = job.category_name || 'Phát Triển Phần Mềm';
 
             document.getElementById('previewModalBody').innerHTML = `
-                <div class="bg-indigo-50 dark:bg-indigo-950/60 p-4 rounded-2xl border border-indigo-100 dark:border-indigo-900/60 flex items-center justify-between">
+                <!-- 1. Visible Public Summary -->
+                <div class="p-4 rounded-2xl bg-slate-50 dark:bg-gray-800 border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
-                        <span class="text-gray-500 dark:text-gray-400 text-xs block">Ngân sách dự kiến</span>
-                        <span class="text-lg font-black text-emerald-600 dark:text-emerald-400">${formattedBudget}</span>
+                        <span class="text-[11px] text-slate-400 font-mono block uppercase">Ngân sách cam kết Escrow</span>
+                        <span class="text-xl font-mono font-black text-indigo-600 dark:text-indigo-400">${formattedBudget}</span>
                     </div>
-                    <div class="text-right">
-                        <span class="text-gray-500 dark:text-gray-400 text-xs block">Khách hàng</span>
-                        <span class="text-xs font-bold text-gray-800 dark:text-gray-200">🏢 ${escapeHtml(clientName)}</span>
+                    <div class="text-left sm:text-right">
+                        <span class="text-[11px] text-slate-400 font-mono block uppercase">Doanh nghiệp đăng việc</span>
+                        <span class="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center sm:justify-end gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> ${escapeHtml(clientName)}
+                        </span>
                     </div>
                 </div>
 
                 <div>
-                    <h4 class="font-black text-gray-900 dark:text-white text-xs uppercase tracking-wider mb-1.5">Mô tả công việc & yêu cầu:</h4>
-                    <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl whitespace-pre-line text-gray-700 dark:text-gray-300 border border-gray-100 dark:border-gray-700">
-                        ${escapeHtml(job.description || 'Không có mô tả chi tiết.')}
+                    <div class="flex items-center justify-between mb-1.5">
+                        <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Tổng Quan Yêu Cầu Dự Án:</h4>
+                        <span class="text-[11px] px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-mono font-bold">${escapeHtml(catName)}</span>
                     </div>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                        ${escapeHtml(job.description || 'Dự án đang tuyển dụng nhân sự IT có chuyên môn cao, cam kết tuân thủ mốc tiến độ theo thỏa thuận...')}
+                    </p>
                 </div>
 
-                <div class="bg-emerald-50 dark:bg-emerald-950/40 p-3.5 rounded-2xl border border-emerald-100 dark:border-emerald-900/60 flex items-center space-x-3 text-emerald-700 dark:text-emerald-300">
-                    <i class="fas fa-check-shield text-xl"></i>
-                    <p class="text-xs">
-                        <strong>Cam kết Escrow:</strong> Ngân sách của dự án này sẽ được ký quỹ trước khi giao việc. Bạn hoàn toàn yên tâm 100% được chi trả khi hoàn tất.
-                    </p>
+                <!-- 2. Gated Content Area (Blurred & Locked) -->
+                <div class="mt-4 relative">
+                    <!-- Fake Detailed Content to be Blurred -->
+                    <div class="filter blur-sm select-none pointer-events-none opacity-40 space-y-3.5 text-xs">
+                        <div>
+                            <h4 class="font-bold text-slate-900 dark:text-white mb-1">Yêu Cầu Kỹ Thuật Chi Tiết & Scope of Work:</h4>
+                            <p class="leading-relaxed">
+                                - Thiết kế hệ thống cơ sở dữ liệu trên PostgreSQL với các bảng: users, jobs, milestones, wallet_ledger, messages, disputes.<br>
+                                - Xây dựng API bảo mật bằng JWT và cơ chế mã hóa mật khẩu bcrypt.<br>
+                                - Tích hợp webhook tự động xử lý thanh toán PayOS và mã phản hồi VietQR 24/7.<br>
+                                - Bàn giao toàn bộ mã nguồn trên repository riêng tư kèm tài liệu hướng dẫn triển khai Docker.
+                            </p>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-900 dark:text-white mb-1">Tiến Độ Giải Ngân Ký Quỹ (Milestone Breakdown):</h4>
+                            <div class="p-3 rounded-xl bg-slate-100 dark:bg-slate-800">
+                                <div>Giai đoạn 1: Khởi tạo kiến trúc & Prototype Figma (30% ngân sách)</div>
+                                <div>Giai đoạn 2: Lập trình chức năng lõi & Tích hợp cổng thanh toán (40% ngân sách)</div>
+                                <div>Giai đoạn 3: Kiểm thử toàn diện, bảo mật & Bàn giao sản phẩm (30% ngân sách)</div>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-900 dark:text-white mb-1">Tài Liệu Đính Kèm Theo Dự Án:</h4>
+                            <div class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700">
+                                📄 SRS_Detailed_Technical_Requirements_v2.0.pdf (4.8 MB)
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lock Overlay Card (High Converting CTA) -->
+                    <div class="absolute inset-0 -top-2 flex items-center justify-center p-3">
+                        <div class="max-w-md w-full p-5 sm:p-6 rounded-2xl bg-white/95 dark:bg-gray-850/95 backdrop-blur-xl border border-indigo-100 dark:border-indigo-900/60 shadow-2xl text-center space-y-3">
+                            <div class="w-10 h-10 rounded-xl bg-indigo-600/10 text-indigo-600 dark:text-indigo-400 mx-auto flex items-center justify-center text-base shadow-xs">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-xs sm:text-sm font-black text-slate-900 dark:text-white">
+                                    Đăng Nhập Để Xem Toàn Bộ Yêu Cầu & Nộp Báo Giá
+                                </h4>
+                                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                                    Dự án này đã được Doanh nghiệp ký quỹ bảo đảm 100%. Vui lòng đăng nhập hoặc tạo tài khoản miễn phí để tải tài liệu kỹ thuật và gửi hồ sơ chào thầu.
+                                </p>
+                            </div>
+                            <div class="flex flex-col sm:flex-row gap-2 pt-1">
+                                <a href="sharedFolder/login.html" class="flex-1 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition shadow-sm">
+                                    Đăng Nhập Ngay
+                                </a>
+                                <a href="sharedFolder/register.html?role=freelancer" class="flex-1 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition border border-slate-200 dark:border-slate-700">
+                                    Tạo Tài Khoản (30s)
+                                </a>
+                            </div>
+                            <div class="text-[10px] text-slate-400 flex items-center justify-center gap-3 pt-0.5">
+                                <span>✓ Bảo chứng 100% Escrow</span>
+                                <span>✓ Nhắn tin trao đổi trực tiếp</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             `;
             document.getElementById('jobDetailModal').classList.remove('hidden');
