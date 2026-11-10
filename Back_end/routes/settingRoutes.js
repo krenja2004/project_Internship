@@ -7,18 +7,22 @@ router.get('/api/admin/settings', (req, res) => {
     res.json({
         autoApprovePayOS: settingsStore.getAutoApprovePayOS(),
         autoApproveWithdraw: settingsStore.getAutoApproveWithdraw(),
+        aiModerationEnabled: settingsStore.getAiModerationEnabled(),
         googleSheetWebhook: settingsStore.getGoogleSheetWebhook(),
         firebaseDbUrl: settingsStore.getFirebaseDbUrl()
     });
 });
 
 router.post('/api/admin/settings', (req, res) => {
-    const { autoApprovePayOS, autoApproveWithdraw, googleSheetWebhook, firebaseDbUrl } = req.body || {};
+    const { autoApprovePayOS, autoApproveWithdraw, aiModerationEnabled, googleSheetWebhook, firebaseDbUrl } = req.body || {};
     if (typeof autoApprovePayOS === 'boolean') {
         settingsStore.setAutoApprovePayOS(autoApprovePayOS);
     }
     if (typeof autoApproveWithdraw === 'boolean') {
         settingsStore.setAutoApproveWithdraw(autoApproveWithdraw);
+    }
+    if (typeof aiModerationEnabled === 'boolean') {
+        settingsStore.setAiModerationEnabled(aiModerationEnabled);
     }
     if (typeof googleSheetWebhook === 'string') {
         settingsStore.setGoogleSheetWebhook(googleSheetWebhook);
@@ -30,6 +34,7 @@ router.post('/api/admin/settings', (req, res) => {
         success: true,
         autoApprovePayOS: settingsStore.getAutoApprovePayOS(),
         autoApproveWithdraw: settingsStore.getAutoApproveWithdraw(),
+        aiModerationEnabled: settingsStore.getAiModerationEnabled(),
         googleSheetWebhook: settingsStore.getGoogleSheetWebhook(),
         firebaseDbUrl: settingsStore.getFirebaseDbUrl()
     });

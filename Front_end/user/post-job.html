@@ -264,17 +264,37 @@
                         </div>
                         <!-- Ngân sách dự án -->
                         <div>
-                            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-1">
-                                Ngân sách Ký quỹ (Token) <span class="text-red-500">*</span>
+                            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-2">
+                                Hình Thức Ngân Sách Dự Án <span class="text-red-500">*</span>
                             </label>
-                            <div class="relative">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                                <label class="flex items-center gap-3 p-3 rounded-xl border border-indigo-200 dark:border-indigo-900 bg-indigo-50/50 dark:bg-indigo-950/30 cursor-pointer hover:border-indigo-500 transition">
+                                    <input type="radio" name="budget_mode" value="fixed" checked onchange="toggleBudgetMode()" class="text-indigo-600 focus:ring-indigo-500">
+                                    <div>
+                                        <div class="text-xs font-bold text-gray-800 dark:text-white">Ngân sách dự kiến cụ thể</div>
+                                        <div class="text-[11px] text-gray-500 dark:text-gray-400">Bạn đã có định mức chi phí rõ ràng</div>
+                                    </div>
+                                </label>
+                                <label class="flex items-center gap-3 p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 cursor-pointer hover:border-indigo-500 transition">
+                                    <input type="radio" name="budget_mode" value="negotiable" onchange="toggleBudgetMode()" class="text-indigo-600 focus:ring-indigo-500">
+                                    <div>
+                                        <div class="text-xs font-bold text-gray-800 dark:text-white">Thương lượng / Nhận chào giá</div>
+                                        <div class="text-[11px] text-gray-500 dark:text-gray-400">Freelancer tự đề xuất giá khi nộp đơn</div>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <div id="budgetInputWrapper" class="relative">
                                 <span class="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-lg">💎</span>
                                 <input type="text" inputmode="numeric" id="budget" oninput="formatNumberInput(this)" min="10000" step="1000" class="w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 text-lg font-bold text-gray-800 dark:text-gray-100 bg-white dark:bg-gray-700" placeholder="VD: 500000">
                             </div>
-                            <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-2 flex items-start">
-                                <i class="fas fa-shield-alt text-emerald-500 mt-0.5 mr-1.5 text-sm shrink-0"></i>
-                                Số Token này sẽ được Ký quỹ trên hệ thống để đảm bảo uy tín. Bạn có thể Rút hoặc Hủy dự án để nhận lại 100% Token nếu chưa chọn ai.
-                            </p>
+
+                            <div class="mt-2.5 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200/60 dark:border-emerald-800/50 flex items-start gap-2.5">
+                                <i class="fas fa-shield-check text-emerald-600 dark:text-emerald-400 mt-0.5 text-sm shrink-0"></i>
+                                <div class="text-[11px] text-emerald-800 dark:text-emerald-300 leading-relaxed">
+                                    <strong>Đăng tin hoàn toàn MIỄN PHÍ:</strong> Bạn không bị trừ tiền hay bắt buộc nạp tiền khi đăng tin. Bạn chỉ cần nạp và Khóa Ký Quỹ (Escrow) sau khi nhận được báo giá và chính thức chấp thuận chọn Freelancer!
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -1145,7 +1165,10 @@
                 } else if (currentStep === 2) {
                     const title = document.getElementById('title')?.value?.trim();
                     const desc = document.getElementById('description')?.value?.trim();
-                    const budgetStr = document.getElementById('budget')?.value; const budget = parseFormattedNumber(budgetStr);
+                    const isNegotiable = document.querySelector('input[name="budget_mode"]:checked')?.value === 'negotiable';
+                    const budgetStr = document.getElementById('budget')?.value;
+                    const budget = parseFormattedNumber(budgetStr);
+
                     if (!title) {
                         alert('Vui lòng nhập tiêu đề dự án!');
                         document.getElementById('title')?.focus();
@@ -1157,40 +1180,11 @@
                         return;
                     }
                     
-                    if (!budget || isNaN(budget) || parseInt(budget) < 10000) {
-                        alert('Vui lòng nhập ngân sách hợp lệ (tối thiểu 10,000 Token)!');
+                    if (!isNegotiable && (!budget || isNaN(budget) || parseInt(budget) < 10000)) {
+                        alert('Vui lòng nhập ngân sách dự kiến (tối thiểu 10,000 Token) hoặc chọn "Thương lượng / Nhận chào giá"!');
                         document.getElementById('budget')?.focus();
                         return;
                     }
-
-                    // --- CHECK BALANCE LÊN BACKEND TRƯỚC KHI TỚI BƯỚC 3 ---
-                    try {
-                        const nextBtn = document.getElementById('nextBtn');
-                        const oldHtml = nextBtn.innerHTML;
-                        nextBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Đang kiểm tra...';
-                        nextBtn.disabled = true;
-
-                        const res = await fetch(`${API_URL}/api/wallet/${currentUser.id}`);
-                        const data = await res.json();
-                        
-                        nextBtn.innerHTML = oldHtml;
-                        nextBtn.disabled = false;
-
-                        if (res.ok && data.success) {
-                            const availableBalance = data.wallet.balance || 0;
-                            if (budget > availableBalance) {
-                                document.getElementById('warningAvailableBalance').textContent = parseInt(availableBalance).toLocaleString('vi-VN').replace(/,/g, '.') + ' Token';
-                                document.getElementById('warningRequiredBudget').textContent = parseInt(budget).toLocaleString('vi-VN').replace(/,/g, '.') + ' Token';
-                                document.getElementById('budgetWarningModal').classList.remove('hidden');
-                                return; // BLOCK CHUYỂN BƯỚC
-                            }
-                        }
-                    } catch (e) {
-                        console.error('Lỗi check số dư', e);
-                        document.getElementById('nextBtn').disabled = false;
-                    }
-                    // ----------------------------------------------------
-
                 }
             }
             
@@ -1210,8 +1204,9 @@
             const fType = document.querySelector('input[name="freelancer_type"]:checked')?.value || "Cá nhân";
             const tagsCount = selectedTags.length;
             const filesCount = uploadedFiles.length;
+            const isNegotiable = document.querySelector('input[name="budget_mode"]:checked')?.value === 'negotiable';
             const budgetVal = parseFormattedNumber(document.getElementById('budget')?.value) || 0;
-            const formattedBudget = new Intl.NumberFormat('en-US').format(budgetVal) + ' Token';
+            const formattedBudget = (isNegotiable || budgetVal <= 0) ? 'Thương lượng / Mở đấu thầu tự do (0 Token khi đăng)' : (new Intl.NumberFormat('en-US').format(budgetVal) + ' Token');
             
             summaryList.innerHTML = `
                 <li><strong>• Lĩnh vực:</strong> ${escapeHtml(catName)}</li>
@@ -1891,7 +1886,9 @@
 
             const title = document.getElementById('title').value.trim();
             let description = document.getElementById('description').value.trim();
-            const budget = parseFormattedNumber(document.getElementById('budget').value);
+            const isNegotiable = document.querySelector('input[name="budget_mode"]:checked')?.value === 'negotiable';
+            const budgetVal = parseFormattedNumber(document.getElementById('budget').value) || 0;
+            const finalBudget = isNegotiable ? 0 : budgetVal;
 
             const fType = document.querySelector('input[name="freelancer_type"]:checked')?.value || "Cá nhân";
             const deadlineVal = document.getElementById('deadlineDate').value;
@@ -1904,8 +1901,8 @@
             }
             const allTags = [...selectedTags];
 
-            if (!title || !description || isNaN(budget) || budget <= 0) {
-                alert('Vui lòng điền đầy đủ Tiêu đề, Mô tả và Ngân sách hợp lệ!');
+            if (!title || !description || (!isNegotiable && (isNaN(finalBudget) || finalBudget < 10000))) {
+                alert('Vui lòng điền đầy đủ Tiêu đề, Mô tả và Ngân sách hợp lệ (hoặc chọn Thương lượng)!');
                 return;
             }
 
@@ -1927,7 +1924,8 @@
                 client_id: currentUser.id,
                 title: title,
                 description: fullDescription,
-                budget: budget,
+                budget: finalBudget,
+                is_negotiable: isNegotiable,
                 category_id: selectedCategory ? selectedCategory.id : null,
                 category_name: selectedCategory ? selectedCategory.name : null,
                 tags: allTags

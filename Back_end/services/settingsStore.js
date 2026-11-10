@@ -15,6 +15,7 @@ function loadSettings() {
     let settings = {
         autoApprovePayOS: true,
         autoApproveWithdraw: false,
+        aiModerationEnabled: true,
         googleSheetWebhook: process.env.GOOGLE_SHEET_LOG_WEBHOOK || '',
         firebaseDbUrl: process.env.FIREBASE_DATABASE_URL || ''
     };
@@ -56,6 +57,12 @@ const settingsStore = {
         currentSettings.autoApproveWithdraw = Boolean(val);
         saveSettings();
         return currentSettings.autoApproveWithdraw;
+    },
+    getAiModerationEnabled: () => currentSettings.aiModerationEnabled !== false,
+    setAiModerationEnabled: (val) => {
+        currentSettings.aiModerationEnabled = Boolean(val);
+        saveSettings();
+        return currentSettings.aiModerationEnabled;
     },
     getGoogleSheetWebhook: () => currentSettings.googleSheetWebhook || process.env.GOOGLE_SHEET_LOG_WEBHOOK || '',
     setGoogleSheetWebhook: (url) => {

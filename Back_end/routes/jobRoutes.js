@@ -4,16 +4,18 @@ const fs = require('fs');
 const path = require('path');
 const supabase = require('../config/supabase');
 const { logEvent } = require('../services/auditLogger');
+const settingsStore = require('../services/settingsStore');
+const aiModeration = require('../services/aiModeration');
 
-// 1. API: Khách hàng đăng Job mới
+// 1. API: Khách hàng đăng Job mới (Miễn phí đăng tin + AI Kiểm duyệt Llama/GPT-OSS)
 router.post('/api/jobs', async (req, res) => {
-    const { client_id, title, description, budget, category_id, category_name, tags } = req.body;
-    console.log(`\n📢 [API POST /api/jobs] Nhận yêu cầu tạo dự án: "${title}" | Danh mục: "${category_name || 'Mặc định'}" | Ngân sách: ${budget} Token | Client: ${client_id}`);
+    const { client_id, title, description, budget, category_id, category_name, tags, is_negotiable } = req.body;
+    const parsedBudget = (is_negotiable || !budget || isNaN(budget) || parseFloat(budget) <= 0) ? 0 : parseFloat(budget);
+    console.log(`\n📢 [API POST /api/jobs] Nhận yêu cầu tạo dự án: "${title}" | Danh mục: "${category_name || 'Mặc định'}" | Ngân sách: ${parsedBudget} Token | Client: ${client_id}`);
+    
     try {
-        // KIỂM TRA SỐ DƯ VÍ TRƯỚC KHI CHO ĐĂNG DỰ ÁN
-        const { data: wallet, error: walletErr } = await supabase.from('wallets').select('balance').eq('user_id', client_id).single();
-        if (walletErr || !wallet) { const { data: newW } = await supabase.from('wallets').insert([{ user_id: client_id, balance: 0, locked_balance: 0 }]).select().single(); wallet = newW || { balance: 0 }; }
-        if (wallet.balance < budget) throw new Error(`Số dư ví không đủ! Dự án yêu cầu ${budget} Token, nhưng ví bạn chỉ có ${wallet.balance} Token. Vui lòng nạp thêm.`);
+        if (!title || !title.trim()) throw new Error('Vui lòng nhập tiêu đề dự án');
+        if (!description || !description.trim()) throw new Error('Vui lòng nhập mô tả chi tiết dự án');
 
         // Đóng gói Danh mục & Tags vào nội dung mô tả một cách chuyên nghiệp
         let fullDescription = description ? description.trim() : '';
@@ -25,32 +27,86 @@ router.post('/api/jobs', async (req, res) => {
             fullDescription += `\n\n🏷️ [Kỹ năng yêu cầu: ${tagList}]`;
         }
 
+        // --- KIỂM DUYỆT BÀI ĐĂNG BẰNG AI HOẶC QUẢN TRỊ VIÊN ---
+        const isAiEnabled = settingsStore.getAiModerationEnabled();
+        let jobStatus = 'open';
+        let moderationResult = {
+            is_approved: true,
+            score: 100,
+            reason: 'Tự động duyệt bài đăng',
+            flagged: false,
+            model: 'Direct'
+        };
+
+        if (isAiEnabled) {
+            moderationResult = await aiModeration.moderateJobContent({
+                title,
+                description: fullDescription,
+                category_name
+            });
+
+            if (!moderationResult.is_approved) {
+                jobStatus = 'pending_review'; // Tạm giữ bài để Admin hậu kiểm
+            } else {
+                jobStatus = 'open'; // AI phê duyệt, hiển thị ngay tức thì
+            }
+        } else {
+            jobStatus = 'pending_review'; // Admin tắt AI tự duyệt -> Chờ duyệt thủ công
+            moderationResult = {
+                is_approved: false,
+                score: 50,
+                reason: 'Đang chờ Admin duyệt thủ công (Tính năng AI tự duyệt đang tạm tắt)',
+                flagged: false,
+                model: 'Manual-Queue'
+            };
+        }
+
         const { data, error } = await supabase
             .from('jobs')
-            .insert([{ client_id, title, description: fullDescription, budget, status: 'open' }])
+            .insert([{ client_id, title: title.trim(), description: fullDescription, budget: parsedBudget, status: jobStatus }])
             .select();
 
         if (error) throw error;
+        const createdJob = data[0];
+
+        // Lưu thông tin kiểm duyệt vào bộ nhớ & file
+        aiModeration.saveModeration(createdJob.id, {
+            ...moderationResult,
+            client_id,
+            title: title.trim(),
+            job_status: jobStatus
+        });
 
         // Gửi thông báo cho Client
-        await supabase.from('notifications').insert([{
-            user_id: client_id,
-            title: 'Tạo Yêu cầu thành công',
-            content: `Bạn đã đăng thành công yêu cầu: "${title}" [${category_name || 'Dự án mới'}]. Hãy chờ Freelancer ứng tuyển nhé.`
-        }]);
+        if (jobStatus === 'open') {
+            await supabase.from('notifications').insert([{
+                user_id: client_id,
+                title: '🎉 Dự án đã được AI phê duyệt tự động!',
+                content: `Dự án "${title}" (${moderationResult.score}/100đ) đã được AI duyệt và mở công khai trên Sàn để Freelancer ứng tuyển.`
+            }]);
+        } else {
+            await supabase.from('notifications').insert([{
+                user_id: client_id,
+                title: '⏳ Dự án đang chờ Quản trị viên xét duyệt',
+                content: `Dự án "${title}" của bạn đang được Ban Quản Trị xem xét trước khi đăng tải. ${moderationResult.reason}`
+            }]);
+        }
 
         // Ghi log kiểm toán
         await logEvent({
-            module: 'JOB',
-            action: 'CREATE_JOB',
-            level: 'INFO',
-            details: `Khách hàng đăng dự án mới: "${title}" | Ngân sách: ${parseFloat(budget).toLocaleString()} Token | Danh mục: ${category_name || 'Mặc định'}`,
+            module: 'JOB_MODERATION',
+            action: jobStatus === 'open' ? 'AI_APPROVED' : 'PENDING_MODERATION',
+            level: jobStatus === 'open' ? 'INFO' : 'WARN',
+            details: `Tạo dự án: "${title}" | Trạng thái: ${jobStatus} | AI Điểm: ${moderationResult.score}/100 | ${moderationResult.reason}`,
             user_id: client_id,
-            metadata: { job_id: data[0].id, title, budget, category_name }
+            metadata: { job_id: createdJob.id, title, budget: parsedBudget, moderation: moderationResult }
         });
 
-        console.log(`✅ [API POST /api/jobs] Tạo dự án thành công! ID: ${data[0].id}`);
-        res.status(201).json({ message: 'Đăng dự án thành công!', job: data[0] });
+        console.log(`✅ [API POST /api/jobs] Tạo dự án thành công! ID: ${createdJob.id} | Trạng thái: ${jobStatus}`);
+        res.status(201).json({
+            message: jobStatus === 'open' ? 'Đăng dự án thành công! AI đã duyệt bài của bạn.' : 'Đăng dự án thành công! Tin đang chờ Ban Quản Trị xét duyệt.',
+            job: { ...createdJob, moderation: moderationResult }
+        });
     } catch (error) {
         console.error(`❌ [API POST /api/jobs] Thất bại: ${error.message}`);
         res.status(400).json({ error: error.message });
@@ -68,9 +124,92 @@ router.get('/api/jobs/:id', async (req, res) => {
             .single();
 
         if (error || !job) throw new Error('Không tìm thấy dự án');
-        res.status(200).json({ success: true, job });
+        const moderation = aiModeration.getModeration(id);
+        res.status(200).json({ success: true, job: { ...job, moderation } });
     } catch (error) {
         res.status(404).json({ success: false, error: error.message });
+    }
+});
+
+// 1c. API: Admin lấy toàn bộ Jobs kèm thông tin AI Moderation
+router.get('/api/admin/jobs', async (req, res) => {
+    try {
+        const { data: jobs, error } = await supabase
+            .from('jobs')
+            .select(`*, users:client_id (id, full_name, email, avatar_url)`)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        const allMods = aiModeration.getAllModerations();
+        const enriched = (jobs || []).map(j => ({
+            ...j,
+            moderation: allMods[j.id] || {
+                is_approved: j.status !== 'pending_review' && j.status !== 'rejected',
+                score: j.status === 'open' ? 90 : (j.status === 'rejected' ? 10 : 50),
+                reason: j.status === 'open' ? 'Bài đăng chuẩn mực' : (j.status === 'rejected' ? 'Đã từ chối' : 'Đang chờ xét duyệt'),
+                flagged: j.status === 'pending_review'
+            }
+        }));
+
+        res.status(200).json({ success: true, jobs: enriched });
+    } catch (error) {
+        res.status(400).json({ success: false, error: error.message });
+    }
+});
+
+// 1d. API: Admin Phê duyệt / Từ chối bài đăng (Override AI)
+router.post('/api/admin/jobs/:id/moderate', async (req, res) => {
+    const { id } = req.params;
+    const { action, note, admin_id } = req.body; // action: 'approve' | 'reject'
+    try {
+        if (!['approve', 'reject'].includes(action)) {
+            return res.status(400).json({ error: 'Hành động không hợp lệ. Chỉ chấp nhận approve hoặc reject.' });
+        }
+
+        const newStatus = action === 'approve' ? 'open' : 'rejected';
+        const { data: job, error } = await supabase
+            .from('jobs')
+            .update({ status: newStatus })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error || !job) throw new Error('Không tìm thấy dự án hoặc không thể cập nhật trạng thái');
+
+        // Ghi đè quyết định của Admin
+        const modRecord = aiModeration.adminOverride(id, { action, note, admin_id });
+
+        // Gửi thông báo cho khách hàng
+        const notiTitle = action === 'approve' ? '✅ Dự án của bạn đã được Admin phê duyệt' : '❌ Dự án của bạn đã bị Admin từ chối';
+        const notiContent = action === 'approve'
+            ? `Dự án "${job.title}" đã được Quản trị viên duyệt công khai trên Sàn việc làm.`
+            : `Dự án "${job.title}" không được phê duyệt. Lý do: ${note || 'Vi phạm tiêu chuẩn cộng đồng'}`;
+
+        await supabase.from('notifications').insert([{
+            user_id: job.client_id,
+            title: notiTitle,
+            content: notiContent
+        }]);
+
+        // Ghi log kiểm toán
+        await logEvent({
+            module: 'ADMIN_MODERATION',
+            action: action === 'approve' ? 'ADMIN_APPROVE_JOB' : 'ADMIN_REJECT_JOB',
+            level: action === 'approve' ? 'INFO' : 'WARN',
+            details: `Admin ${action === 'approve' ? 'phê duyệt' : 'từ chối'} dự án #${id}: "${job.title}". Ghi chú: ${note || 'Không có'}`,
+            user_id: admin_id || 'ADMIN',
+            metadata: { job_id: id, action, note }
+        });
+
+        res.status(200).json({
+            success: true,
+            message: action === 'approve' ? 'Đã phê duyệt và mở công khai dự án!' : 'Đã từ chối bài đăng dự án.',
+            job: { ...job, moderation: modRecord }
+        });
+    } catch (error) {
+        console.error('Lỗi Admin Moderate Job:', error);
+        res.status(400).json({ success: false, error: error.message });
     }
 });
 
@@ -451,6 +590,10 @@ router.get('/api/client/:client_id/my-jobs', async (req, res) => {
             console.error('Lỗi đọc reviews.json (client my-jobs):', e);
         }
 
+        const allMods = aiModeration.getAllModerations();
+        for (let job of (jobs || [])) {
+            job.moderation = allMods[job.id] || null;
+        }
         console.log(`✅ [API GET /api/client/my-jobs] Trả về ${jobs ? jobs.length : 0} dự án`);
         res.status(200).json({ jobs });
     } catch (error) {

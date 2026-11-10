@@ -4,6 +4,7 @@ const supabase = require('../config/supabase');
 const blockchain = require('../blockchain');
 const { getDisputes, saveDisputes } = require('../services/disputeStore');
 const { logEvent } = require('../services/auditLogger');
+const aiModeration = require('../services/aiModeration');
 
 // Helper gửi Notification an toàn
 async function sendNotification(userId, title, message, type = 'dispute') {
@@ -156,13 +157,21 @@ router.get('/api/admin/projects', async (req, res) => {
 
         const disputes = getDisputes();
 
+        const allMods = aiModeration.getAllModerations();
         const fullJobs = (jobs || []).map(j => {
             const app = (apps || []).find(a => a.job_id === j.id);
+            const mod = allMods[j.id] || {
+                is_approved: j.status !== 'pending_review' && j.status !== 'rejected',
+                score: j.status === 'open' ? 92 : (j.status === 'rejected' ? 20 : 50),
+                reason: j.status === 'open' ? 'Nội dung chuẩn mực (AI Phê Duyệt)' : (j.status === 'rejected' ? 'Bài viết đã bị từ chối' : 'Chờ Quản trị viên hậu kiểm'),
+                flagged: j.status === 'pending_review'
+            };
             return {
                 ...j,
                 freelancer: app ? app.freelancers : null,
                 freelancer_id: app ? app.freelancer_id : null,
-                dispute: disputes[j.id] || null
+                dispute: disputes[j.id] || null,
+                moderation: mod
             };
         });
 
