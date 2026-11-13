@@ -138,6 +138,34 @@
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
+
+        /* KEYFRAMES CHUYỂN ĐỘNG THÔNG MINH */
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        @keyframes floatSlowReverse {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(8px); }
+        }
+        @keyframes marqueeScroll {
+            0% { transform: translateX(0%); }
+            100% { transform: translateX(-50%); }
+        }
+        .animate-float {
+            animation: floatSlow 4s ease-in-out infinite;
+        }
+        .animate-float-delayed {
+            animation: floatSlowReverse 4.5s ease-in-out 1s infinite;
+        }
+        .animate-marquee {
+            display: flex;
+            width: max-content;
+            animation: marqueeScroll 36s linear infinite;
+        }
+        .animate-marquee:hover {
+            animation-play-state: paused;
+        }
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-dark-950 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-200 antialiased selection:bg-indigo-600 selection:text-white">
@@ -197,7 +225,30 @@
         <!-- ========================================================== -->
         <!-- HERO SECTION -->
         <!-- ========================================================== -->
-        <section class="relative overflow-hidden pt-14 pb-20 sm:pt-20 sm:pb-28 border-b border-slate-200/80 dark:border-slate-800/80 glow-mesh">
+        <section class="relative overflow-hidden pt-14 pb-20 sm:pt-20 sm:pb-24 border-b border-slate-200/80 dark:border-slate-800/80 glow-mesh">
+            
+            <!-- FLOATING GLASS BADGE TRÁI (CHUYỂN ĐỘNG BỒNG BỀNH THÔNG MINH) -->
+            <div class="animate-float hidden xl:flex items-center gap-3 p-3.5 rounded-2xl bg-white/95 dark:bg-dark-900/95 backdrop-blur-md border border-slate-200/80 dark:border-slate-800 shadow-xl shadow-indigo-500/5 absolute left-6 2xl:left-12 top-28 z-20 pointer-events-none select-none">
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-lg font-bold">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div class="text-left">
+                    <span class="text-[10px] font-bold text-slate-400 block uppercase font-mono">Bảo Hiểm Ký Quỹ</span>
+                    <span class="text-xs font-black text-slate-900 dark:text-white">Rủi Ro Bùng Tiền: 0%</span>
+                </div>
+            </div>
+
+            <!-- FLOATING GLASS BADGE PHẢI (CHUYỂN ĐỘNG BỒNG BỀNH THÔNG MINH) -->
+            <div class="animate-float-delayed hidden xl:flex items-center gap-3 p-3.5 rounded-2xl bg-white/95 dark:bg-dark-900/95 backdrop-blur-md border border-slate-200/80 dark:border-slate-800 shadow-xl shadow-purple-500/5 absolute right-6 2xl:right-12 top-36 z-20 pointer-events-none select-none">
+                <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-lg font-bold">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <div class="text-left">
+                    <span class="text-[10px] font-bold text-slate-400 block uppercase font-mono">Giải Ngân 24/7</span>
+                    <span class="text-xs font-black text-slate-900 dark:text-white">&lt; 30 Giây Về Ngân Hàng</span>
+                </div>
+            </div>
+
             <div class="max-w-6xl mx-auto px-4 sm:px-8 text-center relative z-10">
                 
                 <!-- Protocol Status Badge -->
@@ -253,6 +304,133 @@
                     <a href="explore-jobs.html?tag=Blockchain" class="px-2.5 py-0.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-indigo-500 text-[11px] font-medium transition">Smart Contract</a>
                 </div>
 
+            </div>
+        </section>
+
+        <!-- ========================================================== -->
+        <!-- 2B. LIVE REALTIME ACTIVITY & ESCROW STREAM (DẢI BĂNG CHUYỂN ĐỘNG VÔ TẬN) -->
+        <!-- ========================================================== -->
+        <section class="py-3 bg-slate-900 text-white overflow-hidden relative border-y border-slate-800 shadow-inner">
+            <!-- Left & Right Gradient Fade Masks -->
+            <div class="pointer-events-none absolute inset-y-0 left-0 w-16 sm:w-28 bg-gradient-to-r from-slate-900 to-transparent z-10"></div>
+            <div class="pointer-events-none absolute inset-y-0 right-0 w-16 sm:w-28 bg-gradient-to-l from-slate-900 to-transparent z-10"></div>
+
+            <div class="flex items-center gap-3">
+                <!-- Live Stream Indicator Pill (Fixed Left) -->
+                <div class="shrink-0 pl-4 sm:pl-8 z-20 flex items-center gap-2 pr-4 border-r border-slate-800 bg-slate-900">
+                    <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping"></span>
+                    <span class="w-2 h-2 rounded-full bg-rose-500 -ml-3.5"></span>
+                    <span class="text-[11px] font-mono font-black uppercase tracking-wider text-slate-200">LIVE FEED</span>
+                </div>
+
+                <!-- Infinite Moving Track -->
+                <div class="overflow-hidden flex-1 relative">
+                    <div class="animate-marquee flex items-center gap-4 py-1">
+                        <!-- Items Track Set 1 -->
+                        <div onclick="openJobDetail('fb-1')" class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl bg-slate-800/80 hover:bg-indigo-600/30 border border-slate-700/80 hover:border-indigo-500/80 text-xs text-slate-200 cursor-pointer transition shadow-xs shrink-0 group">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                            <span class="font-bold text-white group-hover:text-indigo-400 transition-colors">Giải ngân Mốc 2:</span>
+                            <span class="text-slate-300">15.000.000 Token</span>
+                            <span class="text-[10px] text-slate-400 font-mono">(E-Commerce Next.js)</span>
+                            <i class="fas fa-chevron-right text-[9px] text-slate-500 group-hover:translate-x-0.5 transition-transform"></i>
+                        </div>
+
+                        <div onclick="openJobDetail('fb-2')" class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl bg-slate-800/80 hover:bg-indigo-600/30 border border-slate-700/80 hover:border-indigo-500/80 text-xs text-slate-200 cursor-pointer transition shadow-xs shrink-0 group">
+                            <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
+                            <span class="font-bold text-indigo-300">Khóa Escrow Vault:</span>
+                            <span class="text-white">20.000.000 Token</span>
+                            <span class="text-[10px] text-slate-400 font-mono">(App Flutter Spa)</span>
+                            <i class="fas fa-chevron-right text-[9px] text-slate-500 group-hover:translate-x-0.5 transition-transform"></i>
+                        </div>
+
+                        <div onclick="openJobDetail('fb-3')" class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl bg-slate-800/80 hover:bg-indigo-600/30 border border-slate-700/80 hover:border-indigo-500/80 text-xs text-slate-200 cursor-pointer transition shadow-xs shrink-0 group">
+                            <span class="px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-300 text-[10px] font-bold font-mono">VIỆC MỚI</span>
+                            <span class="font-bold text-white">Chatbot AI Llama 3.3 RAG</span>
+                            <span class="text-amber-400 font-mono font-bold">12.000.000 Token</span>
+                            <span class="text-[10px] text-slate-400">· 5 thầu nộp</span>
+                            <i class="fas fa-chevron-right text-[9px] text-slate-500 group-hover:translate-x-0.5 transition-transform"></i>
+                        </div>
+
+                        <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700/80 text-xs text-slate-200 shrink-0">
+                            <span class="text-amber-400">★★★★★</span>
+                            <span class="text-slate-300">"Nghiệm thu API đúng hẹn, code sạch" ➔ <strong>Quốc Bảo</strong></span>
+                            <span class="text-[10px] text-emerald-400 font-mono font-bold">KYC Verified</span>
+                        </div>
+
+                        <div onclick="openJobDetail('fb-4')" class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl bg-slate-800/80 hover:bg-indigo-600/30 border border-slate-700/80 hover:border-indigo-500/80 text-xs text-slate-200 cursor-pointer transition shadow-xs shrink-0 group">
+                            <i class="fab fa-ethereum text-indigo-400"></i>
+                            <span class="font-bold text-white">Sepolia Smart Contract:</span>
+                            <span class="text-slate-300 font-mono">0xCe6A...A54b</span>
+                            <span class="px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 text-[10px] font-mono">Verified</span>
+                            <i class="fas fa-chevron-right text-[9px] text-slate-500 group-hover:translate-x-0.5 transition-transform"></i>
+                        </div>
+
+                        <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700/80 text-xs text-slate-200 shrink-0">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span class="font-bold text-white">VietQR & PayOS:</span>
+                            <span class="text-slate-300">Nạp ký quỹ tự động 24/7 hoàn tất trong 2.4 giây</span>
+                        </div>
+
+                        <div onclick="openJobDetail('fb-5')" class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl bg-slate-800/80 hover:bg-indigo-600/30 border border-slate-700/80 hover:border-indigo-500/80 text-xs text-slate-200 cursor-pointer transition shadow-xs shrink-0 group">
+                            <span class="px-1.5 py-0.5 rounded-md bg-purple-500/20 text-purple-300 text-[10px] font-bold font-mono">Figma UI/UX</span>
+                            <span class="font-bold text-white">UI Kit Sàn BĐS 80 screens</span>
+                            <span class="text-purple-300 font-mono font-bold">10.000.000 Token</span>
+                            <i class="fas fa-chevron-right text-[9px] text-slate-500 group-hover:translate-x-0.5 transition-transform"></i>
+                        </div>
+
+                        <!-- Duplicate Set for Seamless Continuous Infinite Glide -->
+                        <div onclick="openJobDetail('fb-1')" class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl bg-slate-800/80 hover:bg-indigo-600/30 border border-slate-700/80 hover:border-indigo-500/80 text-xs text-slate-200 cursor-pointer transition shadow-xs shrink-0 group">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                            <span class="font-bold text-white group-hover:text-indigo-400 transition-colors">Giải ngân Mốc 2:</span>
+                            <span class="text-slate-300">15.000.000 Token</span>
+                            <span class="text-[10px] text-slate-400 font-mono">(E-Commerce Next.js)</span>
+                            <i class="fas fa-chevron-right text-[9px] text-slate-500 group-hover:translate-x-0.5 transition-transform"></i>
+                        </div>
+
+                        <div onclick="openJobDetail('fb-2')" class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl bg-slate-800/80 hover:bg-indigo-600/30 border border-slate-700/80 hover:border-indigo-500/80 text-xs text-slate-200 cursor-pointer transition shadow-xs shrink-0 group">
+                            <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
+                            <span class="font-bold text-indigo-300">Khóa Escrow Vault:</span>
+                            <span class="text-white">20.000.000 Token</span>
+                            <span class="text-[10px] text-slate-400 font-mono">(App Flutter Spa)</span>
+                            <i class="fas fa-chevron-right text-[9px] text-slate-500 group-hover:translate-x-0.5 transition-transform"></i>
+                        </div>
+
+                        <div onclick="openJobDetail('fb-3')" class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl bg-slate-800/80 hover:bg-indigo-600/30 border border-slate-700/80 hover:border-indigo-500/80 text-xs text-slate-200 cursor-pointer transition shadow-xs shrink-0 group">
+                            <span class="px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-300 text-[10px] font-bold font-mono">VIỆC MỚI</span>
+                            <span class="font-bold text-white">Chatbot AI Llama 3.3 RAG</span>
+                            <span class="text-amber-400 font-mono font-bold">12.000.000 Token</span>
+                            <span class="text-[10px] text-slate-400">· 5 thầu nộp</span>
+                            <i class="fas fa-chevron-right text-[9px] text-slate-500 group-hover:translate-x-0.5 transition-transform"></i>
+                        </div>
+
+                        <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700/80 text-xs text-slate-200 shrink-0">
+                            <span class="text-amber-400">★★★★★</span>
+                            <span class="text-slate-300">"Nghiệm thu API đúng hẹn, code sạch" ➔ <strong>Quốc Bảo</strong></span>
+                            <span class="text-[10px] text-emerald-400 font-mono font-bold">KYC Verified</span>
+                        </div>
+
+                        <div onclick="openJobDetail('fb-4')" class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl bg-slate-800/80 hover:bg-indigo-600/30 border border-slate-700/80 hover:border-indigo-500/80 text-xs text-slate-200 cursor-pointer transition shadow-xs shrink-0 group">
+                            <i class="fab fa-ethereum text-indigo-400"></i>
+                            <span class="font-bold text-white">Sepolia Smart Contract:</span>
+                            <span class="text-slate-300 font-mono">0xCe6A...A54b</span>
+                            <span class="px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 text-[10px] font-mono">Verified</span>
+                            <i class="fas fa-chevron-right text-[9px] text-slate-500 group-hover:translate-x-0.5 transition-transform"></i>
+                        </div>
+
+                        <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700/80 text-xs text-slate-200 shrink-0">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span class="font-bold text-white">VietQR & PayOS:</span>
+                            <span class="text-slate-300">Nạp ký quỹ tự động 24/7 hoàn tất trong 2.4 giây</span>
+                        </div>
+
+                        <div onclick="openJobDetail('fb-5')" class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl bg-slate-800/80 hover:bg-indigo-600/30 border border-slate-700/80 hover:border-indigo-500/80 text-xs text-slate-200 cursor-pointer transition shadow-xs shrink-0 group">
+                            <span class="px-1.5 py-0.5 rounded-md bg-purple-500/20 text-purple-300 text-[10px] font-bold font-mono">Figma UI/UX</span>
+                            <span class="font-bold text-white">UI Kit Sàn BĐS 80 screens</span>
+                            <span class="text-purple-300 font-mono font-bold">10.000.000 Token</span>
+                            <i class="fas fa-chevron-right text-[9px] text-slate-500 group-hover:translate-x-0.5 transition-transform"></i>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
