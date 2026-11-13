@@ -6,7 +6,7 @@
     <title>Cơ Chế Thanh Toán Trung Gian (Escrow) - KGS Work</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <!-- Tailwind CSS with data-cfasync="false" to prevent Cloudflare Rocket Loader from deferring runtime styles -->
     <script data-cfasync="false" src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
@@ -16,28 +16,26 @@
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif']
+                        sans: ['"Be Vietnam Pro", "Inter"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif']
                     }
                 }
             }
         }
     </script>
     <style>
-        * { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        * { font-family: 'Be Vietnam Pro', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-gray-950 text-gray-800 dark:text-gray-100 min-h-screen flex flex-col transition-colors duration-200 antialiased selection:bg-indigo-500 selection:text-white">
 
     <!-- NAVIGATION HEADER -->
-    <header class="w-full px-4 sm:px-8 py-3.5 border-b border-slate-200/80 dark:border-slate-800/80 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md sticky top-0 z-40 transition-colors">
+    <header class="w-full px-4 sm:px-8 py-3.5 border-b border-slate-200/80 dark:border-slate-800/80 bg-white/95 dark:bg-slate-950/95 backdrop-blur-lg sticky top-0 z-50 shadow-xs transition-colors">
         <div class="max-w-7xl mx-auto flex items-center justify-between">
             <a href="index.html" class="flex items-center space-x-3 group">
-                <div class="w-9 h-9 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-950 flex items-center justify-center font-black text-sm shadow-sm transition-transform group-hover:scale-105">
-                    HT
-                </div>
+                <img src="assets/logo.png" alt="KGS Work Logo" class="w-9 h-9 rounded-xl object-contain shadow-xs border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 transition-transform group-hover:scale-105">
                 <div>
                     <span class="font-black text-lg text-slate-900 dark:text-white tracking-tight">KGS <span class="text-indigo-600 dark:text-indigo-400">Work</span></span>
-                    <span class="text-[10px] font-semibold text-slate-400 dark:text-slate-400 block -mt-1 tracking-wider uppercase">Escrow Protocol</span>
+                    <span class="text-[10px] font-semibold text-slate-400 dark:text-slate-400 block -mt-1 tracking-wider uppercase font-mono">Escrow Hub</span>
                 </div>
             </a>
 

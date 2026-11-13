@@ -90,7 +90,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <!-- Tailwind CSS with data-cfasync="false" to prevent Cloudflare Rocket Loader deferring styles -->
     <script data-cfasync="false" src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
@@ -116,7 +116,7 @@
                         }
                     },
                     fontFamily: {
-                        sans: ['"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif']
+                        sans: ['"Be Vietnam Pro", "Inter"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif']
                     }
                 }
             }
@@ -124,7 +124,7 @@
     </script>
     <style>
         * {
-            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: 'Be Vietnam Pro', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
         .glow-mesh {
             background-image: radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.12) 0px, transparent 50%),
@@ -145,16 +145,14 @@
     <!-- ============================================================== -->
     <!-- 1. NAVIGATION HEADER (REFINED & MODERN) -->
     <!-- ============================================================== -->
-    <header class="w-full px-4 sm:px-8 py-3.5 border-b border-slate-200/80 dark:border-slate-800/80 bg-white/90 dark:bg-dark-900/90 backdrop-blur-md sticky top-0 z-40 transition-colors">
+    <header class="w-full px-4 sm:px-8 py-3.5 border-b border-slate-200/80 dark:border-slate-800/80 bg-white/95 dark:bg-slate-950/95 backdrop-blur-lg sticky top-0 z-50 shadow-xs transition-colors">
         <div class="max-w-7xl mx-auto flex items-center justify-between">
             <!-- Brand Logo -->
             <a href="index.html" class="flex items-center space-x-3 group">
-                <div class="w-9 h-9 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-950 flex items-center justify-center font-black text-sm shadow-sm transition-transform group-hover:scale-105">
-                    HT
-                </div>
+                <img src="assets/logo.png" alt="KGS Work Logo" class="w-9 h-9 rounded-xl object-contain shadow-xs border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 transition-transform group-hover:scale-105">
                 <div>
                     <span class="font-black text-lg text-slate-900 dark:text-white tracking-tight">KGS <span class="text-indigo-600 dark:text-indigo-400">Work</span></span>
-                    <span class="text-[10px] font-semibold text-slate-400 dark:text-slate-400 block -mt-1 tracking-wider uppercase">Escrow Protocol</span>
+                    <span class="text-[10px] font-semibold text-slate-400 dark:text-slate-400 block -mt-1 tracking-wider uppercase font-mono">Escrow Hub</span>
                 </div>
             </a>
 
@@ -285,6 +283,163 @@
                         <p class="text-[11px] text-slate-400 mt-0.5">Tiếp nhận hồ sơ chào thầu</p>
                     </div>
                 </div>
+            </div>
+        </section>
+
+        <!-- ========================================================== -->
+        <!-- 3B. SYSTEM TRANSPARENCY & CORE STRENGTHS (MINH BẠCH HỆ THỐNG) -->
+        <!-- ========================================================== -->
+        <section class="py-16 sm:py-20 bg-slate-50/70 dark:bg-dark-950 border-b border-slate-200/80 dark:border-slate-800/80">
+            <div class="max-w-6xl mx-auto px-4 sm:px-8">
+                
+                <div class="text-center max-w-3xl mx-auto mb-12">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-50 dark:bg-indigo-950/80 border border-indigo-200/60 dark:border-indigo-800/60 text-indigo-600 dark:text-indigo-400 font-mono text-xs font-bold uppercase tracking-wider mb-3">
+                        <i class="fas fa-shield-halved text-xs"></i>
+                        <span>Bảo Chứng Công Nghệ & Minh Bạch 100%</span>
+                    </div>
+                    <h2 class="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
+                        Tại Sao Doanh Nghiệp & Freelancer IT Hoàn Toàn An Tâm?
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2.5 max-w-2xl mx-auto leading-relaxed">
+                        Loại bỏ hoàn toàn rủi ro bùng tiền, quỵt dự án hay giao việc kém chất lượng. Mọi dòng tiền và tiến độ đều được chứng thực công nghệ minh bạch.
+                    </p>
+                </div>
+
+                <!-- 4 Cột Trụ Điểm Mạnh & Tính Minh Bạch -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                    
+                    <!-- Cột 1: Smart Contract Sepolia -->
+                    <div class="p-6 rounded-3xl bg-white dark:bg-dark-900 border border-slate-200/80 dark:border-slate-800 hover:border-indigo-500/50 hover:shadow-xl transition-all duration-300 flex flex-col justify-between group">
+                        <div>
+                            <div class="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xl font-bold mb-4 group-hover:scale-110 transition-transform shadow-2xs">
+                                <i class="fab fa-ethereum"></i>
+                            </div>
+                            <h3 class="text-base font-extrabold text-slate-900 dark:text-white mb-2">
+                                Smart Contract On-Chain
+                            </h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                                Hợp đồng ký quỹ Escrow được triển khai trên Ethereum Sepolia. Toàn bộ logic khóa và mở khóa tiền đều mở mã nguồn, không ai có thể can thiệp trục lợi.
+                            </p>
+                        </div>
+                        <div class="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800">
+                            <a href="https://sepolia.etherscan.io/address/0xCe6A4e01aB3fd44be7f538B28e284f103426A54b" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
+                                <span>Tra cứu Etherscan</span>
+                                <i class="fas fa-arrow-up-right-from-square text-[10px]"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Cột 2: Sổ Cái Kép Đối Soát Bất Biến -->
+                    <div class="p-6 rounded-3xl bg-white dark:bg-dark-900 border border-slate-200/80 dark:border-slate-800 hover:border-emerald-500/50 hover:shadow-xl transition-all duration-300 flex flex-col justify-between group">
+                        <div>
+                            <div class="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xl font-bold mb-4 group-hover:scale-110 transition-transform shadow-2xs">
+                                <i class="fas fa-book-journal-whills"></i>
+                            </div>
+                            <h3 class="text-base font-extrabold text-slate-900 dark:text-white mb-2">
+                                Sổ Cái Kép Bất Biến
+                            </h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                                Áp dụng chuẩn kế toán Double-Entry Ledger. Mỗi giao dịch nạp, rút, ký quỹ đều tạo cặp đối soát có khóa Idempotency Key chống gian lận nạp rút kép.
+                            </p>
+                        </div>
+                        <div class="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800">
+                            <span class="inline-flex items-center gap-1.5 text-[11px] font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                                <i class="fas fa-circle-check"></i> Sync Sheets & Firebase
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Cột 3: AI Groq Llama 3.3 Duyệt 0.3s -->
+                    <div class="p-6 rounded-3xl bg-white dark:bg-dark-900 border border-slate-200/80 dark:border-slate-800 hover:border-purple-500/50 hover:shadow-xl transition-all duration-300 flex flex-col justify-between group">
+                        <div>
+                            <div class="w-12 h-12 rounded-2xl bg-purple-50 dark:bg-purple-950/80 text-purple-600 dark:text-purple-400 flex items-center justify-center text-xl font-bold mb-4 group-hover:scale-110 transition-transform shadow-2xs">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <h3 class="text-base font-extrabold text-slate-900 dark:text-white mb-2">
+                                AI Phê Duyệt Tức Thì
+                            </h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                                Đăng tin hoàn toàn 0đ. Trí tuệ nhân tạo Groq AI (Llama 3.3 / GPT-OSS) kiểm duyệt tin đăng công nghệ trong 0.3 giây, ngăn chặn 100% spam lừa đảo.
+                            </p>
+                        </div>
+                        <div class="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800">
+                            <span class="inline-flex items-center gap-1.5 text-[11px] font-mono font-bold text-purple-600 dark:text-purple-400">
+                                <i class="fas fa-bolt"></i> Duyệt tin siêu tốc &lt; 0.5s
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Cột 4: Trọng Tài Hòa Giải 50/50 -->
+                    <div class="p-6 rounded-3xl bg-white dark:bg-dark-900 border border-slate-200/80 dark:border-slate-800 hover:border-amber-500/50 hover:shadow-xl transition-all duration-300 flex flex-col justify-between group">
+                        <div>
+                            <div class="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-950/80 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xl font-bold mb-4 group-hover:scale-110 transition-transform shadow-2xs">
+                                <i class="fas fa-scale-balanced"></i>
+                            </div>
+                            <h3 class="text-base font-extrabold text-slate-900 dark:text-white mb-2">
+                                Trọng Tài Phán Xử 50/50
+                            </h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                                Nếu phát sinh tranh chấp sản phẩm, Ban Quản Trị đối soát toàn bộ nhật ký chat, mã nguồn và tài liệu bàn giao để ra phán quyết công bằng cho cả hai bên.
+                            </p>
+                        </div>
+                        <div class="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800">
+                            <span class="inline-flex items-center gap-1.5 text-[11px] font-mono font-bold text-amber-600 dark:text-amber-400">
+                                <i class="fas fa-shield-heart"></i> Bảo vệ cả Doanh nghiệp & Dev
+                            </span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Bảng So Sánh Đối Kháng: Thuê Bên Ngoài vs Thuê Qua KGS Work -->
+                <div class="mt-12 bg-white dark:bg-dark-900 rounded-3xl p-6 sm:p-8 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+                    <div class="text-center mb-6">
+                        <span class="text-[11px] font-mono font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">So Sánh Thực Tế</span>
+                        <h3 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-1">Sự Khác Biệt Khi Giao Dịch Qua KGS Work</h3>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm">
+                        <!-- Cách cũ -->
+                        <div class="p-5 rounded-2xl bg-rose-50/60 dark:bg-rose-950/20 border border-rose-200/70 dark:border-rose-900/40 space-y-3">
+                            <div class="flex items-center gap-2 text-rose-600 dark:text-rose-400 font-extrabold text-sm pb-2 border-b border-rose-200/60 dark:border-rose-900/40">
+                                <i class="fas fa-triangle-exclamation"></i>
+                                <span>Thuê Tự Do Bên Ngoài (Facebook, Zalo)</span>
+                            </div>
+                            <div class="flex items-start gap-2 text-slate-700 dark:text-slate-300">
+                                <span class="text-rose-500 font-bold shrink-0">✗</span>
+                                <span>Phải chuyển cọc 30-50% trước mà không có gì bảo đảm, nguy cơ bị bùng tiền cao.</span>
+                            </div>
+                            <div class="flex items-start gap-2 text-slate-700 dark:text-slate-300">
+                                <span class="text-rose-500 font-bold shrink-0">✗</span>
+                                <span>Freelancer làm xong nhưng khách không trả nốt phần còn lại, quỵt công sức.</span>
+                            </div>
+                            <div class="flex items-start gap-2 text-slate-700 dark:text-slate-300">
+                                <span class="text-rose-500 font-bold shrink-0">✗</span>
+                                <span>Khi xảy ra tranh cãi, không có ai đứng ra phân xử, chỉ biết block nhau và mất trắng.</span>
+                            </div>
+                        </div>
+
+                        <!-- Qua KGS Work -->
+                        <div class="p-5 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200/70 dark:border-emerald-900/40 space-y-3">
+                            <div class="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-extrabold text-sm pb-2 border-b border-emerald-200/60 dark:border-emerald-900/40">
+                                <i class="fas fa-shield-check"></i>
+                                <span>Giao Dịch Qua Sàn KGS Work (Escrow Protocol)</span>
+                            </div>
+                            <div class="flex items-start gap-2 text-slate-700 dark:text-slate-300">
+                                <span class="text-emerald-500 font-bold shrink-0">✓</span>
+                                <span><strong>Đăng tin 0đ:</strong> Tiền cọc được khóa an toàn trong Escrow Vault, chỉ giải phóng khi đã nghiệm thu.</span>
+                            </div>
+                            <div class="flex items-start gap-2 text-slate-700 dark:text-slate-300">
+                                <span class="text-emerald-500 font-bold shrink-0">✓</span>
+                                <span><strong>Chia nhỏ Milestone:</strong> Bàn giao mã nguồn theo từng giai đoạn, nghiệm thu hài lòng từng mốc.</span>
+                            </div>
+                            <div class="flex items-start gap-2 text-slate-700 dark:text-slate-300">
+                                <span class="text-emerald-500 font-bold shrink-0">✓</span>
+                                <span><strong>Trọng tài bảo vệ 100%:</strong> BQT có thẩm quyền hoàn tiền cho khách hoặc thanh toán công bằng cho Dev.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </section>
 
@@ -706,9 +861,7 @@
         <div class="bg-white dark:bg-dark-900 rounded-3xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-200 dark:border-slate-800">
             <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/80 dark:bg-dark-850/80">
                 <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center font-bold text-xs">
-                        HT
-                    </div>
+                    <img src="assets/logo.png" alt="KGS Work Logo" class="w-8 h-8 rounded-xl object-contain border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
                     <div>
                         <h3 class="text-sm font-black text-slate-900 dark:text-white">Bắt Đầu Cùng KGS Work</h3>
                         <p class="text-[11px] text-slate-400">Chọn vai trò của bạn để tiếp tục</p>
@@ -851,12 +1004,12 @@
                 const cleanDesc = job.clean_description || job.description || 'Dự án yêu cầu lập trình viên có kinh nghiệm triển khai đúng cam kết và bảo đảm tiến độ...';
 
                 return `
-                    <div class="bg-white dark:bg-dark-900 rounded-3xl p-5 border border-slate-200/80 dark:border-slate-800 hover:shadow-lg hover:border-indigo-500/50 dark:hover:border-indigo-500/50 transition-all duration-200 flex flex-col justify-between group cursor-pointer" onclick="openJobDetail('${job.id}')">
+                    <div class="bg-white dark:bg-dark-900 rounded-3xl p-5 border border-slate-200/80 dark:border-slate-800 hover:shadow-xl hover:border-indigo-500/50 dark:hover:border-indigo-500/50 transition-all duration-300 flex flex-col justify-between group cursor-pointer" onclick="openJobDetail('${job.id}')">
                         <div>
                             <!-- Header: Client & Escrow Verified Badge -->
-                            <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center justify-between gap-3 mb-3.5">
                                 <div class="flex items-center gap-2.5 min-w-0">
-                                    <img src="${clientAvatar}" alt="${escapeHtml(clientName)}" class="w-8 h-8 rounded-xl object-cover border border-slate-200 dark:border-slate-700">
+                                    <img src="${clientAvatar}" alt="${escapeHtml(clientName)}" class="w-8 h-8 rounded-xl object-cover border border-slate-200 dark:border-slate-700 shrink-0">
                                     <div class="min-w-0">
                                         <span class="text-xs font-bold text-slate-800 dark:text-slate-200 block truncate max-w-[130px]">${escapeHtml(clientName)}</span>
                                         <span class="text-[10px] ${budgetNum > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-indigo-600 dark:text-indigo-400'} font-semibold flex items-center">
@@ -864,20 +1017,13 @@
                                         </span>
                                     </div>
                                 </div>
-                                    <div class="min-w-0">
-                                        <span class="text-xs font-bold text-slate-800 dark:text-slate-200 block truncate max-w-[130px]">${escapeHtml(clientName)}</span>
-                                        <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono font-semibold flex items-center gap-1">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Escrow Locked
-                                        </span>
-                                    </div>
-                                </div>
-                                <span class="px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-mono text-[10px] truncate max-w-[110px]">
+                                <span class="px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-mono text-[10px] font-bold truncate max-w-[120px] shrink-0">
                                     ${escapeHtml(catName)}
                                 </span>
                             </div>
 
                             <!-- Job Title -->
-                            <h3 class="font-bold text-sm sm:text-base text-slate-900 dark:text-white line-clamp-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                            <h3 class="font-bold text-sm sm:text-base text-slate-900 dark:text-white line-clamp-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors leading-snug">
                                 ${escapeHtml(job.title)}
                             </h3>
 
@@ -890,10 +1036,10 @@
                         <!-- Footer: Budget & CTA -->
                         <div class="mt-4 pt-3.5 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between">
                             <div>
-                                <span class="text-[10px] text-slate-400 font-mono block uppercase">Ký quỹ</span>
-                                <span class="font-mono text-sm font-bold text-slate-900 dark:text-white">${formattedBudget}</span>
+                                <span class="text-[10px] text-slate-400 font-mono block uppercase">Ngân Sách</span>
+                                <span class="font-mono text-sm font-black text-slate-900 dark:text-white">${formattedBudget}</span>
                             </div>
-                            <span class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 group-hover:bg-indigo-600 group-hover:text-white text-slate-700 dark:text-slate-200 text-xs font-bold transition flex items-center gap-1">
+                            <span class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 group-hover:bg-indigo-600 group-hover:text-white text-slate-700 dark:text-slate-200 text-xs font-bold transition flex items-center gap-1 shadow-2xs">
                                 <span>Xem chi tiết</span>
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                             </span>
