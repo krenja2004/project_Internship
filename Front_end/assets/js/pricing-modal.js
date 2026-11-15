@@ -1,0 +1,569 @@
+/**
+ * KGS Work - VIP Membership & Monetization Pricing Modal Framework
+ * Cung cấp:
+ * 1. Modal Bảng Giá Nâng Cấp VIP (Client, Freelancer, Add-ons)
+ * 2. Hộp thoại Đẩy Top Bài Tuyển Dụng (Job Boost Prompt)
+ * 3. Smart Promo Banner chào mừng trên Dashboard
+ * 4. Xử lý thanh toán trừ Token tự động & nạp PayOS/VietQR
+ */
+
+(function() {
+    // Tránh inject trùng lặp
+    if (window.KGS_PRICING_INITIALIZED) return;
+    window.KGS_PRICING_INITIALIZED = true;
+
+    const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'http://localhost:5000'
+        : 'https://project-internship-8z76.onrender.com';
+
+    let currentBillingCycle = 'monthly';
+    let currentTab = 'client'; // 'client' | 'freelancer' | 'addons'
+    let plansData = null;
+
+    // 1. Tạo CSS hiệu ứng cho Modal & Banner
+    const styleEl = document.createElement('style');
+    styleEl.innerHTML = `
+        @keyframes kgsGlow {
+            0%, 100% { box-shadow: 0 0 15px rgba(245, 158, 11, 0.4); }
+            50% { box-shadow: 0 0 25px rgba(245, 158, 11, 0.7); }
+        }
+        .kgs-vip-glow { animation: kgsGlow 3s infinite ease-in-out; }
+        .pricing-card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .pricing-card-hover:hover { transform: translateY(-6px); }
+    `;
+    document.head.appendChild(styleEl);
+
+    // 2. HTML Cấu trúc Modal Bảng Giá VIP
+    const modalHtml = `
+    <div id="kgsPricingModalOverlay" class="fixed inset-0 z-[9999] bg-black/75 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 md:p-6 transition-opacity duration-300">
+        <div id="kgsPricingModalContent" class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl shadow-2xl max-w-5xl w-full max-h-[92vh] flex flex-col overflow-hidden transform scale-95 transition-transform duration-300">
+            
+            <!-- Header Modal -->
+            <div class="p-5 sm:p-6 bg-gradient-to-r from-indigo-900 via-purple-900 to-indigo-950 text-white relative shrink-0">
+                <button onclick="window.closePricingModal()" class="absolute top-4 right-4 sm:top-5 sm:right-5 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition text-lg">
+                    &times;
+                </button>
+                <div class="flex items-center space-x-2.5 mb-1.5">
+                    <span class="bg-amber-400 text-gray-900 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full tracking-wider shadow">
+                        👑 KGS Work VIP Hub
+                    </span>
+                    <span class="text-xs text-indigo-200">Gói Hội Viên & Dịch Vụ Tăng Tốc</span>
+                </div>
+                <h2 class="text-xl sm:text-2xl md:text-3xl font-black text-white leading-tight">
+                    Nâng Tầm Trải Nghiệm & Đột Phá Doanh Thu
+                </h2>
+                <p class="text-xs sm:text-sm text-indigo-200 mt-1 max-w-2xl">
+                    Tính năng cơ bản luôn <span class="font-bold text-emerald-400">100% Miễn Phí</span>. Nâng cấp để tiếp cận chuyên gia hàng đầu, đẩy tin Top 1 và tối đa hóa cơ hội hợp tác.
+                </p>
+
+                <!-- Tabs chọn đối tượng -->
+                <div class="flex items-center justify-between flex-wrap gap-3 mt-4 pt-3 border-t border-white/10">
+                    <div class="flex items-center bg-black/30 p-1 rounded-2xl border border-white/10" id="pricingTabSwitcher">
+                        <button onclick="window.switchPricingTab('client')" id="btnTabClient" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 text-white bg-indigo-600 shadow">
+                            <i class="fas fa-building text-amber-300"></i> <span>Dành Cho Khách Hàng</span>
+                        </button>
+                        <button onclick="window.switchPricingTab('freelancer')" id="btnTabFreelancer" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 text-indigo-200 hover:text-white">
+                            <i class="fas fa-laptop-code text-cyan-300"></i> <span>Dành Cho Freelancer</span>
+                        </button>
+                        <button onclick="window.switchPricingTab('addons')" id="btnTabAddons" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 text-indigo-200 hover:text-white">
+                            <i class="fas fa-bolt text-yellow-300"></i> <span>Tiện Ích Mua Lẻ</span>
+                        </button>
+                    </div>
+
+                    <!-- Chu kỳ thanh toán (Tháng / Năm) -->
+                    <div class="flex items-center space-x-2 text-xs" id="billingCycleWrapper">
+                        <span class="text-indigo-200 font-semibold">Theo Tháng</span>
+                        <button type="button" onclick="window.toggleBillingCycle()" id="btnBillingCycleToggle" class="w-12 h-6 bg-indigo-700 rounded-full p-0.5 transition-colors relative flex items-center">
+                            <span id="cycleToggleThumb" class="w-5 h-5 bg-amber-400 rounded-full shadow transform transition-transform"></span>
+                        </button>
+                        <span class="text-white font-bold flex items-center">
+                            Theo Năm <span class="ml-1 bg-emerald-500 text-gray-900 text-[10px] font-black px-1.5 py-0.2 rounded-full uppercase">-20%</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Body Modal (Cuộn nội dung gói) -->
+            <div class="p-5 sm:p-6 md:p-8 overflow-y-auto flex-1 custom-scrollbar space-y-6">
+                <!-- Vùng nạp thẻ gói -->
+                <div id="pricingCardsContainer" class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <!-- Populated dynamically -->
+                </div>
+
+                <!-- Footer Ghi chú an toàn -->
+                <div class="p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500 dark:text-gray-400">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-shield-halved text-emerald-500 text-base"></i>
+                        <span>Thanh toán minh bạch qua <strong>Số dư ví Token</strong> hoặc <strong>Quét mã VietQR/PayOS</strong>. Hủy gói bất cứ lúc nào.</span>
+                    </div>
+                    <div class="flex items-center space-x-2 shrink-0">
+                        <span>Số dư ví của bạn:</span>
+                        <span class="font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-lg border border-emerald-300 dark:border-emerald-800" id="pricingUserBalanceDisplay">-- Token</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Modal Xác Nhận Nâng Cấp / Mua Tiện Ích -->
+    <div id="kgsConfirmPurchaseModal" class="fixed inset-0 z-[10000] bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4">
+            <div class="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-950/60 text-amber-500 flex items-center justify-center text-2xl mx-auto">
+                <i class="fas fa-crown"></i>
+            </div>
+            <div class="text-center">
+                <h3 class="text-lg font-black text-gray-900 dark:text-white" id="confirmPurchaseTitle">Xác Nhận Nâng Cấp Gói</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1" id="confirmPurchaseDesc">Xác nhận thanh toán gói dịch vụ bằng số dư ví Token.</p>
+            </div>
+            <div class="bg-gray-50 dark:bg-gray-750 p-4 rounded-2xl border border-gray-200 dark:border-gray-700 space-y-2 text-xs">
+                <div class="flex justify-between text-gray-500 dark:text-gray-400">
+                    <span>Gói đăng ký:</span>
+                    <span class="font-bold text-gray-800 dark:text-white" id="confirmPlanName">--</span>
+                </div>
+                <div class="flex justify-between text-gray-500 dark:text-gray-400">
+                    <span>Chi phí thanh toán:</span>
+                    <span class="font-black text-amber-600 dark:text-amber-400 text-sm" id="confirmPlanPrice">-- Token</span>
+                </div>
+                <div class="flex justify-between text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-650 pt-2">
+                    <span>Số dư hiện tại:</span>
+                    <span class="font-semibold text-gray-700 dark:text-gray-300" id="confirmCurrentBalance">-- Token</span>
+                </div>
+                <div class="flex justify-between text-gray-500 dark:text-gray-400">
+                    <span>Số dư sau khi thanh toán:</span>
+                    <span class="font-black text-emerald-600 dark:text-emerald-400" id="confirmAfterBalance">-- Token</span>
+                </div>
+            </div>
+            <div id="confirmErrorAlert" class="hidden p-3 rounded-xl bg-red-50 dark:bg-red-950/60 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-xs"></div>
+            <div class="flex items-center space-x-3 pt-2">
+                <button onclick="window.closeConfirmModal()" class="flex-1 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-bold text-xs hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                    Đóng
+                </button>
+                <button id="btnProceedPurchase" onclick="window.executePurchase()" class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-gray-900 font-black text-xs shadow-md transition transform hover:scale-[1.02]">
+                    Xác Nhận Thanh Toán
+                </button>
+            </div>
+        </div>
+    </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+    // 3. Tải dữ liệu các gói từ Backend
+    async function loadPlans() {
+        if (plansData) return plansData;
+        try {
+            const res = await fetch(`${API_URL}/api/monetization/plans`);
+            const json = await res.json();
+            if (json.success) {
+                plansData = json.plans;
+                return plansData;
+            }
+        } catch (e) {
+            console.warn('[Pricing] Fallback to local default plans:', e);
+        }
+        return null;
+    }
+
+    // 4. Lấy số dư ví hiện tại của người dùng
+    async function fetchUserBalance() {
+        let user = null;
+        try { user = JSON.parse(localStorage.getItem('user')); } catch (e) {}
+        if (!user || !user.id) return 0;
+        try {
+            const res = await fetch(`${API_URL}/api/wallet/${user.id}`);
+            const data = await res.json();
+            return parseFloat(data.balance) || 0;
+        } catch (e) {
+            return 0;
+        }
+    }
+
+    // 5. Render danh sách các Card gói
+    async function renderPricingCards() {
+        const container = document.getElementById('pricingCardsContainer');
+        if (!container) return;
+        container.innerHTML = '<div class="col-span-3 text-center py-10 text-gray-400"><i class="fas fa-spinner fa-spin mr-2"></i>Đang tải thông tin gói...</div>';
+
+        const data = await loadPlans();
+        const balance = await fetchUserBalance();
+        const balEl = document.getElementById('pricingUserBalanceDisplay');
+        if (balEl) balEl.innerText = `${balance.toLocaleString('vi-VN')} Token`;
+
+        let list = [];
+        const isAnnual = currentBillingCycle === 'annual';
+
+        if (currentTab === 'client') {
+            list = data?.client || [];
+            document.getElementById('billingCycleWrapper').classList.remove('hidden');
+        } else if (currentTab === 'freelancer') {
+            list = data?.freelancer || [];
+            document.getElementById('billingCycleWrapper').classList.remove('hidden');
+        } else {
+            // Add-ons
+            document.getElementById('billingCycleWrapper').classList.add('hidden');
+            renderAddonCards(data?.addons || [], balance);
+            return;
+        }
+
+        let user = null;
+        try { user = JSON.parse(localStorage.getItem('user')); } catch (e) {}
+
+        let cardsHtml = '';
+        list.forEach(p => {
+            const price = isAnnual ? p.price_annual : p.price_monthly;
+            const priceDisplay = price === 0 ? 'Miễn Phí' : `${price.toLocaleString('vi-VN')} Token`;
+            const durationDisplay = price === 0 ? 'Mãi Mãi' : (isAnnual ? '/ năm' : '/ tháng');
+            const isPopular = p.popular;
+
+            cardsHtml += `
+            <div class="pricing-card-hover rounded-3xl p-6 sm:p-7 flex flex-col justify-between border ${isPopular ? 'border-amber-400 dark:border-amber-500 bg-gradient-to-b from-amber-50/50 via-white to-white dark:from-amber-950/20 dark:via-gray-800 dark:to-gray-800 kgs-vip-glow shadow-xl relative' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm'}">
+                ${isPopular ? `
+                <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-amber-500 to-yellow-400 text-gray-900 text-[10px] font-black uppercase tracking-wider px-3.5 py-1 rounded-full shadow">
+                    ⭐ ${p.badge || 'Khuyên Dùng'}
+                </div>` : ''}
+
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-lg font-black text-gray-900 dark:text-white">${p.name}</h3>
+                        ${!isPopular && p.badge ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">${p.badge}</span>` : ''}
+                    </div>
+
+                    <div class="mb-5">
+                        <span class="text-2xl sm:text-3xl font-black ${price === 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-900 dark:text-white'}">${priceDisplay}</span>
+                        <span class="text-xs text-gray-400">${durationDisplay}</span>
+                    </div>
+
+                    <ul class="space-y-2.5 text-xs text-gray-600 dark:text-gray-300 mb-6">
+                        ${p.features.map(f => `
+                            <li class="flex items-start space-x-2">
+                                <i class="fas fa-check-circle text-emerald-500 mt-0.5 shrink-0 text-sm"></i>
+                                <span>${f}</span>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+
+                <div>
+                    ${price === 0 ? `
+                        <button disabled class="w-full py-2.5 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 font-bold text-xs cursor-default">
+                            Đang Hoạt Động (Mặc định)
+                        </button>
+                    ` : `
+                        <button onclick="window.promptPurchase('${p.id}', '${p.name}', ${price}, '${currentTab}')" class="w-full py-2.5 rounded-xl ${isPopular ? 'bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-600 hover:to-yellow-500 text-gray-900' : 'bg-indigo-600 hover:bg-indigo-700 text-white'} font-black text-xs shadow-md transition transform hover:scale-[1.02] flex items-center justify-center space-x-1.5">
+                            <i class="fas fa-crown text-xs"></i> <span>Nâng Cấp Ngay</span>
+                        </button>
+                    `}
+                </div>
+            </div>`;
+        });
+
+        container.innerHTML = cardsHtml;
+    }
+
+    // Render Tab Add-ons Mua Lẻ
+    function renderAddonCards(addons, balance) {
+        const container = document.getElementById('pricingCardsContainer');
+        if (!container) return;
+
+        let html = '';
+        addons.forEach(a => {
+            html += `
+            <div class="pricing-card-hover rounded-3xl p-6 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-base font-black text-gray-900 dark:text-white">${a.name}</h3>
+                        <span class="text-xs font-black text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded-lg border border-amber-300 dark:border-amber-800">
+                            ${a.price.toLocaleString('vi-VN')} Token
+                        </span>
+                    </div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">${a.desc}</p>
+                </div>
+                <button onclick="window.promptPurchase('${a.id}', '${a.name}', ${a.price}, 'addon')" class="w-full py-2 rounded-xl bg-gray-100 hover:bg-indigo-50 dark:bg-gray-700 dark:hover:bg-gray-650 text-indigo-600 dark:text-indigo-300 font-bold text-xs transition border border-indigo-200 dark:border-indigo-800 flex items-center justify-center space-x-1.5">
+                    <i class="fas fa-bolt text-amber-400"></i> <span>Kích Hoạt Tiện Ích</span>
+                </button>
+            </div>`;
+        });
+        container.innerHTML = html;
+    }
+
+    // 6. Global Switchers & Handlers
+    window.openPricingModal = function(defaultTab = null) {
+        let user = null;
+        try { user = JSON.parse(localStorage.getItem('user')); } catch (e) {}
+        
+        if (defaultTab) {
+            currentTab = defaultTab;
+        } else if (user && user.role === 'freelancer') {
+            currentTab = 'freelancer';
+        } else {
+            currentTab = 'client';
+        }
+
+        updateTabButtons();
+        const overlay = document.getElementById('kgsPricingModalOverlay');
+        const content = document.getElementById('kgsPricingModalContent');
+        if (overlay && content) {
+            overlay.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-95');
+                content.classList.add('scale-100');
+            }, 10);
+        }
+        renderPricingCards();
+    };
+
+    window.closePricingModal = function() {
+        const overlay = document.getElementById('kgsPricingModalOverlay');
+        const content = document.getElementById('kgsPricingModalContent');
+        if (overlay && content) {
+            content.classList.remove('scale-100');
+            content.classList.add('scale-95');
+            setTimeout(() => overlay.classList.add('hidden'), 200);
+        }
+    };
+
+    window.switchPricingTab = function(tab) {
+        currentTab = tab;
+        updateTabButtons();
+        renderPricingCards();
+    };
+
+    function updateTabButtons() {
+        const btnC = document.getElementById('btnTabClient');
+        const btnF = document.getElementById('btnTabFreelancer');
+        const btnA = document.getElementById('btnTabAddons');
+        if (!btnC || !btnF || !btnA) return;
+
+        [btnC, btnF, btnA].forEach(btn => {
+            btn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 text-indigo-200 hover:text-white';
+        });
+
+        if (currentTab === 'client') {
+            btnC.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 text-white bg-indigo-600 shadow';
+        } else if (currentTab === 'freelancer') {
+            btnF.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 text-white bg-indigo-600 shadow';
+        } else {
+            btnA.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 text-white bg-indigo-600 shadow';
+        }
+    }
+
+    window.toggleBillingCycle = function() {
+        currentBillingCycle = currentBillingCycle === 'monthly' ? 'annual' : 'monthly';
+        const thumb = document.getElementById('cycleToggleThumb');
+        const btn = document.getElementById('btnBillingCycleToggle');
+        if (currentBillingCycle === 'annual') {
+            thumb.classList.add('translate-x-6');
+            btn.classList.add('bg-emerald-600');
+            btn.classList.remove('bg-indigo-700');
+        } else {
+            thumb.classList.remove('translate-x-6');
+            btn.classList.remove('bg-emerald-600');
+            btn.classList.add('bg-indigo-700');
+        }
+        renderPricingCards();
+    };
+
+    // 7. Mua gói & Xác nhận
+    let pendingPurchase = null;
+
+    window.promptPurchase = async function(planId, planName, price, category) {
+        let user = null;
+        try { user = JSON.parse(localStorage.getItem('user')); } catch (e) {}
+        if (!user || !user.id) {
+            alert('Vui lòng đăng nhập để nâng cấp gói dịch vụ!');
+            window.location.href = '../sharedFolder/login.html';
+            return;
+        }
+
+        const balance = await fetchUserBalance();
+        pendingPurchase = { planId, planName, price, category, cycle: currentBillingCycle, userId: user.id, role: user.role };
+
+        document.getElementById('confirmPlanName').innerText = `${planName} (${currentBillingCycle === 'annual' ? '1 Năm' : '1 Tháng'})`;
+        document.getElementById('confirmPlanPrice').innerText = `${price.toLocaleString('vi-VN')} Token`;
+        document.getElementById('confirmCurrentBalance').innerText = `${balance.toLocaleString('vi-VN')} Token`;
+        
+        const afterBal = balance - price;
+        const afterEl = document.getElementById('confirmAfterBalance');
+        const errEl = document.getElementById('confirmErrorAlert');
+        const proceedBtn = document.getElementById('btnProceedPurchase');
+
+        if (afterBal < 0) {
+            afterEl.innerText = 'Không đủ số dư';
+            afterEl.className = 'font-bold text-red-500';
+            errEl.classList.remove('hidden');
+            errEl.innerHTML = `<i class="fas fa-exclamation-triangle mr-1"></i> Số dư còn thiếu ${(price - balance).toLocaleString('vi-VN')} Token. <a href="wallet.html" class="underline font-bold ml-1 text-red-700 dark:text-red-300">Nạp thêm Token ngay</a>`;
+            proceedBtn.innerText = 'Nạp Thêm Token Vào Ví';
+            proceedBtn.onclick = () => window.location.href = 'wallet.html';
+        } else {
+            afterEl.innerText = `${afterBal.toLocaleString('vi-VN')} Token`;
+            afterEl.className = 'font-black text-emerald-600 dark:text-emerald-400';
+            errEl.classList.add('hidden');
+            proceedBtn.innerText = 'Xác Nhận Thanh Toán';
+            proceedBtn.onclick = () => window.executePurchase();
+        }
+
+        document.getElementById('kgsConfirmPurchaseModal').classList.remove('hidden');
+    };
+
+    window.closeConfirmModal = function() {
+        document.getElementById('kgsConfirmPurchaseModal').classList.add('hidden');
+        pendingPurchase = null;
+    };
+
+    window.executePurchase = async function() {
+        if (!pendingPurchase) return;
+        const btn = document.getElementById('btnProceedPurchase');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1.5"></i> Đang xử lý...';
+
+        try {
+            const res = await fetch(`${API_URL}/api/monetization/subscribe`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_id: pendingPurchase.userId,
+                    plan_id: pendingPurchase.planId,
+                    billing_cycle: pendingPurchase.cycle,
+                    role: pendingPurchase.role
+                })
+            });
+
+            const result = await res.json();
+            if (!res.ok || result.error) {
+                throw new Error(result.error || 'Thanh toán thất bại');
+            }
+
+            alert(`🎉 ${result.message}`);
+            window.closeConfirmModal();
+            window.closePricingModal();
+
+            // Cập nhật số dư trên UI
+            if (window.loadUserWallet) window.loadUserWallet();
+            if (window.loadFreelancerWallet) window.loadFreelancerWallet();
+            const uiBal = document.getElementById('uiBalanceDisplay');
+            if (uiBal && result.new_balance !== undefined) {
+                uiBal.innerText = `${result.new_balance.toLocaleString('vi-VN')} Token`;
+            }
+        } catch (e) {
+            alert(`❌ Lỗi: ${e.message}`);
+        } finally {
+            btn.disabled = false;
+        }
+    };
+
+    // 8. Đẩy Top Bài Tuyển Dụng (Job Boost Prompt)
+    window.boostJobPrompt = async function(jobId, jobTitle) {
+        let user = null;
+        try { user = JSON.parse(localStorage.getItem('user')); } catch (e) {}
+        if (!user || !user.id) return;
+
+        const balance = await fetchUserBalance();
+        const price = 25000;
+
+        const confirmMsg = `⚡ ĐẨY TIN TUYỂN DỤNG LÊN TOP 1\n\n` +
+            `Dự án: "${jobTitle}"\n` +
+            `Thời gian ưu tiên: 24 giờ\n` +
+            `Chi phí: 25.000 Token (Hiện có: ${balance.toLocaleString('vi-VN')} Token)\n\n` +
+            `Bạn có chắc chắn muốn đẩy tin này lên đầu trang tìm kiếm không?`;
+
+        if (!confirm(confirmMsg)) return;
+
+        if (balance < price) {
+            if (confirm(`Số dư không đủ! Bạn còn thiếu ${(price - balance).toLocaleString('vi-VN')} Token. Bạn có muốn chuyển đến trang Nạp ví không?`)) {
+                window.location.href = 'wallet.html';
+            }
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_URL}/api/monetization/boost-job`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_id: user.id,
+                    job_id: jobId,
+                    boost_type: 'job_boost'
+                })
+            });
+
+            const result = await res.json();
+            if (!res.ok || result.error) throw new Error(result.error || 'Không thể đẩy bài');
+
+            alert(`🚀 Thành công! Dự án "${jobTitle}" đã được đưa lên Top 1 trong 24 giờ tới.`);
+            if (window.loadMyJobs) window.loadMyJobs();
+            if (window.loadUserJobs) window.loadUserJobs();
+            const uiBal = document.getElementById('uiBalanceDisplay');
+            if (uiBal && result.new_balance !== undefined) {
+                uiBal.innerText = `${result.new_balance.toLocaleString('vi-VN')} Token`;
+            }
+        } catch (e) {
+            alert(`❌ Lỗi: ${e.message}`);
+        }
+    };
+
+    // 9. Smart Promo Banner Tự Động (Tự inject vào đầu main của dashboard)
+    window.renderSmartPromoBanner = function(role = 'client') {
+        const bannerKey = `kgs_promo_dismissed_${role}_v1`;
+        if (localStorage.getItem(bannerKey)) return; // Người dùng đã bấm tắt
+
+        const mainEl = document.querySelector('main');
+        if (!mainEl) return;
+
+        const bannerId = 'kgsSmartPromoBanner';
+        if (document.getElementById(bannerId)) return;
+
+        const isClient = role === 'client';
+        const bannerHtml = document.createElement('div');
+        bannerHtml.id = bannerId;
+        bannerHtml.className = `rounded-2xl p-4 sm:p-5 mb-6 relative overflow-hidden shadow-lg border transition-all duration-300 ${
+            isClient
+                ? 'bg-gradient-to-r from-purple-900 via-indigo-900 to-indigo-950 border-purple-500/30 text-white'
+                : 'bg-gradient-to-r from-amber-900 via-yellow-900 to-stone-900 border-amber-500/30 text-white'
+        }`;
+
+        bannerHtml.innerHTML = `
+            <button onclick="window.dismissPromoBanner('${role}')" class="absolute top-3 right-3 w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-sm transition" title="Đóng thông báo">
+                &times;
+            </button>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pr-6">
+                <div class="flex items-center space-x-3.5">
+                    <div class="w-11 h-11 rounded-2xl ${isClient ? 'bg-purple-500/20 text-purple-300' : 'bg-amber-500/20 text-yellow-300'} flex items-center justify-center text-xl shrink-0">
+                        ${isClient ? '<i class="fas fa-rocket"></i>' : '<i class="fas fa-crown"></i>'}
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="${isClient ? 'bg-purple-400 text-purple-950' : 'bg-yellow-400 text-yellow-950'} text-[10px] font-black uppercase px-2 py-0.5 rounded-full">
+                                ${isClient ? 'ĐẶC QUYỀN DOANH NGHIỆP' : 'DÀNH CHO CHUYÊN GIA IT'}
+                            </span>
+                            <span class="text-xs text-gray-300">Khởi chạy tính năng VIP</span>
+                        </div>
+                        <h4 class="text-sm sm:text-base font-extrabold mt-0.5">
+                            ${isClient 
+                                ? 'Cần tuyển nhân sự gấp? Đẩy bài lên Top 1 và kết nối trực tiếp với 50+ Senior Dev' 
+                                : 'Tăng 300% tỷ lệ trúng thầu với Huy hiệu Tích Xanh & 50 lượt Bids dự án mỗi tháng'}
+                        </h4>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2 shrink-0">
+                    <button onclick="window.openPricingModal('${isClient ? 'client' : 'freelancer'}')" class="px-4 py-2 rounded-xl ${isClient ? 'bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600' : 'bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-600 hover:to-yellow-500 text-gray-900'} text-white font-extrabold text-xs shadow-md transition transform hover:scale-105 flex items-center">
+                        <i class="fas fa-crown mr-1.5 ${isClient ? 'text-yellow-300' : 'text-gray-900'}"></i> ${isClient ? 'Nâng Cấp Pro Ngay' : 'Khám Phá Gói Pro'}
+                    </button>
+                </div>
+            </div>
+        `;
+
+        mainEl.insertBefore(bannerHtml, mainEl.firstChild);
+    };
+
+    window.dismissPromoBanner = function(role) {
+        const bannerKey = `kgs_promo_dismissed_${role}_v1`;
+        localStorage.setItem(bannerKey, 'true');
+        const b = document.getElementById('kgsSmartPromoBanner');
+        if (b) {
+            b.style.opacity = '0';
+            b.style.transform = 'translateY(-10px)';
+            setTimeout(() => b.remove(), 300);
+        }
+    };
+})();

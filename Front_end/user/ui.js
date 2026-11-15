@@ -40,6 +40,10 @@ document.addEventListener('DOMContentLoaded', () => {
             <a href="home.html" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-indigo-400 font-semibold transition-colors">
                 <i class="fas fa-chart-line w-5 text-indigo-500"></i> <span>Bảng điều khiển</span>
             </a>
+            <a href="javascript:void(0)" onclick="window.openPricingModal('client')" class="nav-item flex items-center space-x-3 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500/10 via-yellow-500/10 to-amber-500/5 text-amber-700 dark:text-amber-300 hover:from-amber-500/20 hover:to-yellow-500/20 font-black border border-amber-400/40 shadow-sm transition">
+                <i class="fas fa-crown text-amber-500"></i> <span>Gói VIP & Bảng Giá</span>
+                <span class="ml-auto text-[9px] bg-amber-400 text-gray-950 font-black px-1.5 py-0.5 rounded-full uppercase">HOT</span>
+            </a>
             <a href="post-job.html" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-indigo-400 font-semibold transition-colors">
                 <i class="fas fa-plus-circle w-5 text-blue-500"></i> <span>Đăng Dự Án</span>
             </a>
@@ -95,6 +99,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 <a href="home.html" class="drawer-item flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-gray-700 font-semibold">
                     <i class="fas fa-chart-line w-5 text-indigo-500"></i> <span>Bảng điều khiển</span>
                 </a>
+                <a href="javascript:void(0)" onclick="window.openPricingModal('client')" class="drawer-item flex items-center space-x-3 px-4 py-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 font-black border border-amber-300/40">
+                    <i class="fas fa-crown w-5 text-amber-500"></i> <span>Gói VIP & Bảng Giá</span>
+                </a>
                 <a href="post-job.html" class="drawer-item flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-gray-700 font-semibold">
                     <i class="fas fa-plus-circle w-5 text-blue-500"></i> <span>Đăng Dự Án</span>
                 </a>
@@ -144,6 +151,12 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
         
         <div class="flex items-center space-x-2 sm:space-x-3 md:space-x-4 shrink-0">
+            <!-- Nút Nâng Cấp VIP -->
+            <button onclick="window.openPricingModal('client')" class="flex items-center space-x-1.5 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-600 hover:to-yellow-500 text-gray-900 font-black px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-full shadow-md transition transform hover:scale-105 shrink-0 text-xs cursor-pointer" title="Nâng cấp gói Hội viên & Bảng giá">
+                <span>👑</span>
+                <span class="hidden sm:inline">Gói VIP</span>
+            </button>
+
             <!-- Số dư Token -->
             <a href="wallet.html" class="flex items-center space-x-1.5 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/80 px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-full shadow-sm hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition shrink-0" title="Quản lý Ví & Nạp Token">
                 <span class="text-xs sm:text-sm">💎</span>
@@ -568,6 +581,21 @@ document.addEventListener('DOMContentLoaded', () => {
     loadUserNotifications();
     window.loadUserNotifications = loadUserNotifications;
     window.loadGlobalBalance = loadGlobalBalance;
+
+    // Tự động tải Pricing & VIP Module
+    function initPricingSystem() {
+        if (!window.KGS_PRICING_INITIALIZED) {
+            const sc = document.createElement('script');
+            sc.src = '../assets/js/pricing-modal.js?v=' + Date.now();
+            sc.onload = () => {
+                if (window.renderSmartPromoBanner) window.renderSmartPromoBanner('client');
+            };
+            document.body.appendChild(sc);
+        } else {
+            if (window.renderSmartPromoBanner) window.renderSmartPromoBanner('client');
+        }
+    }
+    initPricingSystem();
 
     // Polling định kỳ hợp lý (15s/lần) không gây nghẽn mạng và chống tràn bộ nhớ
     setInterval(() => {

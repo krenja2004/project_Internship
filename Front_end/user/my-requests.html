@@ -394,6 +394,15 @@
                                         <button onclick="deleteJob('${job.id}', '${escapeHtml(job.title)}')" class="text-xs bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400 hover:bg-red-100 font-bold px-3 py-1.5 rounded-xl transition flex items-center">
                                             <i class="fas fa-trash-alt mr-1.5"></i> Xóa
                                         </button>
+                                        ${job.is_boosted ? `
+                                            <span class="text-xs bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 font-black px-3 py-1.5 rounded-xl border border-amber-300 dark:border-amber-700 flex items-center shadow-sm">
+                                                <i class="fas fa-bolt text-amber-500 mr-1.5"></i> Đang Ở Top 1
+                                            </span>
+                                        ` : `
+                                            <button onclick="window.boostJobPrompt('${job.id}', '${escapeHtml(job.title)}')" class="text-xs bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-600 hover:to-yellow-500 text-gray-900 font-black px-3 py-1.5 rounded-xl transition flex items-center shadow-sm" title="Đẩy bài đăng lên Top 1 trang tìm kiếm trong 24h">
+                                                <i class="fas fa-bolt mr-1.5 text-xs"></i> Đẩy Top 1 (25k)
+                                            </button>
+                                        `}
                                     ` : ''}
                                     ${isPlanning ? `
                                         <button onclick="cancelPlanningJob('${job.id}', '${escapeHtml(job.title)}', '${job.budget}')" class="text-xs bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-400 hover:bg-amber-100 font-bold px-3 py-1.5 rounded-xl transition flex items-center">

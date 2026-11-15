@@ -47,6 +47,7 @@ app.use(require('./routes/aiRoutes'));
 app.use(require('./routes/adminRoutes'));
 app.use(require('./routes/supportRoutes'));
 app.use(require('./routes/connectionRoutes'));
+app.use(require('./routes/monetizationRoutes'));
 app.use(require('./routes/testRoutes'));
 
 // 4. Khởi chạy Server (Tích hợp AI Groq Llama 3.3 & Telegram OTP Bot)

@@ -6,6 +6,7 @@ const supabase = require('../config/supabase');
 const { logEvent } = require('../services/auditLogger');
 const settingsStore = require('../services/settingsStore');
 const aiModeration = require('../services/aiModeration');
+const subscriptionService = require('../services/subscriptionService');
 
 // 1. API: Khách hàng đăng Job mới (Miễn phí đăng tin + AI Kiểm duyệt Llama/GPT-OSS)
 router.post('/api/jobs', async (req, res) => {
@@ -231,6 +232,8 @@ router.get('/api/jobs', async (req, res) => {
             .from('jobs')
             .select('client_id, status, budget');
 
+        const boostedJobsMap = subscriptionService.getBoostedJobsMap();
+
         let jobsEnriched = (jobs || []).map(job => {
             const clientJobs = (allJobs || []).filter(j => j.client_id === job.client_id);
             const totalPosted = clientJobs.length;
@@ -238,6 +241,11 @@ router.get('/api/jobs', async (req, res) => {
             const totalSpent = clientJobs
                 .filter(j => j.status === 'completed' || j.status === 'in_progress')
                 .reduce((sum, j) => sum + (parseFloat(j.budget) || 0), 0);
+
+            // Kiểm tra trạng thái Đẩy Top / Tuyển Gấp từ Hệ thống Monetization
+            const boostRecord = boostedJobsMap[job.id] || null;
+            const isBoosted = !!boostRecord;
+            const isUrgent = boostRecord?.boost_type === 'urgent_tag';
 
             // Phân tích Category & Tags từ Description
             const catMatch = (job.description || '').match(/\[Danh mục:\s*([^\]]+)\]/i);
@@ -298,8 +306,20 @@ router.get('/api/jobs', async (req, res) => {
                     rating_display: clientRatingDisplay,
                     credit_tier: creditTier,
                     tier_badge: tierBadge
-                }
+                },
+                is_boosted: isBoosted,
+                is_urgent: isUrgent,
+                boost_details: boostRecord
             };
+        });
+
+        // Sắp xếp ưu tiên: Tin Đẩy Top & Tuyển Gấp luôn nằm ở vị trí đầu tiên
+        jobsEnriched.sort((a, b) => {
+            if (a.is_boosted && !b.is_boosted) return -1;
+            if (!a.is_boosted && b.is_boosted) return 1;
+            if (a.is_urgent && !b.is_urgent) return -1;
+            if (!a.is_urgent && b.is_urgent) return 1;
+            return new Date(b.created_at) - new Date(a.created_at);
         });
 
         if (category && category !== 'all') {
