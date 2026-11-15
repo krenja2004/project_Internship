@@ -1,14 +1,13 @@
 /**
- * KGS Work - VIP Membership & Monetization Pricing Modal Framework
- * Cung cấp:
- * 1. Modal Bảng Giá Nâng Cấp VIP (Client, Freelancer, Add-ons)
- * 2. Hộp thoại Đẩy Top Bài Tuyển Dụng (Job Boost Prompt)
- * 3. Smart Promo Banner chào mừng trên Dashboard
- * 4. Xử lý thanh toán trừ Token tự động & nạp PayOS/VietQR
+ * KGS Work - VIP Membership & Monetization Pricing Modal Framework (v2.0)
+ * Tách biệt 100% vai trò Khách hàng (Client) và Freelancer:
+ * - Trong Freelancer Hub: Chỉ hiển thị Gói Chuyên Gia IT & Tiện ích Dev (Ẩn hoàn toàn gói Client).
+ * - Trong Client Hub: Chỉ hiển thị Gói Doanh Nghiệp & Tiện ích Bài Đăng (Ẩn hoàn toàn gói Freelancer).
+ * - Trên Trang Khách vãng lai: Hiển thị đầy đủ cả 2 phân hệ.
+ * - Tách biệt Doanh thu thuần của Sàn (Admin Profit) khỏi Tiền Ký Quỹ Escrow.
  */
 
 (function() {
-    // Tránh inject trùng lặp
     if (window.KGS_PRICING_INITIALIZED) return;
     window.KGS_PRICING_INITIALIZED = true;
 
@@ -19,6 +18,18 @@
     let currentBillingCycle = 'monthly';
     let currentTab = 'client'; // 'client' | 'freelancer' | 'addons'
     let plansData = null;
+
+    // Phát hiện vai trò ngữ cảnh chuẩn xác
+    function detectContextRole() {
+        let user = null;
+        try { user = JSON.parse(localStorage.getItem('user')); } catch (e) {}
+        const path = window.location.pathname.toLowerCase();
+        if (path.includes('/freelancer/')) return 'freelancer';
+        if (path.includes('/user/')) return 'client';
+        if (user && user.role === 'freelancer') return 'freelancer';
+        if (user && user.role === 'client') return 'client';
+        return 'guest';
+    }
 
     // 1. Tạo CSS hiệu ứng cho Modal & Banner
     const styleEl = document.createElement('style');
@@ -35,7 +46,7 @@
 
     // 2. HTML Cấu trúc Modal Bảng Giá VIP
     const modalHtml = `
-    <div id="kgsPricingModalOverlay" class="fixed inset-0 z-[9999] bg-black/75 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 md:p-6 transition-opacity duration-300">
+    <div id="kgsPricingModalOverlay" class="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 md:p-6 transition-opacity duration-300">
         <div id="kgsPricingModalContent" class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl shadow-2xl max-w-5xl w-full max-h-[92vh] flex flex-col overflow-hidden transform scale-95 transition-transform duration-300">
             
             <!-- Header Modal -->
@@ -44,29 +55,29 @@
                     &times;
                 </button>
                 <div class="flex items-center space-x-2.5 mb-1.5">
-                    <span class="bg-amber-400 text-gray-900 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full tracking-wider shadow">
+                    <span id="modalHeaderBadge" class="bg-amber-400 text-gray-900 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full tracking-wider shadow">
                         👑 KGS Work VIP Hub
                     </span>
-                    <span class="text-xs text-indigo-200">Gói Hội Viên & Dịch Vụ Tăng Tốc</span>
+                    <span class="text-xs text-indigo-200" id="modalHeaderSubtitle">Gói Hội Viên & Dịch Vụ Tăng Tốc</span>
                 </div>
-                <h2 class="text-xl sm:text-2xl md:text-3xl font-black text-white leading-tight">
+                <h2 class="text-xl sm:text-2xl md:text-3xl font-black text-white leading-tight" id="modalMainTitle">
                     Nâng Tầm Trải Nghiệm & Đột Phá Doanh Thu
                 </h2>
-                <p class="text-xs sm:text-sm text-indigo-200 mt-1 max-w-2xl">
+                <p class="text-xs sm:text-sm text-indigo-200 mt-1 max-w-2xl" id="modalDescription">
                     Tính năng cơ bản luôn <span class="font-bold text-emerald-400">100% Miễn Phí</span>. Nâng cấp để tiếp cận chuyên gia hàng đầu, đẩy tin Top 1 và tối đa hóa cơ hội hợp tác.
                 </p>
 
                 <!-- Tabs chọn đối tượng -->
                 <div class="flex items-center justify-between flex-wrap gap-3 mt-4 pt-3 border-t border-white/10">
                     <div class="flex items-center bg-black/30 p-1 rounded-2xl border border-white/10" id="pricingTabSwitcher">
-                        <button onclick="window.switchPricingTab('client')" id="btnTabClient" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 text-white bg-indigo-600 shadow">
-                            <i class="fas fa-building text-amber-300"></i> <span>Dành Cho Khách Hàng</span>
+                        <button onclick="window.switchPricingTab('client')" id="btnTabClient" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 text-indigo-200 hover:text-white">
+                            <i class="fas fa-building text-amber-300"></i> <span id="labelTabClient">Gói Tuyển Dụng (Khách Hàng)</span>
                         </button>
                         <button onclick="window.switchPricingTab('freelancer')" id="btnTabFreelancer" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 text-indigo-200 hover:text-white">
-                            <i class="fas fa-laptop-code text-cyan-300"></i> <span>Dành Cho Freelancer</span>
+                            <i class="fas fa-laptop-code text-cyan-300"></i> <span id="labelTabFreelancer">Gói Chuyên Gia (Freelancer)</span>
                         </button>
                         <button onclick="window.switchPricingTab('addons')" id="btnTabAddons" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 text-indigo-200 hover:text-white">
-                            <i class="fas fa-bolt text-yellow-300"></i> <span>Tiện Ích Mua Lẻ</span>
+                            <i class="fas fa-bolt text-yellow-300"></i> <span id="labelTabAddons">Tiện Ích Mua Lẻ</span>
                         </button>
                     </div>
 
@@ -94,7 +105,7 @@
                 <div class="p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500 dark:text-gray-400">
                     <div class="flex items-center space-x-2">
                         <i class="fas fa-shield-halved text-emerald-500 text-base"></i>
-                        <span>Thanh toán minh bạch qua <strong>Số dư ví Token</strong> hoặc <strong>Quét mã VietQR/PayOS</strong>. Hủy gói bất cứ lúc nào.</span>
+                        <span>Thanh toán minh bạch qua <strong>Số dư ví Token</strong>. Tiền nạp gói được tách biệt vào Doanh thu dịch vụ của Nền tảng. Hủy gói bất cứ lúc nào.</span>
                     </div>
                     <div class="flex items-center space-x-2 shrink-0">
                         <span>Số dư ví của bạn:</span>
@@ -192,6 +203,7 @@
 
         let list = [];
         const isAnnual = currentBillingCycle === 'annual';
+        const role = detectContextRole();
 
         if (currentTab === 'client') {
             list = data?.client || [];
@@ -200,14 +212,17 @@
             list = data?.freelancer || [];
             document.getElementById('billingCycleWrapper').classList.remove('hidden');
         } else {
-            // Add-ons
+            // Add-ons: Lọc đúng tiện ích theo vai trò
             document.getElementById('billingCycleWrapper').classList.add('hidden');
-            renderAddonCards(data?.addons || [], balance);
+            let filteredAddons = data?.addons || [];
+            if (role === 'freelancer') {
+                filteredAddons = filteredAddons.filter(a => a.for_role === 'freelancer' || !a.for_role);
+            } else if (role === 'client') {
+                filteredAddons = filteredAddons.filter(a => a.for_role === 'client' || !a.for_role);
+            }
+            renderAddonCards(filteredAddons, balance);
             return;
         }
-
-        let user = null;
-        try { user = JSON.parse(localStorage.getItem('user')); } catch (e) {}
 
         let cardsHtml = '';
         list.forEach(p => {
@@ -226,7 +241,7 @@
                 <div>
                     <div class="flex items-center justify-between mb-3">
                         <h3 class="text-lg font-black text-gray-900 dark:text-white">${p.name}</h3>
-                        ${!isPopular && p.badge ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">${p.badge}</span>` : ''}
+                        ${!isPopular && p.badge ? `<span class="text-[10px] font-black px-2.5 py-0.5 rounded-full ${p.id.includes('vip') || p.id.includes('agency') ? 'bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300 border border-purple-300 dark:border-purple-700' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'}">${p.badge}</span>` : ''}
                     </div>
 
                     <div class="mb-5">
@@ -266,6 +281,11 @@
         const container = document.getElementById('pricingCardsContainer');
         if (!container) return;
 
+        if (addons.length === 0) {
+            container.innerHTML = '<div class="col-span-3 text-center py-10 text-gray-400 text-xs">Chưa có tiện ích mua lẻ nào cho vai trò này.</div>';
+            return;
+        }
+
         let html = '';
         addons.forEach(a => {
             html += `
@@ -277,9 +297,9 @@
                             ${a.price.toLocaleString('vi-VN')} Token
                         </span>
                     </div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">${a.desc}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">${a.desc}</p>
                 </div>
-                <button onclick="window.promptPurchase('${a.id}', '${a.name}', ${a.price}, 'addon')" class="w-full py-2 rounded-xl bg-gray-100 hover:bg-indigo-50 dark:bg-gray-700 dark:hover:bg-gray-650 text-indigo-600 dark:text-indigo-300 font-bold text-xs transition border border-indigo-200 dark:border-indigo-800 flex items-center justify-center space-x-1.5">
+                <button onclick="window.promptPurchase('${a.id}', '${a.name}', ${a.price}, 'addon')" class="w-full py-2.5 rounded-xl bg-gray-100 hover:bg-indigo-50 dark:bg-gray-700 dark:hover:bg-gray-650 text-indigo-600 dark:text-indigo-300 font-bold text-xs transition border border-indigo-200 dark:border-indigo-800 flex items-center justify-center space-x-1.5">
                     <i class="fas fa-bolt text-amber-400"></i> <span>Kích Hoạt Tiện Ích</span>
                 </button>
             </div>`;
@@ -289,15 +309,39 @@
 
     // 6. Global Switchers & Handlers
     window.openPricingModal = function(defaultTab = null) {
-        let user = null;
-        try { user = JSON.parse(localStorage.getItem('user')); } catch (e) {}
-        
-        if (defaultTab) {
-            currentTab = defaultTab;
-        } else if (user && user.role === 'freelancer') {
-            currentTab = 'freelancer';
+        const role = detectContextRole();
+
+        // 1. Phân quyền và Tách biệt tab theo Role
+        const btnC = document.getElementById('btnTabClient');
+        const btnF = document.getElementById('btnTabFreelancer');
+        const titleEl = document.getElementById('modalMainTitle');
+        const descEl = document.getElementById('modalDescription');
+        const badgeEl = document.getElementById('modalHeaderBadge');
+
+        if (role === 'freelancer') {
+            // Trong Freelancer Hub: Ẩn hẳn tab Khách Hàng
+            if (btnC) btnC.style.display = 'none';
+            if (btnF) btnF.style.display = 'inline-flex';
+            currentTab = (defaultTab === 'addons') ? 'addons' : 'freelancer';
+            if (titleEl) titleEl.innerText = 'Nâng Tầm Chuyên Gia IT & Bứt Phá Thu Nhập';
+            if (descEl) descEl.innerHTML = 'Mở khóa <span class="font-bold text-emerald-400">50+ lượt chào thầu</span>, gắn huy hiệu Tích Xanh uy tín và nhận thông báo dự án mới trước 15 phút.';
+            if (badgeEl) badgeEl.innerText = '⚡ Gói Chuyên Gia IT';
+        } else if (role === 'client') {
+            // Trong Client Hub: Ẩn hẳn tab Freelancer
+            if (btnF) btnF.style.display = 'none';
+            if (btnC) btnC.style.display = 'inline-flex';
+            currentTab = (defaultTab === 'addons') ? 'addons' : 'client';
+            if (titleEl) titleEl.innerText = 'Tuyển Dụng Nhanh Chóng & Tiếp Cận Top 5% Senior Dev';
+            if (descEl) descEl.innerHTML = 'Đăng tin không giới hạn, đẩy bài lên <span class="font-bold text-emerald-400">Top 1</span> và mở khóa liên hệ trực tiếp với chuyên gia IT hàng đầu.';
+            if (badgeEl) badgeEl.innerText = '👑 Gói Doanh Nghiệp VIP';
         } else {
-            currentTab = 'client';
+            // Khách vãng lai: Hiển thị cả 2 tab
+            if (btnC) btnC.style.display = 'inline-flex';
+            if (btnF) btnF.style.display = 'inline-flex';
+            currentTab = defaultTab || 'client';
+            if (titleEl) titleEl.innerText = 'Nâng Tầm Trải Nghiệm & Đột Phá Doanh Thu';
+            if (descEl) descEl.innerHTML = 'Tính năng cơ bản luôn <span class="font-bold text-emerald-400">100% Miễn Phí</span>. Nâng cấp để bứt phá hiệu quả trên sàn KGS Work.';
+            if (badgeEl) badgeEl.innerText = '👑 KGS Work VIP Hub';
         }
 
         updateTabButtons();
@@ -377,9 +421,10 @@
         }
 
         const balance = await fetchUserBalance();
-        pendingPurchase = { planId, planName, price, category, cycle: currentBillingCycle, userId: user.id, role: user.role };
+        const role = detectContextRole();
+        pendingPurchase = { planId, planName, price, category, cycle: currentBillingCycle, userId: user.id, role: user.role || role };
 
-        document.getElementById('confirmPlanName').innerText = `${planName} (${currentBillingCycle === 'annual' ? '1 Năm' : '1 Tháng'})`;
+        document.getElementById('confirmPlanName').innerText = `${planName} (${category === 'addon' ? 'Dịch vụ lẻ' : (currentBillingCycle === 'annual' ? '1 Năm' : '1 Tháng')})`;
         document.getElementById('confirmPlanPrice').innerText = `${price.toLocaleString('vi-VN')} Token`;
         document.getElementById('confirmCurrentBalance').innerText = `${balance.toLocaleString('vi-VN')} Token`;
         
@@ -502,10 +547,10 @@
         }
     };
 
-    // 9. Smart Promo Banner Tự Động (Tự inject vào đầu main của dashboard)
+    // 9. Smart Promo Banner Tự Động
     window.renderSmartPromoBanner = function(role = 'client') {
         const bannerKey = `kgs_promo_dismissed_${role}_v1`;
-        if (localStorage.getItem(bannerKey)) return; // Người dùng đã bấm tắt
+        if (localStorage.getItem(bannerKey)) return;
 
         const mainEl = document.querySelector('main');
         if (!mainEl) return;

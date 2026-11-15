@@ -14,9 +14,10 @@ const DEFAULT_DATA = {
                 badge: 'Miễn Phí',
                 features: [
                     'Đăng tối đa 2 dự án / tháng',
-                    'Tiếp cận mạng lưới Freelancer tiêu chuẩn',
-                    'Ký quỹ Escrow bảo chứng 100%',
-                    'Hỗ trợ cộng đồng qua Ticket'
+                    'Ký quỹ Escrow bảo chứng an toàn 100%',
+                    'Nhận báo giá từ Freelancer tự do',
+                    'Chat trao đổi 1-1 trên hệ thống',
+                    'Hỗ trợ tiêu chuẩn qua Ticket (24h - 48h)'
                 ]
             },
             {
@@ -28,11 +29,12 @@ const DEFAULT_DATA = {
                 popular: true,
                 features: [
                     'Đăng tối đa 10 dự án / tháng',
-                    'Tặng 3 lượt Đẩy Top 1 bài đăng / tháng',
-                    'Khung viền tin Xanh Ưu Tiên',
-                    'Mở khóa xem Zalo/SĐT 10 Senior Dev',
-                    'AI duyệt bài tức thì (<0.1s)',
-                    'Trọng tài phân xử ưu tiên trong 4h'
+                    'Tặng 3 lượt Đẩy Top 1 bài đăng / tháng (Trị giá 75.000đ)',
+                    'Khung viền bài đăng Xanh Ưu Tiên nổi bật',
+                    'Mở khóa xem Zalo/SĐT trực tiếp 10 Senior Dev',
+                    'Hệ thống AI kiểm duyệt bài đăng tức thì (< 0.1s)',
+                    'Trọng tài can thiệp giải quyết tranh chấp ưu tiên trong 4h',
+                    'Báo cáo thống kê lượt tiếp cận và tương tác hồ sơ'
                 ]
             },
             {
@@ -40,14 +42,16 @@ const DEFAULT_DATA = {
                 name: 'Enterprise VIP',
                 price_monthly: 499000,
                 price_annual: 4790000,
-                badge: 'Đẳng Cấp',
+                badge: 'Siêu Cấp Đặc Quyền',
                 features: [
-                    'Không giới hạn số lượng tin đăng',
-                    'Tặng 10 lượt Đẩy Top + Ghim đầu 7 ngày',
-                    'Huy hiệu Vương Miện Doanh Nghiệp VIP',
-                    'Mở khóa xem thông tin trực tiếp 30 Dev',
-                    'AI gợi ý Freelancer chính xác nhất',
-                    'Chuyên viên hỗ trợ 1-1 riêng'
+                    'Không giới hạn số lượng tin đăng dự án',
+                    'Tặng 10 lượt Đẩy Top + Ghim đầu trang 7 ngày liên tục (Trị giá 350.000đ)',
+                    'Huy hiệu Vương Miện Doanh Nghiệp VIP mạ vàng trên sàn',
+                    'Mở khóa xem Zalo/SĐT KHÔNG GIỚI HẠN cho tất cả Freelancer',
+                    'Hệ thống AI Headhunter tự động quét & mời 5 Senior Dev chuẩn nhất',
+                    'Miễn phí 100% phí dịch vụ rút tiền hoàn cọc (0đ)',
+                    'Hỗ trợ phân xử Dispute 1-1 qua Hotline riêng trong 1 giờ',
+                    'Xuất hóa đơn điện tử & Báo cáo kiểm toán chi phí dự án hàng tháng'
                 ]
             }
         ],
@@ -60,9 +64,10 @@ const DEFAULT_DATA = {
                 badge: 'Miễn Phí',
                 features: [
                     '5 lượt chào thầu (bids) / tháng',
-                    'Hồ sơ năng lực công khai',
+                    'Hồ sơ năng lực công khai tiêu chuẩn',
                     'Nhận tiền ví an toàn qua Escrow',
-                    'Rút tiền thường miễn phí'
+                    'Chat trao đổi 1-1 với khách hàng',
+                    'Rút tiền thường qua VietQR trong 24h'
                 ]
             },
             {
@@ -73,26 +78,30 @@ const DEFAULT_DATA = {
                 badge: 'Khuyên Dùng',
                 popular: true,
                 features: [
-                    '50 lượt chào thầu (bids) / tháng',
-                    'Huy hiệu Tích Xanh Verified Pro Dev',
-                    'Luôn xuất hiện đầu mục Chuyên Gia IT',
-                    'Nhận thông báo Job mới sớm hơn 15 phút',
-                    'Hồ sơ luôn nằm trong Top 3 khi nộp bài',
-                    'Ưu tiên giải ngân & rút tiền nhanh'
+                    '50 lượt chào thầu (bids) / tháng (Gấp 10 lần)',
+                    'Huy hiệu Tích Xanh "Verified Pro Dev" tạo lòng tin',
+                    'Luôn xuất hiện ở đầu mục tìm kiếm Chuyên Gia IT',
+                    'Nhận thông báo Job mới sớm hơn 15 phút qua Telegram',
+                    'Hồ sơ ứng tuyển luôn nằm trong Top 3 đầu danh sách nộp',
+                    'Giảm 30% phí rút tiền siêu tốc',
+                    'Báo cáo phân tích số lượt Client xem và lưu hồ sơ'
                 ]
             },
             {
                 id: 'freelancer_agency',
-                name: 'Đội Ngũ / Agency',
+                name: 'Đội Ngũ / Agency VIP',
                 price_monthly: 299000,
                 price_annual: 2870000,
-                badge: 'Đội Ngũ Lớn',
+                badge: 'Siêu Cấp Đặc Quyền',
                 features: [
-                    'Không giới hạn lượt chào thầu (Unlimited Bids)',
-                    'Vương Miện Vàng Top Rated Agency',
-                    'Nằm trong Carousel Đối tác chiến lược',
-                    'Đóng khung nổi bật hồ sơ đấu thầu',
-                    'Tích hợp nhóm làm việc nhiều thành viên'
+                    'Không giới hạn số lượt chào thầu (Unlimited Bids)',
+                    'Huy hiệu Vương Miện Vàng "Top Rated Agency / Master Dev"',
+                    'Được đặt tại Carousel "Đối Tác Chiến Lược" ngay tại Trang chủ',
+                    'Hồ sơ nộp bài luôn Ghim Top 1 kèm khung viền Neon nổi bật',
+                    'Miễn phí 100% Phí Rút Tiền Siêu Tốc (Tiền về sau 30 giây - 0đ)',
+                    'Tích hợp Không gian làm việc nhóm (Team Workspace cho 5 devs)',
+                    'AI tự động tối ưu hóa Cover Letter & Báo giá theo chuẩn IT',
+                    'Quỹ KGS bảo lãnh ứng trước tiền thưởng nếu khách chậm duyệt'
                 ]
             }
         ],
@@ -102,6 +111,7 @@ const DEFAULT_DATA = {
                 name: '⚡ Đẩy Tin Lên Top 1',
                 price: 25000,
                 duration_hours: 24,
+                for_role: 'client',
                 desc: 'Ghim bài đăng lên vị trí Top 1 trang tìm kiếm trong 24 giờ'
             },
             {
@@ -109,25 +119,32 @@ const DEFAULT_DATA = {
                 name: '🔥 Gắn Nhãn Tuyển Gấp',
                 price: 50000,
                 duration_hours: 72,
-                desc: 'Đóng khung đỏ rực + gửi thông báo đẩy đến các Freelancer phù hợp'
+                for_role: 'client',
+                desc: 'Đóng khung đỏ rực + gửi thông báo đẩy đến tất cả Freelancer phù hợp'
             },
             {
                 id: 'bid_pack',
                 name: '🎯 Gói 5 Lượt Chào Thầu',
                 price: 20000,
                 bids: 5,
-                desc: 'Bổ sung ngay 5 lượt nộp hồ sơ ứng tuyển'
+                for_role: 'freelancer',
+                desc: 'Bổ sung ngay 5 lượt nộp hồ sơ ứng tuyển dự án mới'
             },
             {
                 id: 'kyc_badge',
                 name: '🛡️ Chứng Nhận CCCD & Bằng Cấp',
                 price: 30000,
-                desc: 'Admin thẩm định hồ sơ, gắn huy hiệu Tín nhiệm an toàn'
+                for_role: 'freelancer',
+                desc: 'Admin thẩm định bằng cấp & CCCD, gắn huy hiệu Tín nhiệm an toàn'
             }
         ]
     },
     user_subscriptions: {},
-    boosted_jobs: {}
+    boosted_jobs: {},
+    platform_revenue: {
+        total_profit: 0,
+        transactions: []
+    }
 };
 
 function readData() {
@@ -137,7 +154,11 @@ function readData() {
             return DEFAULT_DATA;
         }
         const raw = fs.readFileSync(DATA_FILE, 'utf-8');
-        return JSON.parse(raw);
+        const parsed = JSON.parse(raw);
+        if (!parsed.platform_revenue) {
+            parsed.platform_revenue = { total_profit: 0, transactions: [] };
+        }
+        return parsed;
     } catch (e) {
         console.error('[SubscriptionService] Error reading data, fallback to default:', e.message);
         return DEFAULT_DATA;
@@ -165,7 +186,6 @@ function getUserSubscription(userId) {
     const sub = data.user_subscriptions?.[userId];
     if (!sub) return null;
 
-    // Check expiration
     if (sub.expires_at && new Date(sub.expires_at) < new Date()) {
         sub.is_expired = true;
     } else {
@@ -174,7 +194,39 @@ function getUserSubscription(userId) {
     return sub;
 }
 
-function subscribeUser(userId, planId, billingCycle = 'monthly', role = 'client') {
+function recordPlatformProfit(amount, serviceName, userId, details = {}) {
+    const data = readData();
+    const parsedAmount = parseFloat(amount) || 0;
+    if (parsedAmount <= 0) return;
+
+    if (!data.platform_revenue) {
+        data.platform_revenue = { total_profit: 0, transactions: [] };
+    }
+
+    data.platform_revenue.total_profit = (parseFloat(data.platform_revenue.total_profit) || 0) + parsedAmount;
+    data.platform_revenue.transactions.unshift({
+        id: 'REV-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
+        amount: parsedAmount,
+        service: serviceName,
+        user_id: userId,
+        created_at: new Date().toISOString(),
+        details: details
+    });
+
+    // Giữ tối đa 200 giao dịch doanh thu gần nhất
+    if (data.platform_revenue.transactions.length > 200) {
+        data.platform_revenue.transactions = data.platform_revenue.transactions.slice(0, 200);
+    }
+
+    writeData(data);
+}
+
+function getPlatformProfitStats() {
+    const data = readData();
+    return data.platform_revenue || { total_profit: 0, transactions: [] };
+}
+
+function subscribeUser(userId, planId, billingCycle = 'monthly', role = 'client', pricePaid = 0) {
     const data = readData();
     const plansPool = role === 'freelancer' ? data.plans.freelancer : data.plans.client;
     const plan = plansPool.find(p => p.id === planId);
@@ -197,10 +249,15 @@ function subscribeUser(userId, planId, billingCycle = 'monthly', role = 'client'
     if (!data.user_subscriptions) data.user_subscriptions = {};
     data.user_subscriptions[userId] = subRecord;
     writeData(data);
+
+    if (pricePaid > 0) {
+        recordPlatformProfit(pricePaid, `Gói Hội Viên: ${plan.name} (${billingCycle})`, userId, { plan_id: planId, billing_cycle: billingCycle });
+    }
+
     return subRecord;
 }
 
-function boostJob(jobId, boostType = 'job_boost') {
+function boostJob(jobId, boostType = 'job_boost', pricePaid = 0, userId = null) {
     const data = readData();
     const durationHours = boostType === 'urgent_tag' ? 72 : 24;
     const expiresAt = new Date(Date.now() + durationHours * 60 * 60 * 1000).toISOString();
@@ -216,6 +273,11 @@ function boostJob(jobId, boostType = 'job_boost') {
     if (!data.boosted_jobs) data.boosted_jobs = {};
     data.boosted_jobs[jobId] = boostRecord;
     writeData(data);
+
+    if (pricePaid > 0 && userId) {
+        recordPlatformProfit(pricePaid, `Tiện ích bài đăng: ${boostType}`, userId, { job_id: jobId, boost_type: boostType });
+    }
+
     return boostRecord;
 }
 
@@ -258,5 +320,7 @@ module.exports = {
     subscribeUser,
     boostJob,
     isJobBoosted,
-    getBoostedJobsMap
+    getBoostedJobsMap,
+    recordPlatformProfit,
+    getPlatformProfitStats
 };

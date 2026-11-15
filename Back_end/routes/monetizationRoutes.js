@@ -81,18 +81,18 @@ router.post('/api/monetization/subscribe', async (req, res) => {
 
         if (updateErr) throw updateErr;
 
-        // Ghi Sổ cái (wallet_ledger)
+        // Ghi Sổ cái (wallet_ledger) - Ghi rõ doanh thu thuộc về Kho bạc Sàn (Admin Treasury)
         await supabase.from('wallet_ledger').insert([{
             sender_id: user_id,
-            receiver_id: null,
+            receiver_id: '00000000-0000-0000-0000-000000000000',
             amount: price,
             transaction_type: 'subscription_payment',
             status: 'completed',
-            description: `Thanh toán nâng cấp gói [${plan.name}] (${billing_cycle === 'annual' ? '1 Năm' : '1 Tháng'})`
+            description: `[DOANH THU SÀN] Thanh toán nâng cấp gói VIP [${plan.name}] (${billing_cycle === 'annual' ? '1 Năm' : '1 Tháng'})`
         }]);
 
-        // Kích hoạt gói trong service
-        const sub = subscriptionService.subscribeUser(user_id, plan_id, billing_cycle, role);
+        // Kích hoạt gói trong service & ghi nhận Lợi nhuận sàn
+        const sub = subscriptionService.subscribeUser(user_id, plan_id, billing_cycle, role, price);
 
         // Gửi thông báo cho User
         await supabase.from('notifications').insert([{
@@ -184,18 +184,18 @@ router.post('/api/monetization/boost-job', async (req, res) => {
             .update({ balance: newBalance })
             .eq('user_id', user_id);
 
-        // Ghi Sổ cái
+        // Ghi Sổ cái - Doanh thu dịch vụ của Admin
         await supabase.from('wallet_ledger').insert([{
             sender_id: user_id,
-            receiver_id: null,
+            receiver_id: '00000000-0000-0000-0000-000000000000',
             amount: price,
             transaction_type: 'job_boost',
             status: 'completed',
-            description: `Thanh toán tiện ích [${addon.name}] cho bài đăng: "${job.title}"`
+            description: `[DOANH THU SÀN] Tiện ích [${addon.name}] cho bài đăng: "${job.title}"`
         }]);
 
-        // Kích hoạt Boost
-        const boostRecord = subscriptionService.boostJob(job_id, boost_type);
+        // Kích hoạt Boost & ghi nhận Lợi nhuận sàn
+        const boostRecord = subscriptionService.boostJob(job_id, boost_type, price, user_id);
 
         // Thông báo
         await supabase.from('notifications').insert([{
@@ -223,6 +223,16 @@ router.post('/api/monetization/boost-job', async (req, res) => {
     } catch (e) {
         console.error('❌ [Boost Job Error]:', e);
         res.status(500).json({ error: e.message });
+    }
+});
+
+// 5. API Admin: Lấy báo cáo Doanh thu & Lợi nhuận sàn thuần túy
+router.get('/api/admin/monetization/revenue', (req, res) => {
+    try {
+        const stats = subscriptionService.getPlatformProfitStats();
+        res.status(200).json({ success: true, stats });
+    } catch (e) {
+        res.status(500).json({ success: false, error: e.message });
     }
 });
 

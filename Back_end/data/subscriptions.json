@@ -121,6 +121,87 @@
       }
     ]
   },
-  "user_subscriptions": {},
-  "boosted_jobs": {}
+  "user_subscriptions": {
+    "9d323da5-c143-4c90-8726-4e8a67a7288b": {
+      "user_id": "9d323da5-c143-4c90-8726-4e8a67a7288b",
+      "plan_id": "client_pro",
+      "plan_name": "Doanh Nghiệp Pro",
+      "role": "client",
+      "billing_cycle": "monthly",
+      "started_at": "2026-11-15T15:39:44.189Z",
+      "expires_at": "2026-12-15T15:39:44.188Z",
+      "features": [
+        "Đăng tối đa 10 dự án / tháng",
+        "Tặng 3 lượt Đẩy Top 1 bài đăng / tháng",
+        "Khung viền tin Xanh Ưu Tiên",
+        "Mở khóa xem Zalo/SĐT 10 Senior Dev",
+        "AI duyệt bài tức thì (<0.1s)",
+        "Trọng tài phân xử ưu tiên trong 4h"
+      ]
+    },
+    "8ac76bce-0422-443c-b2d9-d2b08db28da1": {
+      "user_id": "8ac76bce-0422-443c-b2d9-d2b08db28da1",
+      "plan_id": "freelancer_pro",
+      "plan_name": "Chuyên Gia Pro",
+      "role": "freelancer",
+      "billing_cycle": "monthly",
+      "started_at": "2026-11-15T15:39:44.764Z",
+      "expires_at": "2026-12-15T15:39:44.764Z",
+      "features": [
+        "50 lượt chào thầu (bids) / tháng",
+        "Huy hiệu Tích Xanh Verified Pro Dev",
+        "Luôn xuất hiện đầu mục Chuyên Gia IT",
+        "Nhận thông báo Job mới sớm hơn 15 phút",
+        "Hồ sơ luôn nằm trong Top 3 khi nộp bài",
+        "Ưu tiên giải ngân & rút tiền nhanh"
+      ]
+    }
+  },
+  "boosted_jobs": {
+    "34353f6e-f8cb-4cfc-bfdf-9009d42dbcfb": {
+      "job_id": "34353f6e-f8cb-4cfc-bfdf-9009d42dbcfb",
+      "boost_type": "job_boost",
+      "boosted_at": "2026-11-15T15:39:44.576Z",
+      "expires_at": "2026-11-16T15:39:44.576Z",
+      "active": true
+    }
+  },
+  "platform_revenue": {
+    "total_profit": 323000,
+    "transactions": [
+      {
+        "id": "REV-1794757184766-975",
+        "amount": 99000,
+        "service": "Gói Hội Viên: Chuyên Gia Pro (monthly)",
+        "user_id": "8ac76bce-0422-443c-b2d9-d2b08db28da1",
+        "created_at": "2026-11-15T15:39:44.766Z",
+        "details": {
+          "plan_id": "freelancer_pro",
+          "billing_cycle": "monthly"
+        }
+      },
+      {
+        "id": "REV-1794757184577-214",
+        "amount": 25000,
+        "service": "Tiện ích bài đăng: job_boost",
+        "user_id": "9d323da5-c143-4c90-8726-4e8a67a7288b",
+        "created_at": "2026-11-15T15:39:44.577Z",
+        "details": {
+          "job_id": "34353f6e-f8cb-4cfc-bfdf-9009d42dbcfb",
+          "boost_type": "job_boost"
+        }
+      },
+      {
+        "id": "REV-1794757184194-867",
+        "amount": 199000,
+        "service": "Gói Hội Viên: Doanh Nghiệp Pro (monthly)",
+        "user_id": "9d323da5-c143-4c90-8726-4e8a67a7288b",
+        "created_at": "2026-11-15T15:39:44.194Z",
+        "details": {
+          "plan_id": "client_pro",
+          "billing_cycle": "monthly"
+        }
+      }
+    ]
+  }
 }

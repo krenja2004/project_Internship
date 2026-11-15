@@ -5,7 +5,8 @@ const router = express.Router();
 const supabase = require('../config/supabase');
 const blockchain = require('../blockchain');
 const { logEvent, getAuditLogs, getAuditLogsAsync, batchSyncToGoogleSheets, batchSyncToFirebase } = require('../services/auditLogger');
-const { getDisputes } = require('../services/disputeStore');
+const { getDisputes } = require('../services/disputeStore');
+const subscriptionService = require('../services/subscriptionService');
 
 // 1. API: Thống kê tổng quan KPI cho Admin Dashboard
 router.get('/api/admin/stats', async (req, res) => {
@@ -71,7 +72,8 @@ router.get('/api/admin/stats', async (req, res) => {
                 total_deposits: totalDeposits,
                 total_withdrawn: totalWithdrawn,
                 pending_withdraw_count: pendingWithdrawCount,
-                pending_withdraw_amount: pendingWithdrawAmount
+                pending_withdraw_amount: pendingWithdrawAmount,
+                total_platform_profit: (subscriptionService.getPlatformProfitStats().total_profit || 0)
             }
         });
     } catch (error) {

@@ -57,7 +57,7 @@
                     </span>
                     <span class="text-[11px] text-gray-400 font-semibold hidden sm:inline-block">Tỷ lệ quy chuẩn: 1 VNĐ = 1 Token</span>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 sm:gap-4">
                     <!-- KPI 1: Tổng Nạp Token -->
                     <div class="bg-white dark:bg-gray-800 p-4 sm:p-5 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between">
                         <div class="flex justify-between items-center mb-3">
@@ -102,6 +102,22 @@
                             <p id="statSystemFunds" class="text-2xl sm:text-[26px] font-black text-purple-600 dark:text-purple-400 tracking-tight">0</p>
                             <span id="statSystemFundsBreakdown" class="text-xs text-purple-600 dark:text-purple-300 font-bold block mt-1 flex items-center">
                                 <i class="fas fa-layer-group mr-1 text-[10px]"></i> Ví: 0M • Escrow: 0M
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- KPI 5: Lợi Nhuận Doanh Thu Sàn (VIP) -->
+                    <div class="bg-gradient-to-b from-amber-500/10 via-white to-white dark:from-amber-950/30 dark:via-gray-800 dark:to-gray-800 p-4 sm:p-5 rounded-3xl border border-amber-300 dark:border-amber-700 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-[11px] font-black uppercase tracking-wider text-amber-700 dark:text-amber-300">Lợi Nhuận Sàn (VIP)</span>
+                            <div class="w-9 h-9 rounded-2xl bg-amber-100 dark:bg-amber-900/60 text-amber-600 dark:text-amber-400 flex items-center justify-center text-sm font-bold shadow-sm">
+                                <i class="fas fa-crown"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <p id="statPlatformProfit" class="text-2xl sm:text-[26px] font-black text-amber-600 dark:text-amber-400 tracking-tight">0</p>
+                            <span class="text-xs text-amber-600/90 dark:text-amber-300 font-bold block mt-1 flex items-center">
+                                <i class="fas fa-coins mr-1 text-[10px]"></i> Lợi nhuận thuần dịch vụ
                             </span>
                         </div>
                     </div>
