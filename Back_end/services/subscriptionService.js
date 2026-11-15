@@ -15,9 +15,9 @@ const DEFAULT_DATA = {
                 features: [
                     'Đăng tối đa 2 dự án / tháng',
                     'Ký quỹ Escrow bảo chứng an toàn 100%',
-                    'Nhận báo giá từ Freelancer tự do',
-                    'Chat trao đổi 1-1 trên hệ thống',
-                    'Hỗ trợ tiêu chuẩn qua Ticket (24h - 48h)'
+                    'Nhận báo giá tự do từ các Freelancer',
+                    'Nhắn tin trao đổi 1-1 trực tiếp trên hệ thống',
+                    'Hỗ trợ tiêu chuẩn qua Ticket kỹ thuật (24h - 48h)'
                 ]
             },
             {
@@ -42,16 +42,16 @@ const DEFAULT_DATA = {
                 name: 'Enterprise VIP',
                 price_monthly: 499000,
                 price_annual: 4790000,
-                badge: 'Siêu Cấp Đặc Quyền',
+                badge: 'Siêu Cấp Doanh Nghiệp',
                 features: [
                     'Không giới hạn số lượng tin đăng dự án',
                     'Tặng 10 lượt Đẩy Top + Ghim đầu trang 7 ngày liên tục (Trị giá 350.000đ)',
                     'Huy hiệu Vương Miện Doanh Nghiệp VIP mạ vàng trên sàn',
-                    'Mở khóa xem Zalo/SĐT KHÔNG GIỚI HẠN cho tất cả Freelancer',
-                    'Hệ thống AI Headhunter tự động quét & mời 5 Senior Dev chuẩn nhất',
-                    'Miễn phí 100% phí dịch vụ rút tiền hoàn cọc (0đ)',
-                    'Hỗ trợ phân xử Dispute 1-1 qua Hotline riêng trong 1 giờ',
-                    'Xuất hóa đơn điện tử & Báo cáo kiểm toán chi phí dự án hàng tháng'
+                    'Mở khóa Zalo/SĐT KHÔNG GIỚI HẠN cho tất cả Freelancer',
+                    'Trợ lý AI Headhunter phân tích kỹ năng & gợi ý Freelancer chuẩn nhất',
+                    'Miễn phí 100% phí dịch vụ rút tiền hoàn cọc về ngân hàng (0đ)',
+                    'Hàng đợi Trọng tài Ưu tiên Cấp 1 (Giải quyết khiếu nại trong 1h)',
+                    'Xuất Báo Cáo Sao Kê & Kiểm Toán Chi Phí Dự Án (File PDF/Excel có mộc chứng thực số)'
                 ]
             }
         ],
@@ -92,16 +92,16 @@ const DEFAULT_DATA = {
                 name: 'Đội Ngũ / Agency VIP',
                 price_monthly: 299000,
                 price_annual: 2870000,
-                badge: 'Siêu Cấp Đặc Quyền',
+                badge: 'Đẳng Cấp Agency',
                 features: [
                     'Không giới hạn số lượt chào thầu (Unlimited Bids)',
                     'Huy hiệu Vương Miện Vàng "Top Rated Agency / Master Dev"',
                     'Được đặt tại Carousel "Đối Tác Chiến Lược" ngay tại Trang chủ',
                     'Hồ sơ nộp bài luôn Ghim Top 1 kèm khung viền Neon nổi bật',
                     'Miễn phí 100% Phí Rút Tiền Siêu Tốc (Tiền về sau 30 giây - 0đ)',
-                    'Tích hợp Không gian làm việc nhóm (Team Workspace cho 5 devs)',
-                    'AI tự động tối ưu hóa Cover Letter & Báo giá theo chuẩn IT',
-                    'Quỹ KGS bảo lãnh ứng trước tiền thưởng nếu khách chậm duyệt'
+                    'Gắn nhãn Hồ Sơ Năng Lực Doanh Nghiệp (Quy mô Đội nhóm 3 - 10 devs)',
+                    'Trợ lý AI tự động tối ưu hóa Cover Letter & Báo giá theo chuẩn IT (Tích hợp Llama 3.3)',
+                    'Bảo chứng Cam kết Giải ngân Tự động qua Smart Contract sau 72h hoàn thành'
                 ]
             }
         ],
@@ -213,7 +213,6 @@ function recordPlatformProfit(amount, serviceName, userId, details = {}) {
         details: details
     });
 
-    // Giữ tối đa 200 giao dịch doanh thu gần nhất
     if (data.platform_revenue.transactions.length > 200) {
         data.platform_revenue.transactions = data.platform_revenue.transactions.slice(0, 200);
     }

@@ -479,6 +479,14 @@
                 throw new Error(result.error || 'Thanh toán thất bại');
             }
 
+            if (result.subscription) {
+                if (pendingPurchase.role === 'client') {
+                    localStorage.setItem('kgs_client_sub_cache', JSON.stringify(result.subscription));
+                } else {
+                    localStorage.setItem('kgs_freelancer_sub_cache', JSON.stringify(result.subscription));
+                }
+            }
+
             alert(`🎉 ${result.message}`);
             window.closeConfirmModal();
             window.closePricingModal();

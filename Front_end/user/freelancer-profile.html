@@ -308,11 +308,23 @@
             const elCover = document.getElementById('coverContainer');
             if (elCover && data.cover_url) elCover.style.backgroundImage = `url('${data.cover_url}')`;
 
-            // Phone Verified Badge
+            // Phone Verified Badge / Mở Khóa Liên Hệ Trực Tiếp (VIP Feature)
             const phoneBadge = document.getElementById('phoneVerifiedBadge');
             if (phoneBadge) {
                 if (data.is_phone_verified && data.phone_number) {
-                    phoneBadge.innerHTML = `<span class="bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-xs font-black px-3 py-1 rounded-full border border-emerald-200 dark:border-emerald-800 flex items-center shadow-sm"><i class="fas fa-check-circle mr-1.5 text-emerald-600"></i> ${data.phone_number} (Đã xác minh)</span>`;
+                    let clientSub = null;
+                    try {
+                        const savedSub = localStorage.getItem('kgs_client_sub_cache');
+                        if (savedSub) clientSub = JSON.parse(savedSub);
+                    } catch (e) {}
+
+                    const isVip = clientSub && (clientSub.plan_id === 'client_pro' || clientSub.plan_id === 'client_vip');
+                    if (isVip) {
+                        phoneBadge.innerHTML = `<a href="tel:${data.phone_number}" class="bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-xs font-black px-3 py-1 rounded-full border border-emerald-200 dark:border-emerald-800 flex items-center shadow-sm hover:scale-105 transition"><i class="fas fa-phone-alt mr-1.5 text-emerald-600"></i> ${data.phone_number} (Đã Mở Khóa VIP)</a>`;
+                    } else {
+                        const maskedPhone = data.phone_number.substring(0, 4) + ' ••• •••';
+                        phoneBadge.innerHTML = `<button onclick="window.openPricingModal('client')" class="bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 text-xs font-black px-3 py-1 rounded-full border border-amber-300 dark:border-amber-700 flex items-center shadow-sm hover:scale-105 transition" title="Bấm để mở khóa số điện thoại & Zalo liên hệ trực tiếp"><i class="fas fa-lock mr-1.5 text-amber-500"></i> ${maskedPhone} (Mở Khóa VIP)</button>`;
+                    }
                 } else {
                     phoneBadge.innerHTML = `<span class="bg-gray-100 dark:bg-gray-800 text-gray-500 text-xs font-bold px-3 py-1 rounded-full border border-gray-200 dark:border-gray-700 flex items-center"><i class="fas fa-phone mr-1.5 text-gray-400"></i> Chưa xác thực SĐT</span>`;
                 }
