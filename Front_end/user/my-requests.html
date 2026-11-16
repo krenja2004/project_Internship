@@ -398,11 +398,18 @@
                                             <span class="text-xs bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 font-black px-3 py-1.5 rounded-xl border border-amber-300 dark:border-amber-700 flex items-center shadow-sm">
                                                 <i class="fas fa-bolt text-amber-500 mr-1.5"></i> Đang Ở Top 1
                                             </span>
+                                        ` : (job.is_urgent ? `
+                                            <span class="text-xs bg-rose-100 dark:bg-rose-950/80 text-rose-800 dark:text-rose-300 font-black px-3 py-1.5 rounded-xl border border-rose-300 dark:border-rose-700 flex items-center shadow-sm">
+                                                <i class="fas fa-fire text-rose-500 mr-1.5"></i> Đang Tuyển Gấp
+                                            </span>
                                         ` : `
-                                            <button onclick="window.boostJobPrompt('${job.id}', '${escapeHtml(job.title)}')" class="text-xs bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-600 hover:to-yellow-500 text-gray-900 font-black px-3 py-1.5 rounded-xl transition flex items-center shadow-sm" title="Đẩy bài đăng lên Top 1 trang tìm kiếm trong 24h">
+                                            <button onclick="window.boostJobPrompt('${job.id}', '${escapeHtml(job.title)}', 'job_boost')" class="text-xs bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-600 hover:to-yellow-500 text-gray-900 font-black px-3 py-1.5 rounded-xl transition flex items-center shadow-sm" title="Đẩy bài đăng lên Top 1 trang tìm kiếm trong 24h">
                                                 <i class="fas fa-bolt mr-1.5 text-xs"></i> Đẩy Top 1 (25k)
                                             </button>
-                                        `}
+                                            <button onclick="window.boostJobPrompt('${job.id}', '${escapeHtml(job.title)}', 'urgent_tag')" class="text-xs bg-gradient-to-r from-red-600 to-rose-500 hover:from-red-700 hover:to-rose-600 text-white font-black px-3 py-1.5 rounded-xl transition flex items-center shadow-sm ml-1" title="Gắn nhãn Tuyển Gấp nổi bật trong 72h">
+                                                <i class="fas fa-fire mr-1.5 text-xs"></i> Tuyển Gấp (50k)
+                                            </button>
+                                        `)}
                                     ` : ''}
                                     ${isPlanning ? `
                                         <button onclick="cancelPlanningJob('${job.id}', '${escapeHtml(job.title)}', '${job.budget}')" class="text-xs bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-400 hover:bg-amber-100 font-bold px-3 py-1.5 rounded-xl transition flex items-center">

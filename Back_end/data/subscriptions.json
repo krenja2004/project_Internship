@@ -97,27 +97,24 @@
         "name": "⚡ Đẩy Tin Lên Top 1",
         "price": 25000,
         "duration_hours": 24,
-        "desc": "Ghim bài đăng lên vị trí Top 1 trang tìm kiếm trong 24 giờ"
+        "desc": "Ghim bài đăng lên vị trí Top 1 trang tìm kiếm trong 24 giờ",
+        "for_role": "client"
       },
       {
         "id": "urgent_tag",
         "name": "🔥 Gắn Nhãn Tuyển Gấp",
         "price": 50000,
         "duration_hours": 72,
-        "desc": "Đóng khung đỏ rực + gửi thông báo đẩy đến các Freelancer phù hợp"
+        "desc": "Đóng khung đỏ rực + gửi thông báo đẩy đến các Freelancer phù hợp",
+        "for_role": "client"
       },
       {
         "id": "bid_pack",
         "name": "🎯 Gói 5 Lượt Chào Thầu",
         "price": 20000,
         "bids": 5,
-        "desc": "Bổ sung ngay 5 lượt nộp hồ sơ ứng tuyển"
-      },
-      {
-        "id": "kyc_badge",
-        "name": "🛡️ Chứng Nhận CCCD & Bằng Cấp",
-        "price": 30000,
-        "desc": "Admin thẩm định hồ sơ, gắn huy hiệu Tín nhiệm an toàn"
+        "desc": "Bổ sung ngay 5 lượt nộp hồ sơ ứng tuyển",
+        "for_role": "freelancer"
       }
     ]
   },
@@ -275,5 +272,14 @@
         }
       }
     ]
+  },
+  "user_subscription_history": {},
+  "user_addons": {},
+  "discount_campaign": {
+    "active": false,
+    "percent": 0,
+    "title": "",
+    "applies_to": "all",
+    "updated_at": "2026-11-16T06:49:35.826Z"
   }
 }

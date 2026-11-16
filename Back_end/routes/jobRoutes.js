@@ -244,8 +244,8 @@ router.get('/api/jobs', async (req, res) => {
 
             // Kiểm tra trạng thái Đẩy Top / Tuyển Gấp từ Hệ thống Monetization
             const boostRecord = boostedJobsMap[job.id] || null;
-            const isBoosted = !!boostRecord;
-            const isUrgent = boostRecord?.boost_type === 'urgent_tag';
+            const isUrgent = !!boostRecord && boostRecord.boost_type === 'urgent_tag';
+            const isBoosted = !!boostRecord && (boostRecord.boost_type === 'job_boost' || !isUrgent);
 
             // Phân tích Category & Tags từ Description
             const catMatch = (job.description || '').match(/\[Danh mục:\s*([^\]]+)\]/i);

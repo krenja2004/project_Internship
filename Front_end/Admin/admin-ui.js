@@ -41,6 +41,9 @@ document.addEventListener('DOMContentLoaded', () => {
             <a href="revenue-report.html" class="nav-item flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-300 hover:bg-gray-800 hover:text-white font-semibold transition text-xs sm:text-sm">
                 <i class="fas fa-file-invoice-dollar w-5 text-amber-400"></i> <span>Báo Cáo Doanh Thu</span>
             </a>
+            <a href="plans.html" class="nav-item flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-300 hover:bg-gray-800 hover:text-white font-semibold transition text-xs sm:text-sm">
+                <i class="fas fa-crown w-5 text-amber-400"></i> <span>Quản lý Gói & VIP</span>
+            </a>
             <a href="users.html" class="nav-item flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-300 hover:bg-gray-800 hover:text-white font-semibold transition text-xs sm:text-sm">
                 <i class="fas fa-users-cog w-5 text-blue-400"></i> <span>Quản lý Người dùng</span>
             </a>
@@ -119,6 +122,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 </a>
                 <a href="revenue-report.html" class="drawer-item flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-300 hover:bg-gray-800 font-semibold">
                     <i class="fas fa-file-invoice-dollar w-5 text-amber-400"></i> <span>Báo Cáo Doanh Thu</span>
+                </a>
+                <a href="plans.html" class="drawer-item flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-300 hover:bg-gray-800 font-semibold">
+                    <i class="fas fa-crown w-5 text-amber-400"></i> <span>Quản lý Gói & VIP</span>
                 </a>
                 <a href="users.html" class="drawer-item flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-300 hover:bg-gray-800 font-semibold">
                     <i class="fas fa-users-cog w-5 text-blue-400"></i> <span>Quản lý Người dùng</span>

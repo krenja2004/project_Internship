@@ -145,6 +145,13 @@
                     <span class="font-black text-emerald-600 dark:text-emerald-400" id="confirmAfterBalance">-- Token</span>
                 </div>
             </div>
+            <!-- Dropdown chọn dự án khi mua tiện ích (Chỉ cho Client) -->
+            <div id="confirmJobSelectorWrapper" class="hidden text-xs space-y-1">
+                <label class="block font-bold text-gray-700 dark:text-gray-300">Áp dụng ngay cho dự án:</label>
+                <select id="confirmJobSelect" class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-650 rounded-xl px-3 py-2 text-xs font-semibold text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                    <option value="">📦 Lưu vào Kho Tiện Ích để dùng sau (Khuyên dùng)</option>
+                </select>
+            </div>
             <div id="confirmErrorAlert" class="hidden p-3 rounded-xl bg-red-50 dark:bg-red-950/60 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-xs"></div>
             <div class="flex items-center space-x-3 pt-2">
                 <button onclick="window.closeConfirmModal()" class="flex-1 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-bold text-xs hover:bg-gray-100 dark:hover:bg-gray-700 transition">
@@ -251,10 +258,43 @@
         }
 
         const hasAnyPaidPlan = Boolean(userSub && userSub.is_active && !userSub.is_expired && userSub.plan_id && !userSub.plan_id.includes('starter') && !userSub.plan_id.includes('newbie') && !userSub.plan_id.includes('free'));
+        const discount = data?.discount_campaign || { active: false, percent: 0 };
+        const isDiscountActive = discount.active && discount.percent > 0;
 
         let cardsHtml = '';
+
+        // Hiển thị Banner Khuyến Mãi toàn sàn nếu đang mở chiến dịch
+        if (isDiscountActive) {
+            cardsHtml += `
+            <div class="col-span-1 md:col-span-3 p-4 rounded-3xl bg-gradient-to-r from-rose-600 via-amber-500 to-indigo-600 text-white shadow-xl flex flex-col sm:flex-row items-center justify-between gap-3 animate-pulse border border-white/20">
+                <div class="flex items-center space-x-3.5">
+                    <div class="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center text-xl shrink-0">
+                        <i class="fas fa-gift text-yellow-200"></i>
+                    </div>
+                    <div>
+                        <div class="font-black text-sm uppercase tracking-wide flex items-center space-x-2">
+                            <span>${discount.title || 'ĐẠI TIỆC KHUYẾN MÃI HỘI VIÊN TOÀN SÀN'}</span>
+                            <span class="bg-yellow-400 text-gray-900 text-[10px] font-black px-2 py-0.2 rounded-full uppercase">Đang áp dụng</span>
+                        </div>
+                        <p class="text-xs text-white/90 mt-0.5">Giảm trực tiếp <strong>${discount.percent}%</strong> chi phí Token cho tất cả các gói dịch vụ!</p>
+                    </div>
+                </div>
+                <div class="px-4 py-1.5 rounded-2xl bg-white text-rose-600 font-black text-sm shadow-md shrink-0 uppercase tracking-wider">
+                    -${discount.percent}% GIẢM GIÁ
+                </div>
+            </div>`;
+        }
+
         list.forEach(p => {
-            const price = isAnnual ? p.price_annual : p.price_monthly;
+            const basePrice = isAnnual ? p.price_annual : p.price_monthly;
+            let price = basePrice;
+            let hasDiscount = false;
+
+            if (basePrice > 0 && isDiscountActive && (discount.applies_to === 'all' || discount.applies_to === currentTab)) {
+                price = Math.round(basePrice * (100 - discount.percent) / 100);
+                hasDiscount = true;
+            }
+
             const priceDisplay = price === 0 ? 'Miễn Phí' : `${price.toLocaleString('vi-VN')} Token`;
             const durationDisplay = price === 0 ? 'Mãi Mãi' : (isAnnual ? '/ năm' : '/ tháng');
             const isPopular = p.popular;
@@ -281,8 +321,17 @@
                     </div>
 
                     <div class="mb-3">
-                        <span class="text-2xl sm:text-3xl font-black ${price === 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-900 dark:text-white'}">${priceDisplay}</span>
-                        <span class="text-xs text-gray-400">${durationDisplay}</span>
+                        ${hasDiscount ? `
+                            <div class="flex items-baseline space-x-2">
+                                <span class="text-xs text-gray-400 line-through">${basePrice.toLocaleString('vi-VN')} Token</span>
+                                <span class="text-2xl sm:text-3xl font-black text-rose-600 dark:text-rose-400">${priceDisplay}</span>
+                                <span class="text-xs text-gray-400">${durationDisplay}</span>
+                                <span class="text-[10px] font-black bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400 px-1.5 py-0.2 rounded">- ${discount.percent}%</span>
+                            </div>
+                        ` : `
+                            <span class="text-2xl sm:text-3xl font-black ${price === 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-900 dark:text-white'}">${priceDisplay}</span>
+                            <span class="text-xs text-gray-400">${durationDisplay}</span>
+                        `}
                     </div>
 
                     ${isCurrentActivePlan ? `
@@ -321,30 +370,77 @@
         container.innerHTML = cardsHtml;
     }
 
-    // Render Tab Add-ons Mua Lẻ
+    // Render Tab Add-ons Mua Lẻ (Có hiển thị Kho Tiện Ích Đã Mua)
     function renderAddonCards(addons, balance) {
         const container = document.getElementById('pricingCardsContainer');
         if (!container) return;
 
+        let userSub = null;
+        try { userSub = JSON.parse(localStorage.getItem('kgs_user_sub')); } catch(e) {}
+        const userAddons = userSub?.addons || { job_boost_credits: 0, urgent_tag_credits: 0, extra_bids: 0 };
+        const role = detectContextRole();
+
+        let html = '';
+
+        // Hiển thị Kho Tiện Ích nếu có
+        if (role === 'client') {
+            html += `
+            <div class="col-span-1 md:col-span-3 p-4 rounded-3xl bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs mb-2">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-indigo-600 text-white flex items-center justify-center font-bold text-sm shadow">
+                        <i class="fas fa-boxes-stacked"></i>
+                    </div>
+                    <div>
+                        <span class="font-black text-gray-900 dark:text-white text-sm">Kho Tiện Ích Đang Sở Hữu:</span>
+                        <p class="text-gray-500 dark:text-gray-400">Các lượt tiện ích trong kho có thể kích hoạt trực tiếp bất cứ lúc nào trên bài tuyển dụng của bạn.</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2 shrink-0">
+                    <span class="px-3 py-1.5 rounded-2xl bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 font-bold border border-amber-300 dark:border-amber-700">
+                        ⚡ Đẩy Top: <strong>${userAddons.job_boost_credits || 0}</strong> lượt
+                    </span>
+                    <span class="px-3 py-1.5 rounded-2xl bg-rose-100 dark:bg-rose-900/60 text-rose-800 dark:text-rose-200 font-bold border border-rose-300 dark:border-rose-700">
+                        🔥 Tuyển Gấp: <strong>${userAddons.urgent_tag_credits || 0}</strong> lượt
+                    </span>
+                </div>
+            </div>`;
+        } else if (role === 'freelancer') {
+            html += `
+            <div class="col-span-1 md:col-span-3 p-4 rounded-3xl bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 flex items-center justify-between text-xs mb-2">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-bold text-sm shadow">
+                        <i class="fas fa-bullseye"></i>
+                    </div>
+                    <div>
+                        <span class="font-black text-gray-900 dark:text-white text-sm">Lượt Chào Thầu Dự Án Dự Trữ:</span>
+                        <p class="text-gray-500 dark:text-gray-400">Lượt bids dự trữ bổ sung vào hạn mức ứng tuyển dự án mới trên Sàn Việc Làm.</p>
+                    </div>
+                </div>
+                <span class="px-3.5 py-1.5 rounded-2xl bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-200 font-black text-sm border border-emerald-300 dark:border-emerald-700">
+                    🎯 +${userAddons.extra_bids || 0} Bids dự trữ
+                </span>
+            </div>`;
+        }
+
         if (addons.length === 0) {
-            container.innerHTML = '<div class="col-span-3 text-center py-10 text-gray-400 text-xs">Chưa có tiện ích mua lẻ nào cho vai trò này.</div>';
+            html += '<div class="col-span-3 text-center py-10 text-gray-400 text-xs">Chưa có tiện ích mua lẻ nào cho vai trò này.</div>';
+            container.innerHTML = html;
             return;
         }
 
-        let html = '';
         addons.forEach(a => {
             html += `
             <div class="pricing-card-hover rounded-3xl p-6 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-2">
                         <h3 class="text-base font-black text-gray-900 dark:text-white">${a.name}</h3>
-                        <span class="text-xs font-black text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded-lg border border-amber-300 dark:border-amber-800">
+                        <span class="text-xs font-black text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-2.5 py-1 rounded-xl border border-amber-300 dark:border-amber-800">
                             ${a.price.toLocaleString('vi-VN')} Token
                         </span>
                     </div>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">${a.desc}</p>
                 </div>
-                <button onclick="window.promptPurchase('${a.id}', '${a.name}', ${a.price}, 'addon')" class="w-full py-2.5 rounded-xl bg-gray-100 hover:bg-indigo-50 dark:bg-gray-700 dark:hover:bg-gray-650 text-indigo-600 dark:text-indigo-300 font-bold text-xs transition border border-indigo-200 dark:border-indigo-800 flex items-center justify-center space-x-1.5">
+                <button onclick="window.promptPurchase('${a.id}', '${a.name}', ${a.price}, 'addon')" class="w-full py-2.5 rounded-xl bg-gray-100 hover:bg-indigo-50 dark:bg-gray-700 dark:hover:bg-gray-650 text-indigo-600 dark:text-indigo-300 font-bold text-xs transition border border-indigo-200 dark:border-indigo-800 flex items-center justify-center space-x-1.5 cursor-pointer">
                     <i class="fas fa-bolt text-amber-400"></i> <span>Kích Hoạt Tiện Ích</span>
                 </button>
             </div>`;
@@ -506,6 +602,29 @@
             proceedBtn.onclick = () => window.executePurchase();
         }
 
+        // Xử lý chọn dự án khi mua tiện ích cho Client
+        const jobSelectWrapper = document.getElementById('confirmJobSelectorWrapper');
+        const jobSelect = document.getElementById('confirmJobSelect');
+        if (category === 'addon' && role === 'client' && (planId === 'job_boost' || planId === 'urgent_tag')) {
+            if (jobSelectWrapper && jobSelect) {
+                jobSelectWrapper.classList.remove('hidden');
+                jobSelect.innerHTML = '<option value="">📦 Lưu vào Kho Tiện Ích để dùng sau (Khuyên dùng)</option>';
+                try {
+                    const jobsRes = await fetch(`${API_URL}/api/jobs?client_id=${user.id}`);
+                    const jobsJson = await jobsRes.json();
+                    const myJobs = (jobsJson.jobs || []).filter(j => j.client_id === user.id && ['open', 'planning'].includes(j.status));
+                    myJobs.forEach(j => {
+                        const opt = document.createElement('option');
+                        opt.value = j.id;
+                        opt.innerText = `🎯 Áp dụng ngay cho: ${j.title.length > 35 ? j.title.substring(0, 35) + '...' : j.title}`;
+                        jobSelect.appendChild(opt);
+                    });
+                } catch (jErr) {}
+            }
+        } else {
+            if (jobSelectWrapper) jobSelectWrapper.classList.add('hidden');
+        }
+
         document.getElementById('kgsConfirmPurchaseModal').classList.remove('hidden');
     };
 
@@ -520,6 +639,8 @@
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1.5"></i> Đang xử lý...';
 
+        const targetJobId = document.getElementById('confirmJobSelect')?.value || null;
+
         try {
             const res = await fetch(`${API_URL}/api/monetization/subscribe`, {
                 method: 'POST',
@@ -528,7 +649,8 @@
                     user_id: pendingPurchase.userId,
                     plan_id: pendingPurchase.planId,
                     billing_cycle: pendingPurchase.cycle,
-                    role: pendingPurchase.role
+                    role: pendingPurchase.role,
+                    job_id: targetJobId
                 })
             });
 
@@ -552,6 +674,14 @@
                 }
             }
 
+            if (result.user_addons) {
+                localStorage.setItem('kgs_user_addons', JSON.stringify(result.user_addons));
+                let cachedSub = null;
+                try { cachedSub = JSON.parse(localStorage.getItem('kgs_user_sub')) || {}; } catch(e){}
+                cachedSub.addons = result.user_addons;
+                localStorage.setItem('kgs_user_sub', JSON.stringify(cachedSub));
+            }
+
             alert(`🎉 ${result.message}`);
             window.closeConfirmModal();
             window.closePricingModal();
@@ -562,6 +692,8 @@
             if (window.syncVipHeaderBadges) window.syncVipHeaderBadges();
             if (window.loadProfile) window.loadProfile();
             if (window.loadUserProfile) window.loadUserProfile();
+            if (window.loadMyJobs) window.loadMyJobs();
+            if (window.loadUserJobs) window.loadUserJobs();
 
             const uiBal = document.getElementById('uiBalanceDisplay');
             if (uiBal && result.new_balance !== undefined) {
@@ -573,26 +705,67 @@
                 renderPricingCards();
             }, 500);
         } catch (e) {
+            console.error('Lỗi khi nâng cấp gói:', e);
             alert(`❌ Lỗi: ${e.message}`);
         } finally {
             btn.disabled = false;
+            btn.innerText = 'Xác Nhận Thanh Toán';
         }
     };
 
-    // 8. Đẩy Top Bài Tuyển Dụng (Job Boost Prompt)
-    window.boostJobPrompt = async function(jobId, jobTitle) {
+    // 8. Đẩy Top Bài Tuyển Dụng & Gắn Nhãn Tuyển Gấp (Hỗ trợ Sử Dụng Credit Miễn Phí)
+    window.boostJobPrompt = async function(jobId, jobTitle, boostType = 'job_boost') {
         let user = null;
         try { user = JSON.parse(localStorage.getItem('user')); } catch (e) {}
         if (!user || !user.id) return;
 
-        const balance = await fetchUserBalance();
-        const price = 25000;
+        let userSub = null;
+        try { userSub = JSON.parse(localStorage.getItem('kgs_user_sub')); } catch(e) {}
+        const userCredits = userSub?.addons || { job_boost_credits: 0, urgent_tag_credits: 0 };
+        const creditCount = boostType === 'urgent_tag' ? (userCredits.urgent_tag_credits || 0) : (userCredits.job_boost_credits || 0);
 
-        const confirmMsg = `⚡ ĐẨY TIN TUYỂN DỤNG LÊN TOP 1\n\n` +
+        // Kiểm tra nếu người dùng đang có lượt miễn phí trong kho
+        if (creditCount > 0) {
+            const typeLabel = boostType === 'urgent_tag' ? '🔥 Gắn Nhãn Tuyển Gấp (72h)' : '⚡ Đẩy Top 1 (24h)';
+            const useFree = confirm(
+                `📦 BẠN ĐANG CÓ ${creditCount} LƯỢT TIỆN ÍCH TRONG KHO!\n\n` +
+                `Dự án: "${jobTitle}"\n` +
+                `Loại tiện ích: ${typeLabel}\n\n` +
+                `Bạn có muốn sử dụng 1 lượt có sẵn này (0 Token) ngay bây giờ không?`
+            );
+            if (useFree) {
+                try {
+                    const res = await fetch(`${API_URL}/api/monetization/use-addon`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            user_id: user.id,
+                            addon_id: boostType,
+                            job_id: jobId
+                        })
+                    });
+                    const result = await res.json();
+                    if (!res.ok || result.error) throw new Error(result.error || 'Không thể sử dụng tiện ích');
+                    alert(`🎉 ${result.message}`);
+                    if (window.loadMyJobs) window.loadMyJobs();
+                    if (window.loadUserJobs) window.loadUserJobs();
+                    return;
+                } catch (err) {
+                    alert(`❌ Lỗi: ${err.message}`);
+                    return;
+                }
+            }
+        }
+
+        const balance = await fetchUserBalance();
+        const price = boostType === 'urgent_tag' ? 50000 : 25000;
+        const typeLabel = boostType === 'urgent_tag' ? '🔥 GẮN NHÃN TUYỂN GẤP (72H)' : '⚡ ĐẨY TIN TUYỂN DỤNG LÊN TOP 1 (24H)';
+
+        const confirmMsg = `${typeLabel}\n\n` +
             `Dự án: "${jobTitle}"\n` +
-            `Thời gian ưu tiên: 24 giờ\n` +
-            `Chi phí: 25.000 Token (Hiện có: ${balance.toLocaleString('vi-VN')} Token)\n\n` +
-            `Bạn có chắc chắn muốn đẩy tin này lên đầu trang tìm kiếm không?`;
+            `Thời gian ưu tiên: ${boostType === 'urgent_tag' ? '72 giờ' : '24 giờ'}\n` +
+            `Chi phí: ${price.toLocaleString('vi-VN')} Token (Hiện có: ${balance.toLocaleString('vi-VN')} Token)\n\n` +
+            `Bạn có chắc chắn muốn kích hoạt tiện ích này không?`;
 
         if (!confirm(confirmMsg)) return;
 
@@ -610,7 +783,7 @@
                 body: JSON.stringify({
                     user_id: user.id,
                     job_id: jobId,
-                    boost_type: 'job_boost'
+                    boost_type: boostType
                 })
             });
 
@@ -620,9 +793,9 @@
             } catch(jsonErr) {
                 result = { error: `Máy chủ phản hồi mã ${res.status}. Vui lòng thử lại.` };
             }
-            if (!res.ok || result.error) throw new Error(result.error || 'Không thể đẩy bài');
+            if (!res.ok || result.error) throw new Error(result.error || 'Không thể kích hoạt tiện ích');
 
-            alert(`🚀 Thành công! Dự án "${jobTitle}" đã được đưa lên Top 1 trong 24 giờ tới.`);
+            alert(`🚀 ${result.message}`);
             if (window.loadMyJobs) window.loadMyJobs();
             if (window.loadUserJobs) window.loadUserJobs();
             const uiBal = document.getElementById('uiBalanceDisplay');

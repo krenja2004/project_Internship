@@ -129,17 +129,18 @@ const DEFAULT_DATA = {
                 bids: 5,
                 for_role: 'freelancer',
                 desc: 'Bổ sung ngay 5 lượt nộp hồ sơ ứng tuyển dự án mới'
-            },
-            {
-                id: 'kyc_badge',
-                name: '🛡️ Chứng Nhận CCCD & Bằng Cấp',
-                price: 30000,
-                for_role: 'freelancer',
-                desc: 'Admin thẩm định bằng cấp & CCCD, gắn huy hiệu Tín nhiệm an toàn'
             }
         ]
     },
+    discount_campaign: {
+        active: false,
+        percent: 0,
+        title: '',
+        applies_to: 'all'
+    },
     user_subscriptions: {},
+    user_subscription_history: {},
+    user_addons: {},
     boosted_jobs: {},
     platform_revenue: {
         total_profit: 0,
@@ -157,6 +158,11 @@ function readData() {
         const parsed = JSON.parse(raw);
         if (!parsed.platform_revenue) {
             parsed.platform_revenue = { total_profit: 0, transactions: [] };
+        }
+        if (!parsed.user_subscription_history) parsed.user_subscription_history = {};
+        if (!parsed.user_addons) parsed.user_addons = {};
+        if (!parsed.discount_campaign) {
+            parsed.discount_campaign = { active: false, percent: 0, title: '', applies_to: 'all' };
         }
         return parsed;
     } catch (e) {
@@ -177,7 +183,10 @@ function writeData(data) {
 
 function getAllPlans() {
     const data = readData();
-    return data.plans;
+    return {
+        ...data.plans,
+        discount_campaign: data.discount_campaign || { active: false, percent: 0, title: '', applies_to: 'all' }
+    };
 }
 
 function getUserSubscription(userId) {
@@ -197,7 +206,16 @@ function getUserSubscription(userId) {
         sub.is_active = true;
         sub.days_remaining = Math.max(0, Math.ceil((expDate - now) / (1000 * 60 * 60 * 24)));
     }
+    // Gắn thêm lịch sử nâng cấp & kho tiện ích Addon Credits
+    sub.history = data.user_subscription_history?.[userId] || [];
+    sub.addons = data.user_addons?.[userId] || { job_boost_credits: 0, urgent_tag_credits: 0, extra_bids: 0 };
     return sub;
+}
+
+function getUserAddons(userId) {
+    if (!userId) return { job_boost_credits: 0, urgent_tag_credits: 0, extra_bids: 0 };
+    const data = readData();
+    return data.user_addons?.[userId] || { job_boost_credits: 0, urgent_tag_credits: 0, extra_bids: 0 };
 }
 
 function recordPlatformProfit(amount, serviceName, userId, details = {}) {
@@ -270,13 +288,105 @@ function subscribeUser(userId, planId, billingCycle = 'monthly', role = 'client'
     };
 
     data.user_subscriptions[userId] = subRecord;
+
+    // Ghi nhận vào Lịch sử Nâng Cấp (Subscription History)
+    if (!data.user_subscription_history) data.user_subscription_history = {};
+    if (!data.user_subscription_history[userId]) data.user_subscription_history[userId] = [];
+    data.user_subscription_history[userId].unshift({
+        id: 'SUBHIST-' + Date.now(),
+        plan_id: planId,
+        plan_name: plan.name,
+        role: role,
+        billing_cycle: billingCycle,
+        price: pricePaid,
+        subscribed_at: new Date().toISOString(),
+        expires_at: expiresAt
+    });
+
     writeData(data);
 
     if (pricePaid > 0) {
-        recordPlatformProfit(pricePaid, `Gói Hội Viên: ${plan.name} (${billingCycle})`, userId, { plan_id: planId, billing_cycle: billingCycle });
+        recordPlatformProfit(pricePaid, `Gói Hội Viên: ${plan.name} (${billingCycle === 'annual' ? 'Năm' : 'Tháng'})`, userId, { plan_id: planId, billing_cycle: billingCycle });
     }
 
     return subRecord;
+}
+
+function purchaseAddon(userId, addonId, targetJobId = null, pricePaid = 0) {
+    const data = readData();
+    const addon = (data.plans.addons || []).find(a => a.id === addonId);
+    if (!addon) throw new Error('Tiện ích không tồn tại');
+
+    if (!data.user_addons) data.user_addons = {};
+    if (!data.user_addons[userId]) {
+        data.user_addons[userId] = { job_boost_credits: 0, urgent_tag_credits: 0, extra_bids: 0 };
+    }
+
+    let resultMsg = '';
+    let boostResult = null;
+
+    if (addonId === 'bid_pack') {
+        const added = addon.bids || 5;
+        data.user_addons[userId].extra_bids = (data.user_addons[userId].extra_bids || 0) + added;
+        resultMsg = `Đã cộng thêm ${added} lượt chào thầu (Bids) vào tài khoản của bạn!`;
+    } else if (addonId === 'job_boost') {
+        if (targetJobId) {
+            boostResult = boostJob(targetJobId, 'job_boost', pricePaid, userId);
+            resultMsg = `Đã đẩy Top 1 bài đăng #${targetJobId} thành công trong 24 giờ!`;
+        } else {
+            data.user_addons[userId].job_boost_credits = (data.user_addons[userId].job_boost_credits || 0) + 1;
+            resultMsg = `Đã thêm 1 lượt Đẩy Tin Top 1 vào Kho Tiện Ích của bạn!`;
+        }
+    } else if (addonId === 'urgent_tag') {
+        if (targetJobId) {
+            boostResult = boostJob(targetJobId, 'urgent_tag', pricePaid, userId);
+            resultMsg = `Đã gắn nhãn Tuyển Gấp 🔥 cho bài đăng #${targetJobId} thành công trong 72 giờ!`;
+        } else {
+            data.user_addons[userId].urgent_tag_credits = (data.user_addons[userId].urgent_tag_credits || 0) + 1;
+            resultMsg = `Đã thêm 1 lượt Gắn Nhãn Tuyển Gấp vào Kho Tiện Ích của bạn!`;
+        }
+    }
+
+    if (pricePaid > 0) {
+        recordPlatformProfit(pricePaid, `Tiện ích lẻ: ${addon.name}`, userId, { addon_id: addonId, target_job_id: targetJobId });
+    }
+
+    writeData(data);
+    return {
+        success: true,
+        message: resultMsg,
+        addon,
+        boost: boostResult,
+        user_addons: data.user_addons[userId]
+    };
+}
+
+function useAddonCredit(userId, addonId, targetJobId) {
+    const data = readData();
+    if (!data.user_addons || !data.user_addons[userId]) {
+        throw new Error('Bạn chưa có lượt tiện ích nào trong kho');
+    }
+    const userCredits = data.user_addons[userId];
+
+    if (addonId === 'job_boost') {
+        if ((userCredits.job_boost_credits || 0) < 1) {
+            throw new Error('Bạn đã hết lượt Đẩy Tin Top 1. Vui lòng mua thêm trong Bảng Giá.');
+        }
+        userCredits.job_boost_credits -= 1;
+        const boostRecord = boostJob(targetJobId, 'job_boost', 0, userId);
+        writeData(data);
+        return { success: true, message: `Đã sử dụng 1 lượt Đẩy Top 1 cho bài đăng!`, boost: boostRecord, remaining: userCredits.job_boost_credits };
+    } else if (addonId === 'urgent_tag') {
+        if ((userCredits.urgent_tag_credits || 0) < 1) {
+            throw new Error('Bạn đã hết lượt Gắn Nhãn Tuyển Gấp. Vui lòng mua thêm trong Bảng Giá.');
+        }
+        userCredits.urgent_tag_credits -= 1;
+        const boostRecord = boostJob(targetJobId, 'urgent_tag', 0, userId);
+        writeData(data);
+        return { success: true, message: `Đã sử dụng 1 lượt Gắn Nhãn Tuyển Gấp 🔥 cho bài đăng!`, boost: boostRecord, remaining: userCredits.urgent_tag_credits };
+    } else {
+        throw new Error('Loại tiện ích không hợp lệ');
+    }
 }
 
 function boostJob(jobId, boostType = 'job_boost', pricePaid = 0, userId = null) {
@@ -336,13 +446,130 @@ function getBoostedJobsMap() {
     return result;
 }
 
+// ADMIN PLAN MANAGEMENT
+function createPlan(category, planData) {
+    const data = readData();
+    if (!data.plans[category]) {
+        throw new Error(`Danh mục gói "${category}" không hợp lệ (hỗ trợ: client, freelancer, addons)`);
+    }
+
+    const newId = planData.id ? planData.id.trim().toLowerCase().replace(/\s+/g, '_') : `${category}_plan_${Date.now()}`;
+    const exists = data.plans[category].some(p => p.id === newId);
+    if (exists) {
+        throw new Error(`Mã gói "${newId}" đã tồn tại`);
+    }
+
+    const newPlan = {
+        id: newId,
+        name: planData.name || 'Gói Dịch Vụ Mới',
+        badge: planData.badge || '',
+        features: Array.isArray(planData.features) ? planData.features : (typeof planData.features === 'string' ? planData.features.split('\n').map(s => s.trim()).filter(Boolean) : []),
+        created_at: new Date().toISOString()
+    };
+
+    if (category === 'addons') {
+        newPlan.price = parseFloat(planData.price) || 0;
+        newPlan.duration_hours = parseInt(planData.duration_hours) || 24;
+        newPlan.for_role = planData.for_role || 'client';
+        newPlan.desc = planData.desc || '';
+    } else {
+        newPlan.price_monthly = parseFloat(planData.price_monthly) || 0;
+        newPlan.price_annual = parseFloat(planData.price_annual) || 0;
+        newPlan.popular = !!planData.popular;
+    }
+
+    data.plans[category].push(newPlan);
+    writeData(data);
+    return newPlan;
+}
+
+function updatePlan(category, planId, updateData) {
+    const data = readData();
+    if (!data.plans[category]) {
+        throw new Error(`Danh mục gói "${category}" không hợp lệ`);
+    }
+    const idx = data.plans[category].findIndex(p => p.id === planId);
+    if (idx === -1) {
+        throw new Error(`Không tìm thấy gói #${planId} trong danh mục ${category}`);
+    }
+
+    const target = data.plans[category][idx];
+    if (updateData.name !== undefined) target.name = updateData.name;
+    if (updateData.badge !== undefined) target.badge = updateData.badge;
+    if (updateData.popular !== undefined) target.popular = !!updateData.popular;
+    if (updateData.features !== undefined) {
+        target.features = Array.isArray(updateData.features) ? updateData.features : (typeof updateData.features === 'string' ? updateData.features.split('\n').map(s => s.trim()).filter(Boolean) : target.features);
+    }
+
+    if (category === 'addons') {
+        if (updateData.price !== undefined) target.price = parseFloat(updateData.price) || 0;
+        if (updateData.duration_hours !== undefined) target.duration_hours = parseInt(updateData.duration_hours) || 24;
+        if (updateData.for_role !== undefined) target.for_role = updateData.for_role;
+        if (updateData.desc !== undefined) target.desc = updateData.desc;
+    } else {
+        if (updateData.price_monthly !== undefined) target.price_monthly = parseFloat(updateData.price_monthly) || 0;
+        if (updateData.price_annual !== undefined) target.price_annual = parseFloat(updateData.price_annual) || 0;
+    }
+
+    target.updated_at = new Date().toISOString();
+    data.plans[category][idx] = target;
+    writeData(data);
+    return target;
+}
+
+function deletePlan(category, planId) {
+    const data = readData();
+    if (!data.plans[category]) {
+        throw new Error(`Danh mục gói "${category}" không hợp lệ`);
+    }
+    if (['starter', 'newbie'].includes(planId)) {
+        throw new Error('Không thể xóa gói mặc định miễn phí của hệ thống!');
+    }
+
+    const initialLen = data.plans[category].length;
+    data.plans[category] = data.plans[category].filter(p => p.id !== planId);
+    if (data.plans[category].length === initialLen) {
+        throw new Error(`Không tìm thấy gói #${planId} để xóa`);
+    }
+
+    writeData(data);
+    return { success: true, message: `Đã xóa gói #${planId} thành công` };
+}
+
+// CÀI ĐẶT KHUYẾN MÃI (DISCOUNT CAMPAIGN)
+function getDiscountCampaign() {
+    const data = readData();
+    return data.discount_campaign || { active: false, percent: 0, title: '', applies_to: 'all' };
+}
+
+function setDiscountCampaign(campaignData) {
+    const data = readData();
+    data.discount_campaign = {
+        active: !!campaignData.active,
+        percent: Math.min(100, Math.max(0, parseInt(campaignData.percent) || 0)),
+        title: campaignData.title || '',
+        applies_to: campaignData.applies_to || 'all',
+        updated_at: new Date().toISOString()
+    };
+    writeData(data);
+    return data.discount_campaign;
+}
+
 module.exports = {
     getAllPlans,
     getUserSubscription,
+    getUserAddons,
     subscribeUser,
+    purchaseAddon,
+    useAddonCredit,
     boostJob,
     isJobBoosted,
     getBoostedJobsMap,
     recordPlatformProfit,
-    getPlatformProfitStats
+    getPlatformProfitStats,
+    createPlan,
+    updatePlan,
+    deletePlan,
+    getDiscountCampaign,
+    setDiscountCampaign
 };
