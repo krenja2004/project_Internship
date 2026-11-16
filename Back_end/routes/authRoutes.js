@@ -893,6 +893,8 @@ router.get('/api/users/:id', async (req, res) => {
             freelancer_type,
             recent_jobs: recentJobs,
             subscription: userSub || null,
+            subscription_history: subscriptionService.getUserSubscriptionHistory(id),
+            addons: subscriptionService.getUserAddons(id),
             is_vip: isVip,
             vip_tier: isVip ? userSub.plan_name : 'Gói Cơ Bản (Miễn Phí)',
             vip_badge: isVip ? (user.role === 'freelancer' ? 'Tích Xanh Verified Pro Dev' : 'Vương Miện Doanh Nghiệp VIP') : null,

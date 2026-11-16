@@ -14,13 +14,14 @@ router.get('/api/monetization/plans', (req, res) => {
     }
 });
 
-// 2. Lấy thông tin gói hiện tại của User & Kho Addon Credits
+// 2. Lấy thông tin gói hiện tại của User, Kho Addon Credits & Lịch sử mua gói
 router.get('/api/monetization/user-subscription/:user_id', (req, res) => {
     try {
         const { user_id } = req.params;
         const sub = subscriptionService.getUserSubscription(user_id);
         const addons = subscriptionService.getUserAddons(user_id);
-        res.status(200).json({ success: true, subscription: sub, addons });
+        const history = subscriptionService.getUserSubscriptionHistory(user_id);
+        res.status(200).json({ success: true, subscription: sub, addons, history });
     } catch (e) {
         res.status(500).json({ success: false, error: e.message });
     }
@@ -405,14 +406,46 @@ router.get('/api/admin/monetization/revenue', (req, res) => {
     }
 });
 
-// 7. API Admin: Danh sách đầy đủ gói và cấu hình
-router.get('/api/admin/monetization/plans', (req, res) => {
+// 7. API Admin: Danh sách đầy đủ gói, cấu hình, Hội viên đang dùng gói & Lịch sử giao dịch
+router.get('/api/admin/monetization/plans', async (req, res) => {
     try {
         const plans = subscriptionService.getAllPlans();
         const stats = subscriptionService.getPlatformProfitStats();
-        res.status(200).json({ success: true, plans, profit_stats: stats });
+        const subscribers = await subscriptionService.getAllSubscribersWithUserInfo(supabase);
+        const history = await subscriptionService.getAllSubscriptionHistoryWithUserInfo(supabase);
+        res.status(200).json({
+            success: true,
+            plans,
+            profit_stats: stats,
+            subscribers,
+            history
+        });
     } catch (e) {
         res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// 7b. API Admin: Gia hạn thêm ngày cho hội viên
+router.post('/api/admin/monetization/extend-subscription', async (req, res) => {
+    try {
+        const { user_id, days = 30 } = req.body;
+        if (!user_id) return res.status(400).json({ error: 'Thiếu user_id người dùng' });
+        const updated = subscriptionService.adminExtendSubscription(user_id, parseInt(days) || 30);
+        res.status(200).json({ success: true, message: `Đã gia hạn thêm ${days} ngày sử dụng cho hội viên!`, subscription: updated });
+    } catch (e) {
+        res.status(400).json({ success: false, error: e.message });
+    }
+});
+
+// 7c. API Admin: Hủy gói của hội viên
+router.post('/api/admin/monetization/cancel-subscription', async (req, res) => {
+    try {
+        const { user_id } = req.body;
+        if (!user_id) return res.status(400).json({ error: 'Thiếu user_id người dùng' });
+        const updated = subscriptionService.adminCancelSubscription(user_id);
+        res.status(200).json({ success: true, message: 'Đã hủy kích hoạt gói của người dùng thành công!', subscription: updated });
+    } catch (e) {
+        res.status(400).json({ success: false, error: e.message });
     }
 });
 

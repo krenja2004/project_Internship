@@ -273,7 +273,86 @@
       }
     ]
   },
-  "user_subscription_history": {},
+  "user_subscription_history": {
+    "5f79cd46-e8e4-4db3-80d7-250c54199b6a": [
+      {
+        "id": "REV-1794796276351-62",
+        "plan_name": "Gói Hội Viên: Chuyên Gia Pro (monthly)",
+        "plan_id": "freelancer_pro",
+        "billing_cycle": "monthly",
+        "price": 99000,
+        "subscribed_at": "2026-11-16T02:31:16.351Z",
+        "status": "completed"
+      },
+      {
+        "id": "REV-1794795941072-16",
+        "plan_name": "Gói Hội Viên: Chuyên Gia Pro (monthly)",
+        "plan_id": "freelancer_pro",
+        "billing_cycle": "monthly",
+        "price": 99000,
+        "subscribed_at": "2026-11-16T02:25:41.072Z",
+        "status": "completed"
+      }
+    ],
+    "8ac76bce-0422-443c-b2d9-d2b08db28da1": [
+      {
+        "id": "REV-1794757698224-810",
+        "plan_name": "Gói Hội Viên: Chuyên Gia Pro (monthly)",
+        "plan_id": "freelancer_pro",
+        "billing_cycle": "monthly",
+        "price": 99000,
+        "subscribed_at": "2026-11-15T15:48:18.224Z",
+        "status": "completed"
+      },
+      {
+        "id": "REV-1794757184766-975",
+        "plan_name": "Gói Hội Viên: Chuyên Gia Pro (monthly)",
+        "plan_id": "freelancer_pro",
+        "billing_cycle": "monthly",
+        "price": 99000,
+        "subscribed_at": "2026-11-15T15:39:44.766Z",
+        "status": "completed"
+      }
+    ],
+    "9d323da5-c143-4c90-8726-4e8a67a7288b": [
+      {
+        "id": "REV-1794757698016-580",
+        "plan_name": "Tiện ích bài đăng: job_boost",
+        "plan_id": "job_boost",
+        "billing_cycle": "monthly",
+        "price": 25000,
+        "subscribed_at": "2026-11-15T15:48:18.016Z",
+        "status": "completed"
+      },
+      {
+        "id": "REV-1794757697630-789",
+        "plan_name": "Gói Hội Viên: Doanh Nghiệp Pro (monthly)",
+        "plan_id": "client_pro",
+        "billing_cycle": "monthly",
+        "price": 199000,
+        "subscribed_at": "2026-11-15T15:48:17.630Z",
+        "status": "completed"
+      },
+      {
+        "id": "REV-1794757184577-214",
+        "plan_name": "Tiện ích bài đăng: job_boost",
+        "plan_id": "job_boost",
+        "billing_cycle": "monthly",
+        "price": 25000,
+        "subscribed_at": "2026-11-15T15:39:44.577Z",
+        "status": "completed"
+      },
+      {
+        "id": "REV-1794757184194-867",
+        "plan_name": "Gói Hội Viên: Doanh Nghiệp Pro (monthly)",
+        "plan_id": "client_pro",
+        "billing_cycle": "monthly",
+        "price": 199000,
+        "subscribed_at": "2026-11-15T15:39:44.194Z",
+        "status": "completed"
+      }
+    ]
+  },
   "user_addons": {},
   "discount_campaign": {
     "active": false,

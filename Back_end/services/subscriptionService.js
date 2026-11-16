@@ -218,6 +218,13 @@ function getUserAddons(userId) {
     return data.user_addons?.[userId] || { job_boost_credits: 0, urgent_tag_credits: 0, extra_bids: 0 };
 }
 
+function getUserSubscriptionHistory(userId) {
+    if (!userId) return [];
+    const data = readData();
+    const list = data.user_subscription_history?.[userId] || [];
+    return [...list].sort((a, b) => new Date(b.subscribed_at || 0) - new Date(a.subscribed_at || 0));
+}
+
 function recordPlatformProfit(amount, serviceName, userId, details = {}) {
     const data = readData();
     const parsedAmount = parseFloat(amount) || 0;
@@ -350,6 +357,20 @@ function purchaseAddon(userId, addonId, targetJobId = null, pricePaid = 0) {
     if (pricePaid > 0) {
         recordPlatformProfit(pricePaid, `Tiện ích lẻ: ${addon.name}`, userId, { addon_id: addonId, target_job_id: targetJobId });
     }
+
+    // Ghi nhận tiện ích đã mua vào Lịch sử mua hàng của user
+    if (!data.user_subscription_history) data.user_subscription_history = {};
+    if (!data.user_subscription_history[userId]) data.user_subscription_history[userId] = [];
+    data.user_subscription_history[userId].unshift({
+        id: 'ADDONHIST-' + Date.now(),
+        plan_id: addonId,
+        plan_name: `Tiện ích: ${addon.name}`,
+        role: 'addon',
+        billing_cycle: 'one-time',
+        price: pricePaid,
+        subscribed_at: new Date().toISOString(),
+        status: 'completed'
+    });
 
     writeData(data);
     return {
@@ -555,9 +576,148 @@ function setDiscountCampaign(campaignData) {
     return data.discount_campaign;
 }
 
+// ADMIN: LẤY DANH SÁCH HỘI VIÊN ĐANG SỬ DỤNG GÓI VIP (KÈM THÔNG TIN NGƯỜI DÙNG)
+async function getAllSubscribersWithUserInfo(supabase) {
+    const data = readData();
+    const subs = data.user_subscriptions || {};
+    const userIds = Object.keys(subs);
+    if (userIds.length === 0) return [];
+
+    let usersMap = {};
+    if (supabase) {
+        try {
+            const { data: users, error } = await supabase
+                .from('users')
+                .select('id, full_name, email, role, phone_number, avatar_url')
+                .in('id', userIds);
+            if (!error && users) {
+                users.forEach(u => { usersMap[u.id] = u; });
+            }
+        } catch (e) {
+            console.warn('[getAllSubscribersWithUserInfo] Error querying users:', e.message);
+        }
+    }
+
+    const now = new Date();
+    const list = [];
+    for (const [userId, sub] of Object.entries(subs)) {
+        const expDate = new Date(sub.expires_at);
+        const isExpired = expDate < now;
+        const daysRemaining = Math.max(0, Math.ceil((expDate - now) / (1000 * 60 * 60 * 24)));
+        const u = usersMap[userId] || {};
+
+        list.push({
+            user_id: userId,
+            user_name: u.full_name || 'Người Dùng KGS',
+            user_email: u.email || '',
+            user_phone: u.phone_number || '',
+            user_avatar: u.avatar_url || '',
+            user_role: u.role || sub.role || 'client',
+            plan_id: sub.plan_id,
+            plan_name: sub.plan_name,
+            role: sub.role,
+            billing_cycle: sub.billing_cycle || 'monthly',
+            started_at: sub.started_at,
+            expires_at: sub.expires_at,
+            days_remaining: daysRemaining,
+            is_active: !isExpired,
+            is_expired: isExpired,
+            features: sub.features || []
+        });
+    }
+
+    list.sort((a, b) => {
+        if (a.is_active && !b.is_active) return -1;
+        if (!a.is_active && b.is_active) return 1;
+        return new Date(b.started_at) - new Date(a.started_at);
+    });
+
+    return list;
+}
+
+// ADMIN: LẤY TOÀN BỘ LỊCH SỬ ĐĂNG KÝ / MUA GÓI & TIỆN ÍCH
+async function getAllSubscriptionHistoryWithUserInfo(supabase) {
+    const data = readData();
+    const rawTx = data.platform_revenue?.transactions || [];
+    const historyList = [];
+
+    const userIds = [...new Set(rawTx.map(t => t.user_id).filter(Boolean))];
+    let usersMap = {};
+    if (supabase && userIds.length > 0) {
+        try {
+            const { data: users } = await supabase
+                .from('users')
+                .select('id, full_name, email, role, avatar_url')
+                .in('id', userIds);
+            if (users) {
+                users.forEach(u => { usersMap[u.id] = u; });
+            }
+        } catch (e) {}
+    }
+
+    rawTx.forEach(t => {
+        const u = usersMap[t.user_id] || {};
+        historyList.push({
+            id: t.id,
+            user_id: t.user_id,
+            user_name: u.full_name || 'Khách hàng',
+            user_email: u.email || '',
+            user_avatar: u.avatar_url || '',
+            user_role: u.role || 'client',
+            service: t.service,
+            amount: t.amount,
+            created_at: t.created_at,
+            details: t.details || {}
+        });
+    });
+
+    return historyList;
+}
+
+// ADMIN: GIA HẠN THÊM NGÀY CHO HỘI VIÊN
+function adminExtendSubscription(userId, extraDays = 30) {
+    const data = readData();
+    if (!data.user_subscriptions || !data.user_subscriptions[userId]) {
+        throw new Error('Người dùng chưa có gói đăng ký để gia hạn');
+    }
+    const sub = data.user_subscriptions[userId];
+    let baseTime = Date.now();
+    if (sub.expires_at) {
+        const existingExpires = new Date(sub.expires_at).getTime();
+        if (existingExpires > baseTime) {
+            baseTime = existingExpires;
+        }
+    }
+    const newExpires = new Date(baseTime + extraDays * 24 * 60 * 60 * 1000).toISOString();
+    sub.expires_at = newExpires;
+    sub.is_active = true;
+    sub.is_expired = false;
+    sub.days_remaining = Math.max(1, Math.ceil((new Date(newExpires) - new Date()) / (1000 * 60 * 60 * 24)));
+    
+    writeData(data);
+    return sub;
+}
+
+// ADMIN: HỦY KÍCH HOẠT GÓI CỦA NGƯỜI DÙNG
+function adminCancelSubscription(userId) {
+    const data = readData();
+    if (!data.user_subscriptions || !data.user_subscriptions[userId]) {
+        throw new Error('Người dùng không có gói hoạt động');
+    }
+    const sub = data.user_subscriptions[userId];
+    sub.expires_at = new Date().toISOString();
+    sub.is_active = false;
+    sub.is_expired = true;
+    sub.days_remaining = 0;
+    
+    writeData(data);
+    return sub;
+}
+
 module.exports = {
     getAllPlans,
     getUserSubscription,
+    getUserSubscriptionHistory,
     getUserAddons,
     subscribeUser,
     purchaseAddon,
@@ -571,5 +731,9 @@ module.exports = {
     updatePlan,
     deletePlan,
     getDiscountCampaign,
-    setDiscountCampaign
+    setDiscountCampaign,
+    getAllSubscribersWithUserInfo,
+    getAllSubscriptionHistoryWithUserInfo,
+    adminExtendSubscription,
+    adminCancelSubscription
 };
