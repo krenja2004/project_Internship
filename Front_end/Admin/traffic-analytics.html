@@ -294,7 +294,7 @@
     </div>
 
     <!-- Admin UI Framework JS -->
-    <script src="admin-ui.js?v=20261116_v4"></script>
+    <script src="admin-ui.js?v=20261116_v5"></script>
 
     <!-- Page Logic -->
     <script>
@@ -657,14 +657,14 @@
 
         function startAutoRefreshTimer() {
             if (intervalRef) clearInterval(intervalRef);
-            countdownTimer = 5;
+            countdownTimer = 3;
             intervalRef = setInterval(async () => {
                 countdownTimer--;
                 const timerEl = document.getElementById('autoRefreshCountdown');
                 if (timerEl) timerEl.innerText = countdownTimer;
 
                 if (countdownTimer <= 0) {
-                    countdownTimer = 5;
+                    countdownTimer = 3;
                     // Nhẹ nhàng cập nhật live pulse không reload toàn trang
                     try {
                         const res = await fetch(`${API_URL}/api/admin/analytics/live`);

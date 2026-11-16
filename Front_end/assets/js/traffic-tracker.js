@@ -1,11 +1,11 @@
 /**
- * KGS Work - Real-time Traffic & Live User Tracker
- * Non-blocking, real user identification & active session tracking
+ * KGS Work - Real-time Presence & Active User Session Tracker
+ * Non-blocking, CORS-compliant, adblock-resilient presence engine
  */
 (function() {
     'use strict';
-    if (window.__kgsTrafficBeaconLoaded) return;
-    window.__kgsTrafficBeaconLoaded = true;
+    if (window.__kgsPresenceTrackerActive) return;
+    window.__kgsPresenceTrackerActive = true;
 
     try {
         // 1. Xác định API Backend URL
@@ -30,8 +30,8 @@
             localStorage.setItem('__kgs_vid', visitorId);
         }
 
-        // 4. Hàm gửi tín hiệu theo dõi (Tracking Beacon)
-        function sendTrackPing(isHeartbeat = false) {
+        // 4. Hàm gửi tín hiệu hiện diện (Presence Ping - Stealth & CORS-safe)
+        function sendPresencePing(isHeartbeat = false) {
             const user = getCurrentUser();
             
             // Nếu đã đăng nhập: Phân định session theo user_id để nhận diện chính xác 2 tài khoản khác nhau trên cùng 1 máy
@@ -60,47 +60,59 @@
                 user_avatar: user ? (user.avatar_url || '') : ''
             };
 
-            const endpoint = `${API_BASE}/api/analytics/track`;
+            const jsonBody = JSON.stringify(payload);
 
-            // Ưu tiên dùng fetch với keepalive (hoặc sendBeacon)
-            if (navigator.sendBeacon) {
-                try {
-                    const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
-                    navigator.sendBeacon(endpoint, blob);
-                    return;
-                } catch(e) {}
-            }
+            // Dùng Fetch chuẩn với mode 'cors' và keepalive: true (Chống lỗi preflight của sendBeacon)
+            // Ưu tiên endpoint stealth '/api/presence/ping' (Không bị AdBlocker chặn)
+            const primaryEndpoint = `${API_BASE}/api/presence/ping`;
+            const fallbackEndpoint = `${API_BASE}/api/analytics/track`;
 
-            fetch(endpoint, {
+            fetch(primaryEndpoint, {
                 method: 'POST',
+                mode: 'cors',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload),
+                body: jsonBody,
                 keepalive: true
-            }).catch(() => {});
+            }).catch(() => {
+                // Fallback nếu primary endpoint gặp sự cố
+                fetch(fallbackEndpoint, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: jsonBody,
+                    keepalive: true
+                }).catch(() => {});
+            });
         }
 
-        // 5. Gửi ping ngay khi trang tải xong
+        window.__kgsSendPresencePing = sendPresencePing;
+
+        // 5. Gửi ping ngay lập tức khi file script vừa nạp xong
+        sendPresencePing(false);
+
+        // 6. Gửi ping khi trang tải hoàn tất
         if (document.readyState === 'complete') {
-            sendTrackPing(false);
+            sendPresencePing(false);
         } else {
-            window.addEventListener('load', () => sendTrackPing(false));
+            window.addEventListener('load', () => sendPresencePing(false));
+            document.addEventListener('DOMContentLoaded', () => sendPresencePing(false));
         }
 
-        // 6. Gửi ping khi user chuyển tab quay lại trang
+        // 7. Gửi ping khi user chuyển tab quay lại trang
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden) {
-                sendTrackPing(true);
+                sendPresencePing(true);
             }
         });
 
-        // 7. Duy trì trạng thái trực tuyến (Heartbeat mỗi 15 giây)
+        // 8. Duy trì trạng thái trực tuyến (Heartbeat mỗi 15 giây)
         setInterval(() => {
             if (!document.hidden) {
-                sendTrackPing(true);
+                sendPresencePing(true);
             }
         }, 15000);
 
     } catch (err) {
-        console.warn('[TrafficTracker] Init bypassed:', err);
+        console.warn('[PresenceTracker] Init bypassed:', err);
     }
 })();

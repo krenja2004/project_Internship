@@ -2,9 +2,34 @@ const express = require('express');
 const router = express.Router();
 const trafficService = require('../services/trafficService');
 
-// 1. Endpoint thu thập dữ liệu truy cập từ phía client (beacon/fetch)
-router.post('/api/analytics/track', (req, res) => {
+// Middleware hỗ trợ CORS chuẩn & xử lý OPTIONS preflight cho các tracker/presence endpoints
+const handleTrackerCors = (req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept');
+    if (req.method === 'OPTIONS') {
+        return res.status(204).end();
+    }
+    next();
+};
+
+router.options('/api/analytics/track', handleTrackerCors);
+router.options('/api/presence/ping', handleTrackerCors);
+router.options('/api/presence/heartbeat', handleTrackerCors);
+
+// Hàm dùng chung ghi nhận phiên hoạt động & lưu lượng
+const processPresencePing = (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept');
+
     try {
+        let payload = req.body;
+        if (typeof payload === 'string') {
+            try { payload = JSON.parse(payload); } catch(e) {}
+        }
+        if (!payload || typeof payload !== 'object') payload = {};
+
         const {
             path,
             title,
@@ -17,7 +42,7 @@ router.post('/api/analytics/track', (req, res) => {
             user_email,
             user_role,
             user_avatar
-        } = req.body || {};
+        } = payload;
 
         const userAgent = req.headers['user-agent'] || '';
         
@@ -52,7 +77,12 @@ router.post('/api/analytics/track', (req, res) => {
         console.error('[AnalyticsRoute] Lỗi ghi nhận lượt truy cập:', error);
         return res.status(200).json({ success: false }); // Không làm lỗi trang client
     }
-});
+};
+
+// 1. Endpoint thu thập dữ liệu truy cập từ phía client (Hỗ trợ cả endpoint tàng hình presence chống AdBlock và analytics truyền thống)
+router.post('/api/presence/ping', handleTrackerCors, processPresencePing);
+router.post('/api/presence/heartbeat', handleTrackerCors, processPresencePing);
+router.post('/api/analytics/track', handleTrackerCors, processPresencePing);
 
 // 2. Endpoint lấy toàn bộ báo cáo tổng quan dành cho Admin (Biểu đồ ngày, giờ, Top trang, thiết bị)
 router.get('/api/admin/analytics/overview', (req, res) => {

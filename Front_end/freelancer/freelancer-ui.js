@@ -1,11 +1,11 @@
 // JavaScript framework to build Responsive Sidebar, Header, Mobile Drawer, Bottom Nav, Dark Mode, and Live Balance for Freelancer Workspace
 
-// Tự động kích hoạt beacon đo lường lưu lượng truy cập thực tế
+// Tự động kích hoạt beacon đo lường lưu lượng truy cập & session trực tuyến thực tế (Chống AdBlocker)
 (function() {
     if (!window.__kgsTrafficTracked) {
         window.__kgsTrafficTracked = true;
         const s = document.createElement('script');
-        s.src = '../assets/js/traffic-tracker.js?v=20261116_v4';
+        s.src = '../assets/js/session-presence.js?v=20261116_v5';
         s.async = true;
         document.head.appendChild(s);
     }
