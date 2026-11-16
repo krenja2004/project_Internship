@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </a>
             <a href="javascript:void(0)" onclick="window.openPricingModal('client')" class="nav-item flex items-center space-x-3 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500/10 via-yellow-500/10 to-amber-500/5 text-amber-700 dark:text-amber-300 hover:from-amber-500/20 hover:to-yellow-500/20 font-black border border-amber-400/40 shadow-sm transition">
                 <i class="fas fa-crown text-amber-500"></i> <span>Gói VIP & Bảng Giá</span>
-                <span class="ml-auto text-[9px] bg-amber-400 text-gray-950 font-black px-1.5 py-0.5 rounded-full uppercase">HOT</span>
+                <span id="sidebarVipBadge" class="ml-auto text-[9px] bg-amber-400 text-gray-950 font-black px-1.5 py-0.5 rounded-full uppercase">HOT</span>
             </a>
             <a href="post-job.html" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-indigo-400 font-semibold transition-colors">
                 <i class="fas fa-plus-circle w-5 text-blue-500"></i> <span>Đăng Dự Án</span>
@@ -163,9 +163,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         <div class="flex items-center space-x-2 sm:space-x-3 md:space-x-4 shrink-0">
             <!-- Nút Nâng Cấp VIP -->
-            <button onclick="window.openPricingModal('client')" class="flex items-center space-x-1.5 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-600 hover:to-yellow-500 text-gray-900 font-black px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-full shadow-md transition transform hover:scale-105 shrink-0 text-xs cursor-pointer" title="Nâng cấp gói Hội viên & Bảng giá">
-                <span>👑</span>
-                <span class="hidden sm:inline">Gói VIP</span>
+            <button id="uiTopVipBtn" onclick="window.openPricingModal('client')" class="flex items-center space-x-1.5 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-600 hover:to-yellow-500 text-gray-900 font-black px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-full shadow-md transition transform hover:scale-105 shrink-0 text-xs cursor-pointer" title="Nâng cấp gói Hội viên & Bảng giá">
+                <span id="uiTopVipIcon">👑</span>
+                <span id="uiTopVipText" class="hidden sm:inline">Gói VIP</span>
             </button>
 
             <!-- Số dư Token -->
@@ -597,16 +597,87 @@ document.addEventListener('DOMContentLoaded', () => {
     window.loadUserNotifications = loadUserNotifications;
     window.loadGlobalBalance = loadGlobalBalance;
 
+    // 10. Đồng bộ Gói VIP & Đếm ngược thời hạn trên Header / Sidebar
+    window.syncVipHeaderBadges = async function() {
+        if (!user || !user.id) return;
+        const topBtn = document.getElementById('uiTopVipBtn');
+        const topText = document.getElementById('uiTopVipText');
+        const topIcon = document.getElementById('uiTopVipIcon');
+        const sidebarBadge = document.getElementById('sidebarVipBadge');
+
+        // Check local cache first for instant render
+        try {
+            const cachedSub = JSON.parse(localStorage.getItem('kgs_user_sub') || localStorage.getItem('kgs_client_sub_cache'));
+            if (cachedSub && cachedSub.is_active && !cachedSub.is_expired && cachedSub.plan_id && !cachedSub.plan_id.includes('starter') && !cachedSub.plan_id.includes('newbie')) {
+                if (topBtn) {
+                    topBtn.className = "flex items-center space-x-1.5 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-gray-950 font-black px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-full shadow-lg border border-amber-300 transition transform hover:scale-105 shrink-0 text-xs cursor-pointer";
+                    topBtn.title = `👑 ${cachedSub.plan_name} - Còn ${cachedSub.days_remaining} ngày sử dụng`;
+                }
+                if (topText) {
+                    topText.className = "inline-flex items-center space-x-1 text-gray-950 font-black";
+                    topText.innerHTML = `<span>${cachedSub.plan_name}</span> <span class="bg-black/20 text-gray-950 text-[10px] px-1.5 py-0.2 rounded-full font-black ml-1">${cachedSub.days_remaining} ngày</span>`;
+                }
+                if (sidebarBadge) {
+                    sidebarBadge.innerText = `${cachedSub.days_remaining}d VIP`;
+                    sidebarBadge.className = "ml-auto text-[9px] bg-emerald-500 text-white font-black px-1.5 py-0.5 rounded-full uppercase shadow-xs";
+                }
+            }
+        } catch(e) {}
+
+        // Fetch fresh subscription from backend
+        try {
+            const res = await fetch(`${API_URL}/api/monetization/user-subscription/${user.id}`);
+            const data = await res.json();
+            if (data.success && data.subscription) {
+                const sub = data.subscription;
+                localStorage.setItem('kgs_user_sub', JSON.stringify(sub));
+                localStorage.setItem('kgs_client_sub_cache', JSON.stringify(sub));
+
+                if (sub.is_active && !sub.is_expired && sub.plan_id && !sub.plan_id.includes('starter') && !sub.plan_id.includes('newbie')) {
+                    if (topBtn) {
+                        topBtn.className = "flex items-center space-x-1.5 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-gray-950 font-black px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-full shadow-lg border border-amber-300 transition transform hover:scale-105 shrink-0 text-xs cursor-pointer";
+                        topBtn.title = `👑 ${sub.plan_name} - Còn ${sub.days_remaining} ngày (Hết hạn: ${new Date(sub.expires_at).toLocaleDateString('vi-VN')})`;
+                    }
+                    if (topText) {
+                        topText.className = "inline-flex items-center space-x-1 text-gray-950 font-black";
+                        topText.innerHTML = `<span>${sub.plan_name}</span> <span class="bg-black/20 text-gray-950 text-[10px] px-1.5 py-0.2 rounded-full font-black ml-1">${sub.days_remaining} ngày</span>`;
+                    }
+                    if (sidebarBadge) {
+                        sidebarBadge.innerText = `${sub.days_remaining}d VIP`;
+                        sidebarBadge.className = "ml-auto text-[9px] bg-emerald-500 text-white font-black px-1.5 py-0.5 rounded-full uppercase shadow-xs";
+                    }
+                } else {
+                    if (topBtn) {
+                        topBtn.className = "flex items-center space-x-1.5 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-600 hover:to-yellow-500 text-gray-900 font-black px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-full shadow-md transition transform hover:scale-105 shrink-0 text-xs cursor-pointer";
+                        topBtn.title = "Nâng cấp gói Hội viên & Bảng giá";
+                    }
+                    if (topText) {
+                        topText.className = "hidden sm:inline";
+                        topText.innerText = "Gói VIP";
+                    }
+                    if (sidebarBadge) {
+                        sidebarBadge.innerText = "HOT";
+                        sidebarBadge.className = "ml-auto text-[9px] bg-amber-400 text-gray-950 font-black px-1.5 py-0.5 rounded-full uppercase";
+                    }
+                }
+            }
+        } catch (e) {
+            console.warn('Sync VIP header badge error:', e);
+        }
+    };
+
     // Tự động tải Pricing & VIP Module
     function initPricingSystem() {
         if (!window.KGS_PRICING_INITIALIZED) {
             const sc = document.createElement('script');
             sc.src = '../assets/js/pricing-modal.js?v=' + Date.now();
             sc.onload = () => {
+                window.syncVipHeaderBadges();
                 if (window.renderSmartPromoBanner) window.renderSmartPromoBanner('client');
             };
             document.body.appendChild(sc);
         } else {
+            window.syncVipHeaderBadges();
             if (window.renderSmartPromoBanner) window.renderSmartPromoBanner('client');
         }
     }
@@ -617,6 +688,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (user && user.id) {
             loadGlobalBalance();
             loadUserNotifications();
+            window.syncVipHeaderBadges();
         }
     }, 15000);
 });

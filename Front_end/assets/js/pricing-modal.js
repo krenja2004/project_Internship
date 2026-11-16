@@ -190,6 +190,31 @@
         }
     }
 
+    // 4b. Lấy thông tin gói đang hoạt động của người dùng
+    async function fetchUserSubscription() {
+        let user = null;
+        try { user = JSON.parse(localStorage.getItem('user')); } catch (e) {}
+        if (!user || !user.id) return null;
+        try {
+            const res = await fetch(`${API_URL}/api/monetization/user-subscription/${user.id}`);
+            const data = await res.json();
+            if (data.success && data.subscription) {
+                const sub = data.subscription;
+                localStorage.setItem('kgs_user_sub', JSON.stringify(sub));
+                localStorage.setItem('kgs_client_sub_cache', JSON.stringify(sub));
+                localStorage.setItem('kgs_freelancer_sub_cache', JSON.stringify(sub));
+                return sub;
+            }
+        } catch (e) {
+            console.warn('[Pricing] Error fetching user subscription:', e);
+        }
+        try {
+            return JSON.parse(localStorage.getItem('kgs_user_sub')) || null;
+        } catch (e) {
+            return null;
+        }
+    }
+
     // 5. Render danh sách các Card gói
     async function renderPricingCards() {
         const container = document.getElementById('pricingCardsContainer');
@@ -198,6 +223,7 @@
 
         const data = await loadPlans();
         const balance = await fetchUserBalance();
+        const userSub = await fetchUserSubscription();
         const balEl = document.getElementById('pricingUserBalanceDisplay');
         if (balEl) balEl.innerText = `${balance.toLocaleString('vi-VN')} Token`;
 
@@ -224,30 +250,45 @@
             return;
         }
 
+        const hasAnyPaidPlan = Boolean(userSub && userSub.is_active && !userSub.is_expired && userSub.plan_id && !userSub.plan_id.includes('starter') && !userSub.plan_id.includes('newbie') && !userSub.plan_id.includes('free'));
+
         let cardsHtml = '';
         list.forEach(p => {
             const price = isAnnual ? p.price_annual : p.price_monthly;
             const priceDisplay = price === 0 ? 'Miễn Phí' : `${price.toLocaleString('vi-VN')} Token`;
             const durationDisplay = price === 0 ? 'Mãi Mãi' : (isAnnual ? '/ năm' : '/ tháng');
             const isPopular = p.popular;
+            const isCurrentActivePlan = Boolean(userSub && userSub.is_active && !userSub.is_expired && userSub.plan_id === p.id);
 
             cardsHtml += `
-            <div class="pricing-card-hover rounded-3xl p-6 sm:p-7 flex flex-col justify-between border ${isPopular ? 'border-amber-400 dark:border-amber-500 bg-gradient-to-b from-amber-50/50 via-white to-white dark:from-amber-950/20 dark:via-gray-800 dark:to-gray-800 kgs-vip-glow shadow-xl relative' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm'}">
-                ${isPopular ? `
+            <div class="pricing-card-hover rounded-3xl p-6 sm:p-7 flex flex-col justify-between border ${
+                isCurrentActivePlan
+                    ? 'border-2 border-emerald-500 dark:border-emerald-400 bg-gradient-to-b from-emerald-50/80 via-white to-white dark:from-emerald-950/40 dark:via-gray-800 dark:to-gray-800 shadow-xl relative'
+                    : (isPopular ? 'border-amber-400 dark:border-amber-500 bg-gradient-to-b from-amber-50/50 via-white to-white dark:from-amber-950/20 dark:via-gray-800 dark:to-gray-800 kgs-vip-glow shadow-xl relative' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm')
+            }">
+                ${isCurrentActivePlan ? `
+                <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-emerald-600 to-teal-500 text-white text-[10px] font-black uppercase tracking-wider px-3.5 py-1 rounded-full shadow flex items-center space-x-1">
+                    <i class="fas fa-check-circle"></i> <span>⭐ ĐÃ NÂNG CẤP (Còn ${userSub.days_remaining || 1} ngày)</span>
+                </div>` : (isPopular ? `
                 <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-amber-500 to-yellow-400 text-gray-900 text-[10px] font-black uppercase tracking-wider px-3.5 py-1 rounded-full shadow">
                     ⭐ ${p.badge || 'Khuyên Dùng'}
-                </div>` : ''}
+                </div>` : '')}
 
                 <div>
                     <div class="flex items-center justify-between mb-3">
                         <h3 class="text-lg font-black text-gray-900 dark:text-white">${p.name}</h3>
-                        ${!isPopular && p.badge ? `<span class="text-[10px] font-black px-2.5 py-0.5 rounded-full ${p.id.includes('vip') || p.id.includes('agency') ? 'bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300 border border-purple-300 dark:border-purple-700' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'}">${p.badge}</span>` : ''}
+                        ${!isPopular && !isCurrentActivePlan && p.badge ? `<span class="text-[10px] font-black px-2.5 py-0.5 rounded-full ${p.id.includes('vip') || p.id.includes('agency') ? 'bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300 border border-purple-300 dark:border-purple-700' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'}">${p.badge}</span>` : ''}
                     </div>
 
-                    <div class="mb-5">
+                    <div class="mb-3">
                         <span class="text-2xl sm:text-3xl font-black ${price === 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-900 dark:text-white'}">${priceDisplay}</span>
                         <span class="text-xs text-gray-400">${durationDisplay}</span>
                     </div>
+
+                    ${isCurrentActivePlan ? `
+                    <div class="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold mb-4 flex items-center bg-emerald-50/60 dark:bg-emerald-950/60 px-2.5 py-1 rounded-lg border border-emerald-200 dark:border-emerald-800">
+                        <i class="fas fa-calendar-alt mr-1.5 text-emerald-500"></i> Hết hạn ngày: ${new Date(userSub.expires_at).toLocaleDateString('vi-VN')}
+                    </div>` : ''}
 
                     <ul class="space-y-2.5 text-xs text-gray-600 dark:text-gray-300 mb-6">
                         ${p.features.map(f => `
@@ -260,15 +301,19 @@
                 </div>
 
                 <div>
-                    ${price === 0 ? `
-                        <button disabled class="w-full py-2.5 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 font-bold text-xs cursor-default">
-                            Đang Hoạt Động (Mặc định)
+                    ${isCurrentActivePlan ? `
+                        <button onclick="window.promptPurchase('${p.id}', '${p.name}', ${price}, '${currentTab}', true)" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black text-xs shadow-md transition transform hover:scale-[1.02] flex items-center justify-center space-x-1.5">
+                            <i class="fas fa-sync-alt text-xs"></i> <span>Gia Hạn Thêm (${isAnnual ? '+1 Năm' : '+1 Tháng'}) - Cộng Dồn</span>
+                        </button>
+                    ` : (price === 0 ? `
+                        <button disabled class="w-full py-2.5 rounded-xl ${hasAnyPaidPlan ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500' : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800'} font-bold text-xs cursor-default">
+                            ${hasAnyPaidPlan ? 'Gói Mặc Định Khi Hết Hạn' : '✓ Đang Hoạt Động (Mặc định)'}
                         </button>
                     ` : `
-                        <button onclick="window.promptPurchase('${p.id}', '${p.name}', ${price}, '${currentTab}')" class="w-full py-2.5 rounded-xl ${isPopular ? 'bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-600 hover:to-yellow-500 text-gray-900' : 'bg-indigo-600 hover:bg-indigo-700 text-white'} font-black text-xs shadow-md transition transform hover:scale-[1.02] flex items-center justify-center space-x-1.5">
-                            <i class="fas fa-crown text-xs"></i> <span>Nâng Cấp Ngay</span>
+                        <button onclick="window.promptPurchase('${p.id}', '${p.name}', ${price}, '${currentTab}', false)" class="w-full py-2.5 rounded-xl ${isPopular ? 'bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-600 hover:to-yellow-500 text-gray-900' : 'bg-indigo-600 hover:bg-indigo-700 text-white'} font-black text-xs shadow-md transition transform hover:scale-[1.02] flex items-center justify-center space-x-1.5">
+                            <i class="fas fa-crown text-xs"></i> <span>${hasAnyPaidPlan ? 'Chuyển Đổi Sang Gói Này' : 'Nâng Cấp Ngay'}</span>
                         </button>
-                    `}
+                    `)}
                 </div>
             </div>`;
         });
@@ -411,7 +456,7 @@
     // 7. Mua gói & Xác nhận
     let pendingPurchase = null;
 
-    window.promptPurchase = async function(planId, planName, price, category) {
+    window.promptPurchase = async function(planId, planName, price, category, isRenew = false) {
         let user = null;
         try { user = JSON.parse(localStorage.getItem('user')); } catch (e) {}
         if (!user || !user.id) {
@@ -422,9 +467,22 @@
 
         const balance = await fetchUserBalance();
         const role = detectContextRole();
-        pendingPurchase = { planId, planName, price, category, cycle: currentBillingCycle, userId: user.id, role: user.role || role };
+        pendingPurchase = { planId, planName, price, category, cycle: currentBillingCycle, userId: user.id, role: user.role || role, isRenew };
 
-        document.getElementById('confirmPlanName').innerText = `${planName} (${category === 'addon' ? 'Dịch vụ lẻ' : (currentBillingCycle === 'annual' ? '1 Năm' : '1 Tháng')})`;
+        const titleEl = document.getElementById('confirmPurchaseTitle');
+        const descEl = document.getElementById('confirmPurchaseDesc');
+        const planNameEl = document.getElementById('confirmPlanName');
+
+        if (isRenew) {
+            if (titleEl) titleEl.innerText = 'Xác Nhận Gia Hạn Gói Dịch Vụ';
+            if (descEl) descEl.innerHTML = 'Thời hạn gói sẽ được <span class="font-bold text-emerald-600 dark:text-emerald-400">CỘNG DỒN TIẾP TỤC</span> vào ngày hết hạn hiện tại của bạn.';
+            if (planNameEl) planNameEl.innerText = `${planName} [GIA HẠN +${currentBillingCycle === 'annual' ? '365 Ngày' : '30 Ngày'}]`;
+        } else {
+            if (titleEl) titleEl.innerText = 'Xác Nhận Nâng Cấp Gói';
+            if (descEl) descEl.innerText = 'Xác nhận thanh toán gói dịch vụ bằng số dư ví Token.';
+            if (planNameEl) planNameEl.innerText = `${planName} (${category === 'addon' ? 'Dịch vụ lẻ' : (currentBillingCycle === 'annual' ? '1 Năm' : '1 Tháng')})`;
+        }
+
         document.getElementById('confirmPlanPrice').innerText = `${price.toLocaleString('vi-VN')} Token`;
         document.getElementById('confirmCurrentBalance').innerText = `${balance.toLocaleString('vi-VN')} Token`;
         
@@ -444,7 +502,7 @@
             afterEl.innerText = `${afterBal.toLocaleString('vi-VN')} Token`;
             afterEl.className = 'font-black text-emerald-600 dark:text-emerald-400';
             errEl.classList.add('hidden');
-            proceedBtn.innerText = 'Xác Nhận Thanh Toán';
+            proceedBtn.innerText = isRenew ? 'Xác Nhận Gia Hạn (Cộng Dồn)' : 'Xác Nhận Thanh Toán';
             proceedBtn.onclick = () => window.executePurchase();
         }
 
@@ -486,6 +544,7 @@
             }
 
             if (result.subscription) {
+                localStorage.setItem('kgs_user_sub', JSON.stringify(result.subscription));
                 if (pendingPurchase.role === 'client') {
                     localStorage.setItem('kgs_client_sub_cache', JSON.stringify(result.subscription));
                 } else {
@@ -497,13 +556,22 @@
             window.closeConfirmModal();
             window.closePricingModal();
 
-            // Cập nhật số dư trên UI
+            // Cập nhật số dư & Header Badges & Profile
             if (window.loadUserWallet) window.loadUserWallet();
             if (window.loadFreelancerWallet) window.loadFreelancerWallet();
+            if (window.syncVipHeaderBadges) window.syncVipHeaderBadges();
+            if (window.loadProfile) window.loadProfile();
+            if (window.loadUserProfile) window.loadUserProfile();
+
             const uiBal = document.getElementById('uiBalanceDisplay');
             if (uiBal && result.new_balance !== undefined) {
                 uiBal.innerText = `${result.new_balance.toLocaleString('vi-VN')} Token`;
             }
+
+            // Render lại các thẻ gói với thời hạn mới
+            setTimeout(() => {
+                renderPricingCards();
+            }, 500);
         } catch (e) {
             alert(`❌ Lỗi: ${e.message}`);
         } finally {
@@ -577,45 +645,84 @@
         const bannerId = 'kgsSmartPromoBanner';
         if (document.getElementById(bannerId)) return;
 
+        let userSub = null;
+        try { userSub = JSON.parse(localStorage.getItem('kgs_user_sub')); } catch(e) {}
+        const isVip = Boolean(userSub && userSub.is_active && !userSub.is_expired && userSub.plan_id && !userSub.plan_id.includes('starter') && !userSub.plan_id.includes('newbie'));
+
         const isClient = role === 'client';
         const bannerHtml = document.createElement('div');
         bannerHtml.id = bannerId;
         bannerHtml.className = `rounded-2xl p-4 sm:p-5 mb-6 relative overflow-hidden shadow-lg border transition-all duration-300 ${
-            isClient
-                ? 'bg-gradient-to-r from-purple-900 via-indigo-900 to-indigo-950 border-purple-500/30 text-white'
-                : 'bg-gradient-to-r from-amber-900 via-yellow-900 to-stone-900 border-amber-500/30 text-white'
+            isVip
+                ? 'bg-gradient-to-r from-amber-950 via-purple-950 to-indigo-950 border-amber-500/40 text-white'
+                : (isClient
+                    ? 'bg-gradient-to-r from-purple-900 via-indigo-900 to-indigo-950 border-purple-500/30 text-white'
+                    : 'bg-gradient-to-r from-amber-900 via-yellow-900 to-stone-900 border-amber-500/30 text-white')
         }`;
 
-        bannerHtml.innerHTML = `
-            <button onclick="window.dismissPromoBanner('${role}')" class="absolute top-3 right-3 w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-sm transition" title="Đóng thông báo">
-                &times;
-            </button>
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pr-6">
-                <div class="flex items-center space-x-3.5">
-                    <div class="w-11 h-11 rounded-2xl ${isClient ? 'bg-purple-500/20 text-purple-300' : 'bg-amber-500/20 text-yellow-300'} flex items-center justify-center text-xl shrink-0">
-                        ${isClient ? '<i class="fas fa-rocket"></i>' : '<i class="fas fa-crown"></i>'}
-                    </div>
-                    <div>
-                        <div class="flex items-center space-x-2">
-                            <span class="${isClient ? 'bg-purple-400 text-purple-950' : 'bg-yellow-400 text-yellow-950'} text-[10px] font-black uppercase px-2 py-0.5 rounded-full">
-                                ${isClient ? 'ĐẶC QUYỀN DOANH NGHIỆP' : 'DÀNH CHO CHUYÊN GIA IT'}
-                            </span>
-                            <span class="text-xs text-gray-300">Khởi chạy tính năng VIP</span>
+        if (isVip) {
+            bannerHtml.innerHTML = `
+                <button onclick="window.dismissPromoBanner('${role}')" class="absolute top-3 right-3 w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-sm transition" title="Đóng thông báo">
+                    &times;
+                </button>
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pr-6">
+                    <div class="flex items-center space-x-3.5">
+                        <div class="w-11 h-11 rounded-2xl bg-amber-500/20 text-yellow-300 flex items-center justify-center text-xl shrink-0 shadow-sm border border-amber-400/30">
+                            <i class="fas fa-crown"></i>
                         </div>
-                        <h4 class="text-sm sm:text-base font-extrabold mt-0.5">
-                            ${isClient 
-                                ? 'Cần tuyển nhân sự gấp? Đẩy bài lên Top 1 và kết nối trực tiếp với 50+ Senior Dev' 
-                                : 'Tăng 300% tỷ lệ trúng thầu với Huy hiệu Tích Xanh & 50 lượt Bids dự án mỗi tháng'}
-                        </h4>
+                        <div>
+                            <div class="flex items-center space-x-2">
+                                <span class="bg-amber-400 text-amber-950 text-[10px] font-black uppercase px-2 py-0.5 rounded-full">
+                                    👑 HỘI VIÊN VIP ĐANG HOẠT ĐỘNG
+                                </span>
+                                <span class="text-xs text-emerald-300 font-bold flex items-center">
+                                    <i class="fas fa-clock mr-1"></i> Còn ${userSub.days_remaining || 1} ngày sử dụng
+                                </span>
+                            </div>
+                            <h4 class="text-sm sm:text-base font-extrabold mt-0.5">
+                                Gói: <span class="text-amber-300 font-black">${userSub.plan_name}</span> - Đã kích hoạt đầy đủ đặc quyền ưu tiên cao cấp trên toàn hệ thống!
+                            </h4>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2 shrink-0">
+                        <button onclick="window.openPricingModal('${isClient ? 'client' : 'freelancer'}')" class="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-600 hover:to-yellow-500 text-gray-900 font-black text-xs shadow-md transition transform hover:scale-105 flex items-center">
+                            <i class="fas fa-sync-alt mr-1.5 text-gray-900"></i> Gia Hạn / Quản Lý Gói
+                        </button>
                     </div>
                 </div>
-                <div class="flex items-center space-x-2 shrink-0">
-                    <button onclick="window.openPricingModal('${isClient ? 'client' : 'freelancer'}')" class="px-4 py-2 rounded-xl ${isClient ? 'bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600' : 'bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-600 hover:to-yellow-500 text-gray-900'} text-white font-extrabold text-xs shadow-md transition transform hover:scale-105 flex items-center">
-                        <i class="fas fa-crown mr-1.5 ${isClient ? 'text-yellow-300' : 'text-gray-900'}"></i> ${isClient ? 'Nâng Cấp Pro Ngay' : 'Khám Phá Gói Pro'}
-                    </button>
+            `;
+        } else {
+            bannerHtml.innerHTML = `
+                <button onclick="window.dismissPromoBanner('${role}')" class="absolute top-3 right-3 w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-sm transition" title="Đóng thông báo">
+                    &times;
+                </button>
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pr-6">
+                    <div class="flex items-center space-x-3.5">
+                        <div class="w-11 h-11 rounded-2xl ${isClient ? 'bg-purple-500/20 text-purple-300' : 'bg-amber-500/20 text-yellow-300'} flex items-center justify-center text-xl shrink-0">
+                            ${isClient ? '<i class="fas fa-rocket"></i>' : '<i class="fas fa-crown"></i>'}
+                        </div>
+                        <div>
+                            <div class="flex items-center space-x-2">
+                                <span class="${isClient ? 'bg-purple-400 text-purple-950' : 'bg-yellow-400 text-yellow-950'} text-[10px] font-black uppercase px-2 py-0.5 rounded-full">
+                                    ${isClient ? 'ĐẶC QUYỀN DOANH NGHIỆP' : 'DÀNH CHO CHUYÊN GIA IT'}
+                                </span>
+                                <span class="text-xs text-gray-300">Khởi chạy tính năng VIP</span>
+                            </div>
+                            <h4 class="text-sm sm:text-base font-extrabold mt-0.5">
+                                ${isClient 
+                                    ? 'Cần tuyển nhân sự gấp? Đẩy bài lên Top 1 và kết nối trực tiếp với 50+ Senior Dev' 
+                                    : 'Tăng 300% tỷ lệ trúng thầu với Huy hiệu Tích Xanh & 50 lượt Bids dự án mỗi tháng'}
+                            </h4>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2 shrink-0">
+                        <button onclick="window.openPricingModal('${isClient ? 'client' : 'freelancer'}')" class="px-4 py-2 rounded-xl ${isClient ? 'bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600' : 'bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-600 hover:to-yellow-500 text-gray-900'} text-white font-extrabold text-xs shadow-md transition transform hover:scale-105 flex items-center">
+                            <i class="fas fa-crown mr-1.5 ${isClient ? 'text-yellow-300' : 'text-gray-900'}"></i> ${isClient ? 'Nâng Cấp Pro Ngay' : 'Khám Phá Gói Pro'}
+                        </button>
+                    </div>
                 </div>
-            </div>
-        `;
+            `;
+        }
 
         mainEl.insertBefore(bannerHtml, mainEl.firstChild);
     };

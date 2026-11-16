@@ -186,10 +186,16 @@ function getUserSubscription(userId) {
     const sub = data.user_subscriptions?.[userId];
     if (!sub) return null;
 
-    if (sub.expires_at && new Date(sub.expires_at) < new Date()) {
+    const now = new Date();
+    const expDate = new Date(sub.expires_at);
+    if (sub.expires_at && expDate < now) {
         sub.is_expired = true;
+        sub.is_active = false;
+        sub.days_remaining = 0;
     } else {
         sub.is_expired = false;
+        sub.is_active = true;
+        sub.days_remaining = Math.max(0, Math.ceil((expDate - now) / (1000 * 60 * 60 * 24)));
     }
     return sub;
 }
@@ -232,7 +238,22 @@ function subscribeUser(userId, planId, billingCycle = 'monthly', role = 'client'
     if (!plan) throw new Error('Gói dịch vụ không tồn tại');
 
     const durationDays = billingCycle === 'annual' ? 365 : 30;
-    const expiresAt = new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000).toISOString();
+
+    if (!data.user_subscriptions) data.user_subscriptions = {};
+    const existingSub = data.user_subscriptions[userId];
+
+    // CỘNG DỒN THỜI HẠN: Nếu đang có gói còn hạn, cộng dồn tiếp tục từ ngày hết hạn cũ!
+    let baseTime = Date.now();
+    if (existingSub && existingSub.expires_at) {
+        const existingExpires = new Date(existingSub.expires_at).getTime();
+        if (existingExpires > baseTime) {
+            baseTime = existingExpires; // Cộng dồn ngày sử dụng
+        }
+    }
+
+    const expiresAt = new Date(baseTime + durationDays * 24 * 60 * 60 * 1000).toISOString();
+    const now = new Date();
+    const daysRemaining = Math.max(1, Math.ceil((new Date(expiresAt) - now) / (1000 * 60 * 60 * 24)));
 
     const subRecord = {
         user_id: userId,
@@ -240,12 +261,14 @@ function subscribeUser(userId, planId, billingCycle = 'monthly', role = 'client'
         plan_name: plan.name,
         role: role,
         billing_cycle: billingCycle,
-        started_at: new Date().toISOString(),
+        started_at: (existingSub && existingSub.started_at) ? existingSub.started_at : new Date().toISOString(),
         expires_at: expiresAt,
+        days_remaining: daysRemaining,
+        is_active: true,
+        is_expired: false,
         features: plan.features
     };
 
-    if (!data.user_subscriptions) data.user_subscriptions = {};
     data.user_subscriptions[userId] = subRecord;
     writeData(data);
 

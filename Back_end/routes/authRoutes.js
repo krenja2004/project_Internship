@@ -11,6 +11,7 @@ const { sendOtpEmail } = require('../services/emailService');
 const { generateAndSaveOtp, verifyOtp } = require('../services/otpService');
 const { sendWhatsAppOtp, getWhatsAppStatus, initWhatsAppClient } = require('../services/whatsappService');
 const { createTelegramOtpSession, getTelegramBotStatus, TELEGRAM_BOT_USERNAME } = require('../services/telegramService');
+const subscriptionService = require('../services/subscriptionService');
 const crypto = require('crypto');
 
 // In-Memory store cho Phone OTP (WhatsApp)
@@ -870,6 +871,18 @@ router.get('/api/users/:id', async (req, res) => {
 
         console.log(`✅ [API GET /api/users] Hồ sơ: ${user.full_name} | Role: ${user.role} | Tier: ${creditTier} | Category: ${primary_category || 'N/A'}`);
 
+        // Lấy thông tin Gói VIP / Hội viên (Subscription)
+        let userSub = null;
+        let isVip = false;
+        try {
+            userSub = subscriptionService.getUserSubscription(id);
+            if (userSub && userSub.is_active && !userSub.is_expired) {
+                isVip = true;
+            }
+        } catch (subErr) {
+            console.warn('[User Subscription Check Warning]:', subErr.message);
+        }
+
         res.status(200).json({
             ...user,
             skills: rawSkills,
@@ -879,6 +892,12 @@ router.get('/api/users/:id', async (req, res) => {
             portfolios,
             freelancer_type,
             recent_jobs: recentJobs,
+            subscription: userSub || null,
+            is_vip: isVip,
+            vip_tier: isVip ? userSub.plan_name : 'Gói Cơ Bản (Miễn Phí)',
+            vip_badge: isVip ? (user.role === 'freelancer' ? 'Tích Xanh Verified Pro Dev' : 'Vương Miện Doanh Nghiệp VIP') : null,
+            vip_days_remaining: isVip ? (userSub.days_remaining || 0) : 0,
+            vip_expires_at: isVip ? userSub.expires_at : null,
             stats: {
                 total_spent: totalSpent,
                 hire_rate: hireRate,
@@ -1219,6 +1238,23 @@ router.get('/api/freelancers', async (req, res) => {
                 console.warn('Lỗi đọc reviews cho freelancer:', err.message);
             }
 
+            // Kiểm tra trạng thái Gói VIP Freelancer (Chuyên Gia Pro / Agency)
+            let isVip = false;
+            let vipTier = 'Cơ bản';
+            let vipBadge = null;
+            let vipDays = 0;
+            let vipExpires = null;
+            try {
+                const sub = subscriptionService.getUserSubscription(f.id);
+                if (sub && sub.is_active && !sub.is_expired) {
+                    isVip = true;
+                    vipTier = sub.plan_name;
+                    vipBadge = 'Tích Xanh Verified Pro Dev';
+                    vipDays = sub.days_remaining || 0;
+                    vipExpires = sub.expires_at;
+                }
+            } catch (subErr) {}
+
             return {
                 id: f.id,
                 full_name: f.full_name || 'Freelancer Ẩn Danh',
@@ -1236,6 +1272,11 @@ router.get('/api/freelancers', async (req, res) => {
                 hourly_rate: 150000, // Token / giờ hoặc ngân sách gợi ý
                 is_email_verified: Boolean(f.is_email_verified),
                 is_phone_verified: Boolean(f.is_phone_verified),
+                is_vip: isVip,
+                vip_tier: vipTier,
+                vip_badge: vipBadge,
+                vip_days_remaining: vipDays,
+                vip_expires_at: vipExpires,
                 created_at: f.created_at
             };
         });
@@ -1268,7 +1309,14 @@ router.get('/api/freelancers', async (req, res) => {
             );
         }
 
-        console.log(`✅ [API GET /api/freelancers] Trả về ${enrichedFreelancers.length} nhân sự`);
+        // ĐẶC QUYỀN VIP: Luôn xuất hiện đầu mục Chuyên Gia IT (VIP Freelancers Sorted to Top)
+        enrichedFreelancers.sort((a, b) => {
+            if (a.is_vip && !b.is_vip) return -1;
+            if (!a.is_vip && b.is_vip) return 1;
+            return 0;
+        });
+
+        console.log(`✅ [API GET /api/freelancers] Trả về ${enrichedFreelancers.length} nhân sự (Đã ưu tiên VIP lên đầu)`);
         res.status(200).json({ success: true, freelancers: enrichedFreelancers });
     } catch (err) {
         console.error(`❌ [API GET /api/freelancers] Lỗi: ${err.message}`);

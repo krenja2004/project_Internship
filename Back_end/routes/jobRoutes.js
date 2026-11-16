@@ -1078,6 +1078,23 @@ router.get('/api/freelancers/:id/work-history', async (req, res) => {
             bio = user.bio;
         }
 
+        // Kiểm tra Gói VIP Freelancer
+        let isVip = false;
+        let vipTier = 'Cơ bản';
+        let vipBadge = null;
+        let vipDays = 0;
+        let vipExpires = null;
+        try {
+            const sub = subscriptionService.getUserSubscription(id);
+            if (sub && sub.is_active && !sub.is_expired) {
+                isVip = true;
+                vipTier = sub.plan_name;
+                vipBadge = 'Tích Xanh Verified Pro Dev';
+                vipDays = sub.days_remaining || 0;
+                vipExpires = sub.expires_at;
+            }
+        } catch(subErr) {}
+
         res.status(200).json({
             success: true,
             freelancer: {
@@ -1089,7 +1106,12 @@ router.get('/api/freelancers/:id/work-history', async (req, res) => {
                 in_progress_count: inProgressJobs.length,
                 rating_score: ratingScore,
                 rating_display: avgRating,
-                bio: bio
+                bio: bio,
+                is_vip: isVip,
+                vip_tier: vipTier,
+                vip_badge: vipBadge,
+                vip_days_remaining: vipDays,
+                vip_expires_at: vipExpires
             },
             completed_jobs: completedJobs,
             in_progress_jobs: inProgressJobs,

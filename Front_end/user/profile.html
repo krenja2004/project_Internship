@@ -12,7 +12,7 @@
             theme: { extend: { colors: { primary: '#4f46e5', dark: '#111827', darkCard: '#1f2937' } } }
         }
     </script>
-    <script src="../assets/js/token-formatter.js?v=1791344398"></script>
+    <script src="../assets/js/token-formatter.js?v=1794810000"></script>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 transition-colors text-gray-800 dark:text-gray-100 h-screen flex overflow-hidden">
     <div id="sidebar-container"></div>
@@ -167,6 +167,10 @@
                                 <div><p class="text-xs text-gray-500 dark:text-gray-400 font-medium">Đánh giá Uy tín</p><p id="statRating" class="text-xl font-black text-yellow-500 mt-0.5 flex items-center">Chưa có</p></div>
                             </div>
                         </div>
+
+                        <!-- THẺ TRẠNG THÁI GÓI HỘI VIÊN & ĐẶC QUYỀN DOANH NGHIỆP (VIP STATUS CARD) -->
+                        <div id="clientVipCard"></div>
+
                         <!-- HYBRID WEB2-WEB3 TRUST LEDGER CARD (ĐIỂM TÍN DỤNG KHÁCH HÀNG) -->
                         <div class="bg-gradient-to-br from-indigo-900 via-indigo-950 to-slate-900 text-white rounded-2xl shadow-md p-6 border border-indigo-700/40 relative overflow-hidden">
                             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-indigo-800/60 pb-4">
@@ -986,14 +990,72 @@
             // Client Tier Display in Header
             const clientTierEl = document.getElementById('displayClientTier');
             if (clientTierEl) {
-                const isVip = (stats.total_spent && stats.total_spent >= 2000) || 
-                              (stats.credit_tier && (stats.credit_tier.includes('VIP') || stats.credit_tier.includes('Hạng A')));
-                if (isVip) {
-                    clientTierEl.innerHTML = `<i class="fas fa-crown text-amber-500 mr-1.5"></i>Client VIP`;
-                    clientTierEl.className = 'flex items-center text-amber-600 dark:text-amber-400 font-bold';
+                if (data.is_vip) {
+                    clientTierEl.innerHTML = `<i class="fas fa-crown text-amber-500 mr-1.5 animate-bounce"></i>${data.vip_tier} (Còn ${data.vip_days_remaining} ngày)`;
+                    clientTierEl.className = 'flex items-center text-amber-600 dark:text-amber-400 font-black';
                 } else {
-                    clientTierEl.innerHTML = `<i class="fas fa-user-check text-blue-600 dark:text-blue-400 mr-1.5"></i>Client Basic`;
+                    clientTierEl.innerHTML = `<i class="fas fa-user-check text-blue-600 dark:text-blue-400 mr-1.5"></i>Khách hàng Thường (Cơ bản)`;
                     clientTierEl.className = 'flex items-center text-blue-600 dark:text-blue-400 font-medium';
+                }
+            }
+
+            // Render Thẻ Trạng Thái Gói Hội Viên (VIP Status Card)
+            const vipCardEl = document.getElementById('clientVipCard');
+            if (vipCardEl) {
+                if (data.is_vip) {
+                    vipCardEl.innerHTML = `
+                    <div class="bg-gradient-to-r from-amber-500/10 via-yellow-500/10 to-amber-500/5 dark:from-amber-950/40 dark:via-yellow-950/20 dark:to-stone-900 border-2 border-amber-400 dark:border-amber-500 rounded-2xl p-5 sm:p-6 shadow-md">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500 to-yellow-400 text-gray-950 flex items-center justify-center text-2xl font-black shadow shrink-0">
+                                    👑
+                                </div>
+                                <div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-[10px] font-black uppercase bg-amber-400 text-gray-950 px-2.5 py-0.5 rounded-full shadow-xs">👑 GÓI ĐANG HOẠT ĐỘNG</span>
+                                        <span class="text-xs font-black text-amber-600 dark:text-amber-400">${data.vip_tier}</span>
+                                    </div>
+                                    <h4 class="text-base sm:text-lg font-black text-gray-900 dark:text-white mt-1">
+                                        Thời hạn còn lại: <span class="text-emerald-600 dark:text-emerald-400">${data.vip_days_remaining} ngày</span>
+                                        <span class="text-xs font-normal text-gray-500 dark:text-gray-400 ml-1">(Hết hạn: ${new Date(data.vip_expires_at).toLocaleDateString('vi-VN')})</span>
+                                    </h4>
+                                    <p class="text-xs text-gray-600 dark:text-gray-300 mt-1">
+                                        Đặc quyền: Đăng tối đa 10 dự án/tháng • Tặng 3 lượt Đẩy Top 1 • Mở khóa xem Zalo/SĐT 10 Senior Dev • Ưu tiên trọng tài 4h
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="shrink-0 flex items-center space-x-2">
+                                <button onclick="window.openPricingModal('client')" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-600 hover:to-yellow-500 text-gray-900 font-black text-xs shadow-md transition transform hover:scale-105 flex items-center space-x-1.5 cursor-pointer">
+                                    <i class="fas fa-sync-alt"></i> <span>Gia Hạn / Nâng Cấp Gói</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>`;
+                } else {
+                    vipCardEl.innerHTML = `
+                    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 shadow-sm">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-gray-700 text-gray-400 flex items-center justify-center text-xl shrink-0">
+                                    <i class="fas fa-shield-alt"></i>
+                                </div>
+                                <div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-[10px] font-bold uppercase bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2.5 py-0.5 rounded-full">Gói Cơ Bản (Starter)</span>
+                                        <span class="text-xs text-gray-400 font-medium">Chưa kích hoạt VIP</span>
+                                    </div>
+                                    <h4 class="text-sm font-bold text-gray-800 dark:text-gray-200 mt-1">
+                                        Nâng cấp lên Doanh Nghiệp Pro để mở khóa xem SĐT/Zalo Freelancer và đẩy tin tuyển dụng lên Top 1
+                                    </h4>
+                                </div>
+                            </div>
+                            <div class="shrink-0">
+                                <button onclick="window.openPricingModal('client')" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow transition flex items-center space-x-1.5 cursor-pointer">
+                                    <i class="fas fa-crown text-amber-300"></i> <span>Nâng Cấp Gói VIP Ngay</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>`;
                 }
             }
 
@@ -1083,7 +1145,7 @@
         loadBanks();
         loadProfile();
     </script>
-    <script src="ui.js?v=1791344398"></script>
+    <script src="ui.js?v=1794810000"></script>
 
     <script>
         // Global Drag and Drop protection
