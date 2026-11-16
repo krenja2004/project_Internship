@@ -5,7 +5,7 @@
     if (!window.__kgsTrafficTracked) {
         window.__kgsTrafficTracked = true;
         const s = document.createElement('script');
-        s.src = '../assets/js/traffic-tracker.js';
+        s.src = '../assets/js/traffic-tracker.js?v=20261116_v4';
         s.async = true;
         document.head.appendChild(s);
     }

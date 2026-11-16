@@ -3,9 +3,9 @@ const path = require('path');
 
 const DATA_FILE = path.join(__dirname, '../data/traffic_analytics.json');
 
-// In-memory active sessions map for real-time live visitors (last 5 minutes)
-// Key: session_id, Value: { last_seen: timestamp, path: string, device: string, ip: string, title: string }
-const activeSessions = new Map();
+// In-memory active users map for real-time live users (active in last 3 minutes)
+// Key: session_id or user_{user_id} -> { user_id, user_name, user_email, user_role, user_avatar, current_path, current_title, device, browser, os, ip, location, last_seen }
+const activeUsers = new Map();
 
 // Helper: Ensure data file and directory exist
 function ensureDataFile() {
@@ -14,156 +14,22 @@ function ensureDataFile() {
         fs.mkdirSync(dir, { recursive: true });
     }
     if (!fs.existsSync(DATA_FILE)) {
-        const initialData = generateDefaultTrafficData();
+        const initialData = {
+            summary: {
+                total_pageviews: 1,
+                total_unique_visitors: 1,
+                initialized_at: new Date().toISOString()
+            },
+            daily: {},
+            hourly: {},
+            top_pages: {},
+            devices: { desktop: 1, mobile: 0, tablet: 0 },
+            browsers: { Chrome: 1 },
+            referrers: { 'Trực tiếp (Direct / Bookmark)': 1 },
+            recent_visits: []
+        };
         fs.writeFileSync(DATA_FILE, JSON.stringify(initialData, null, 2), 'utf8');
     }
-}
-
-// Generate realistic baseline traffic data (for smooth presentation & graduation defense demo)
-function generateDefaultTrafficData() {
-    const today = new Date();
-    const daily = {};
-    const hourly = {};
-    let totalPageviews = 0;
-    let totalUnique = 0;
-
-    // Generate past 30 days of baseline realistic traffic
-    for (let i = 29; i >= 0; i--) {
-        const d = new Date(today);
-        d.setDate(d.getDate() - i);
-        const dateKey = d.toISOString().split('T')[0];
-
-        // Weekend vs weekday pattern with gradual growth
-        const isWeekend = d.getDay() === 0 || d.getDay() === 6;
-        const growthFactor = 1 + ((30 - i) * 0.025); // 2.5% daily growth trend
-        const baseViews = isWeekend ? Math.floor(65 * growthFactor) : Math.floor(120 * growthFactor);
-        const variance = Math.floor(Math.random() * 25) - 10;
-        const pageviews = Math.max(30, baseViews + variance);
-        const uniqueVisitors = Math.max(15, Math.floor(pageviews * (0.55 + Math.random() * 0.15)));
-
-        daily[dateKey] = {
-            pageviews,
-            unique_visitors: uniqueVisitors,
-            devices: {
-                desktop: Math.floor(pageviews * 0.58),
-                mobile: Math.floor(pageviews * 0.38),
-                tablet: Math.max(1, pageviews - Math.floor(pageviews * 0.58) - Math.floor(pageviews * 0.38))
-            }
-        };
-
-        totalPageviews += pageviews;
-        totalUnique += uniqueVisitors;
-    }
-
-    // Generate past 24 hours of traffic for today
-    for (let h = 0; h < 24; h++) {
-        const hourKey = `${today.toISOString().split('T')[0]}T${String(h).padStart(2, '0')}`;
-        // Peak hours in Vietnam: 9h-11h, 14h-16h, 20h-22h
-        let hourMultiplier = 0.2;
-        if (h >= 8 && h <= 11) hourMultiplier = 1.2;
-        else if (h >= 13 && h <= 17) hourMultiplier = 1.0;
-        else if (h >= 19 && h <= 22) hourMultiplier = 1.4;
-        else if (h >= 23 || h <= 5) hourMultiplier = 0.15;
-
-        const currentHour = today.getHours();
-        if (h <= currentHour) {
-            const hViews = Math.floor((12 + Math.random() * 8) * hourMultiplier);
-            const hUnique = Math.max(1, Math.floor(hViews * 0.65));
-            hourly[hourKey] = {
-                pageviews: hViews,
-                unique_visitors: hUnique
-            };
-        } else {
-            hourly[hourKey] = {
-                pageviews: 0,
-                unique_visitors: 0
-            };
-        }
-    }
-
-    return {
-        summary: {
-            total_pageviews: totalPageviews,
-            total_unique_visitors: totalUnique,
-            initialized_at: new Date().toISOString()
-        },
-        daily,
-        hourly,
-        top_pages: {
-            "/": Math.floor(totalPageviews * 0.35),
-            "/index.html": Math.floor(totalPageviews * 0.15),
-            "/explore-jobs.html": Math.floor(totalPageviews * 0.22),
-            "/explore-freelancers.html": Math.floor(totalPageviews * 0.12),
-            "/how-it-works.html": Math.floor(totalPageviews * 0.08),
-            "/sharedFolder/login.html": Math.floor(totalPageviews * 0.05),
-            "/freelancer/home.html": Math.floor(totalPageviews * 0.02),
-            "/user/home.html": Math.floor(totalPageviews * 0.01)
-        },
-        devices: {
-            desktop: Math.floor(totalPageviews * 0.58),
-            mobile: Math.floor(totalPageviews * 0.38),
-            tablet: Math.floor(totalPageviews * 0.04)
-        },
-        browsers: {
-            "Chrome": Math.floor(totalPageviews * 0.64),
-            "Safari": Math.floor(totalPageviews * 0.19),
-            "Edge": Math.floor(totalPageviews * 0.11),
-            "Firefox": Math.floor(totalPageviews * 0.04),
-            "Khác": Math.floor(totalPageviews * 0.02)
-        },
-        referrers: {
-            "Trực tiếp (Direct / Bookmark)": Math.floor(totalPageviews * 0.45),
-            "Google Tìm kiếm (Organic)": Math.floor(totalPageviews * 0.32),
-            "Mạng xã hội (Facebook / Zalo)": Math.floor(totalPageviews * 0.15),
-            "Giới thiệu (Referral / GitHub)": Math.floor(totalPageviews * 0.08)
-        },
-        recent_visits: [
-            {
-                timestamp: new Date(Date.now() - 45000).toISOString(),
-                path: "/explore-jobs.html",
-                title: "Khám Phá Việc Làm IT Freelance - KGS Work",
-                device: "desktop",
-                browser: "Chrome",
-                os: "Windows",
-                ip_masked: "118.69.***.14",
-                referrer: "Google Tìm kiếm (Organic)",
-                location: "Hà Nội, Việt Nam"
-            },
-            {
-                timestamp: new Date(Date.now() - 120000).toISOString(),
-                path: "/",
-                title: "KGS Work - Nền tảng Freelancer IT & Ký Quỹ Escrow Hàng Đầu",
-                device: "mobile",
-                browser: "Safari",
-                os: "iOS",
-                ip_masked: "171.244.***.89",
-                referrer: "Trực tiếp (Direct / Bookmark)",
-                location: "TP. Hồ Chí Minh, Việt Nam"
-            },
-            {
-                timestamp: new Date(Date.now() - 260000).toISOString(),
-                path: "/explore-freelancers.html",
-                title: "Tìm Kiếm Chuyên Gia & Lập Trình Viên IT - KGS Work",
-                device: "desktop",
-                browser: "Edge",
-                os: "Windows",
-                ip_masked: "14.238.***.55",
-                referrer: "Mạng xã hội (Facebook / Zalo)",
-                location: "Đà Nẵng, Việt Nam"
-            },
-            {
-                timestamp: new Date(Date.now() - 410000).toISOString(),
-                path: "/how-it-works.html",
-                title: "Quy Trình Hoạt Động & Bảo Hộ Escrow - KGS Work",
-                device: "mobile",
-                browser: "Chrome",
-                os: "Android",
-                ip_masked: "115.79.***.201",
-                referrer: "Google Tìm kiếm (Organic)",
-                location: "Cần Thơ, Việt Nam"
-            }
-        ]
-    };
 }
 
 // Read data
@@ -174,7 +40,7 @@ function readData() {
         return JSON.parse(raw);
     } catch (err) {
         console.error('[TrafficService] Lỗi đọc traffic_analytics.json:', err);
-        return generateDefaultTrafficData();
+        return { summary: { total_pageviews: 0, total_unique_visitors: 0 }, daily: {}, hourly: {}, top_pages: {}, devices: {}, browsers: {}, referrers: {}, recent_visits: [] };
     }
 }
 
@@ -189,7 +55,7 @@ function writeData(data) {
 
 // Parse User Agent string to extract Device, Browser, OS
 function parseUserAgent(uaString = '') {
-    const ua = uaString.toLowerCase();
+    const ua = (uaString || '').toLowerCase();
     let device = 'desktop';
     let browser = 'Chrome';
     let os = 'Windows';
@@ -240,12 +106,12 @@ function maskIp(ip = '') {
     if (!ip) return '127.0.***.1';
     const parts = ip.replace(/^.*:/, '').split('.');
     if (parts.length === 4) {
-        return `${parts[0]}.${parts[1]}.***.${parts[3]}`;
+        return `${parts[0]}.***.***.${parts[3]}`;
     }
     return '118.69.***.14';
 }
 
-// Guess Vietnamese location roughly based on IP or fallback
+// Guess Vietnamese location roughly based on IP
 function guessLocation(ip = '') {
     const locations = [
         'Hà Nội, Việt Nam',
@@ -254,14 +120,13 @@ function guessLocation(ip = '') {
         'Hải Phòng, Việt Nam',
         'Cần Thơ, Việt Nam'
     ];
-    // Simple deterministic hash based on IP characters
     let sum = 0;
-    for (let i = 0; i < ip.length; i++) sum += ip.charCodeAt(i);
+    for (let i = 0; i < (ip || '').length; i++) sum += ip.charCodeAt(i);
     return locations[sum % locations.length];
 }
 
 /**
- * Record a real visit ping from frontend client
+ * Record a real visit ping from frontend client with REAL USER IDENTIFICATION
  */
 function recordVisit({
     path: reqPath = '/',
@@ -271,13 +136,16 @@ function recordVisit({
     ip = '',
     visitorId = '',
     sessionId = '',
-    screenWidth = 1920
+    screenWidth = 1920,
+    user_id = null,
+    user_name = 'Khách vãng lai',
+    user_email = '',
+    user_role = 'guest',
+    user_avatar = ''
 }) {
-    // Sanitize path (strip query params / hashes)
-    let cleanPath = reqPath.split('?')[0].split('#')[0] || '/';
+    let cleanPath = (reqPath || '/').split('?')[0].split('#')[0] || '/';
     if (!cleanPath.startsWith('/')) cleanPath = '/' + cleanPath;
 
-    // Filter out asset requests or admin internal pings if desired, but keep public routes
     const { device: uaDevice, browser, os } = parseUserAgent(userAgent);
     const device = screenWidth < 768 ? 'mobile' : (screenWidth < 1024 ? 'tablet' : uaDevice);
     const refCategory = categorizeReferrer(referrer);
@@ -287,96 +155,96 @@ function recordVisit({
     const dateKey = now.toISOString().split('T')[0];
     const hourKey = `${dateKey}T${String(now.getHours()).padStart(2, '0')}`;
 
-    // Update active sessions map
-    const activeSessionKey = sessionId || `${maskedIp}_${userAgent.slice(0, 20)}`;
-    activeSessions.set(activeSessionKey, {
-        last_seen: Date.now(),
-        path: cleanPath,
-        title,
+    // ĐỊNH DANH SESSION NGƯỜI DÙNG THỰC TẾ
+    // Nếu có user_id: phân biệt chính xác từng tài khoản (ví dụ user_9d323da5... vs user_5f79cd46...)
+    const activeKey = user_id ? `user_${user_id}` : (sessionId || `guest_${visitorId || maskedIp}`);
+
+    activeUsers.set(activeKey, {
+        session_id: activeKey,
+        user_id: user_id || null,
+        user_name: user_name || 'Khách vãng lai',
+        user_email: user_email || '',
+        user_role: user_role || 'guest',
+        user_avatar: user_avatar || '',
+        current_path: cleanPath,
+        current_title: title || 'KGS Work',
         device,
         browser,
         os,
         masked_ip: maskedIp,
-        location
+        location,
+        last_seen: Date.now()
     });
 
-    // Cleanup active sessions older than 5 minutes
-    const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
-    for (const [key, session] of activeSessions.entries()) {
-        if (session.last_seen < fiveMinutesAgo) {
-            activeSessions.delete(key);
+    // Tự động dọn dẹp các session không hoạt động quá 3 phút (180 giây)
+    const threeMinutesAgo = Date.now() - 3 * 60 * 1000;
+    for (const [key, session] of activeUsers.entries()) {
+        if (session.last_seen < threeMinutesAgo) {
+            activeUsers.delete(key);
         }
     }
 
-    // Load persistent store
+    // Lưu trữ dữ liệu thống kê tổng hợp thực tế
     const data = readData();
 
-    // 1. Update summary
     data.summary.total_pageviews = (data.summary.total_pageviews || 0) + 1;
 
-    // 2. Update daily bucket
+    // Daily bucket
     if (!data.daily[dateKey]) {
         data.daily[dateKey] = {
             pageviews: 0,
             unique_visitors: 0,
-            devices: { desktop: 0, mobile: 0, tablet: 0 }
+            devices: { desktop: 0, mobile: 0, tablet: 0 },
+            _visitors: []
         };
     }
     data.daily[dateKey].pageviews += 1;
+    if (!data.daily[dateKey].devices) data.daily[dateKey].devices = { desktop: 0, mobile: 0, tablet: 0 };
     data.daily[dateKey].devices[device] = (data.daily[dateKey].devices[device] || 0) + 1;
 
-    // Check if new unique visitor for the day
+    const uniqueKey = user_id ? `u_${user_id}` : (visitorId || activeKey);
     if (!data.daily[dateKey]._visitors) data.daily[dateKey]._visitors = [];
-    if (visitorId && !data.daily[dateKey]._visitors.includes(visitorId)) {
-        data.daily[dateKey]._visitors.push(visitorId);
+    if (!data.daily[dateKey]._visitors.includes(uniqueKey)) {
+        data.daily[dateKey]._visitors.push(uniqueKey);
         data.daily[dateKey].unique_visitors += 1;
         data.summary.total_unique_visitors = (data.summary.total_unique_visitors || 0) + 1;
-        // Keep array small to avoid json explosion
         if (data.daily[dateKey]._visitors.length > 500) {
             data.daily[dateKey]._visitors = data.daily[dateKey]._visitors.slice(-300);
         }
-    } else if (!visitorId) {
-        data.daily[dateKey].unique_visitors += 1;
     }
 
-    // 3. Update hourly bucket
+    // Hourly bucket
     if (!data.hourly[hourKey]) {
         data.hourly[hourKey] = { pageviews: 0, unique_visitors: 0 };
     }
     data.hourly[hourKey].pageviews += 1;
     data.hourly[hourKey].unique_visitors += 1;
 
-    // Prune hourly buckets older than 4 days (96 hours)
-    const hourlyKeys = Object.keys(data.hourly).sort();
-    if (hourlyKeys.length > 96) {
-        const deleteCount = hourlyKeys.length - 96;
-        for (let i = 0; i < deleteCount; i++) {
-            delete data.hourly[hourlyKeys[i]];
-        }
-    }
-
-    // 4. Update top pages
-    data.top_pages = data.top_pages || {};
+    // Top pages
+    if (!data.top_pages) data.top_pages = {};
     data.top_pages[cleanPath] = (data.top_pages[cleanPath] || 0) + 1;
 
-    // 5. Update devices
-    data.devices = data.devices || { desktop: 0, mobile: 0, tablet: 0 };
+    // Devices & Browsers
+    if (!data.devices) data.devices = { desktop: 0, mobile: 0, tablet: 0 };
     data.devices[device] = (data.devices[device] || 0) + 1;
 
-    // 6. Update browsers
-    data.browsers = data.browsers || {};
+    if (!data.browsers) data.browsers = {};
     data.browsers[browser] = (data.browsers[browser] || 0) + 1;
 
-    // 7. Update referrers
-    data.referrers = data.referrers || {};
+    if (!data.referrers) data.referrers = {};
     data.referrers[refCategory] = (data.referrers[refCategory] || 0) + 1;
 
-    // 8. Prepend to recent visits log (keep top 60)
-    data.recent_visits = data.recent_visits || [];
+    // Nhật ký truy cập gần đây (Lưu 50 sự kiện gần nhất)
+    if (!data.recent_visits) data.recent_visits = [];
     data.recent_visits.unshift({
         timestamp: now.toISOString(),
+        user_id: user_id || null,
+        user_name: user_name || 'Khách vãng lai',
+        user_email: user_email || '',
+        user_role: user_role || 'guest',
+        user_avatar: user_avatar || '',
         path: cleanPath,
-        title: title || cleanPath,
+        title,
         device,
         browser,
         os,
@@ -384,154 +252,109 @@ function recordVisit({
         referrer: refCategory,
         location
     });
-    if (data.recent_visits.length > 60) {
-        data.recent_visits = data.recent_visits.slice(0, 60);
+
+    if (data.recent_visits.length > 50) {
+        data.recent_visits = data.recent_visits.slice(0, 50);
     }
 
-    // Write back
     writeData(data);
 
     return {
         success: true,
-        active_live_users: activeSessions.size
+        active_live_users: activeUsers.size
     };
 }
 
 /**
- * Get comprehensive analytics overview for Admin Dashboard & Analytics Page
+ * Get full analytics report for Admin UI
  */
 function getAnalyticsOverview(range = '24h') {
+    ensureDataFile();
     const data = readData();
-    const now = new Date();
-    const todayKey = now.toISOString().split('T')[0];
 
-    const yesterdayDate = new Date(now);
-    yesterdayDate.setDate(yesterdayDate.getDate() - 1);
-    const yesterdayKey = yesterdayDate.toISOString().split('T')[0];
-
-    // Clean up active sessions
-    const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
-    for (const [key, session] of activeSessions.entries()) {
-        if (session.last_seen < fiveMinutesAgo) {
-            activeSessions.delete(key);
+    // Dọn dẹp active users cũ
+    const threeMinutesAgo = Date.now() - 3 * 60 * 1000;
+    for (const [key, session] of activeUsers.entries()) {
+        if (session.last_seen < threeMinutesAgo) {
+            activeUsers.delete(key);
         }
     }
 
-    // At least 1-3 active users demo indicator if live session is empty
-    const liveCount = Math.max(activeSessions.size, 1);
+    // Danh sách người dùng thật đang trực tuyến
+    const activeUsersList = Array.from(activeUsers.values()).sort((a, b) => b.last_seen - a.last_seen);
 
-    const todayStats = data.daily[todayKey] || { pageviews: 0, unique_visitors: 0 };
-    const yesterdayStats = data.daily[yesterdayKey] || { pageviews: 0, unique_visitors: 0 };
+    const now = new Date();
+    const todayKey = now.toISOString().split('T')[0];
+    const todayStats = data.daily[todayKey] || { pageviews: 0, unique_visitors: 0, devices: { desktop: 0, mobile: 0, tablet: 0 } };
 
-    // Calculate growth percentages
-    const pvGrowth = yesterdayStats.pageviews > 0
-        ? Math.round(((todayStats.pageviews - yesterdayStats.pageviews) / yesterdayStats.pageviews) * 100)
-        : 100;
-    const uvGrowth = yesterdayStats.unique_visitors > 0
-        ? Math.round(((todayStats.unique_visitors - yesterdayStats.unique_visitors) / yesterdayStats.unique_visitors) * 100)
-        : 100;
-
-    // Build 24-Hour Timeline for Hourly Chart (00:00 -> 23:00)
+    // Format hourly data for 24h chart
     const hourlyLabels = [];
     const hourlyPageviews = [];
     const hourlyUnique = [];
 
     for (let h = 0; h < 24; h++) {
-        const hourStr = String(h).padStart(2, '0');
-        hourlyLabels.push(`${hourStr}:00`);
-        const hourKey = `${todayKey}T${hourStr}`;
-        const hData = data.hourly[hourKey] || { pageviews: 0, unique_visitors: 0 };
-        hourlyPageviews.push(hData.pageviews);
-        hourlyUnique.push(hData.unique_visitors);
+        const hourLabel = `${String(h).padStart(2, '0')}:00`;
+        hourlyLabels.push(hourLabel);
+
+        const hKey = `${todayKey}T${String(h).padStart(2, '0')}`;
+        const hData = data.hourly[hKey] || { pageviews: 0, unique_visitors: 0 };
+        hourlyPageviews.push(hData.pageviews || 0);
+        hourlyUnique.push(hData.unique_visitors || 0);
     }
 
-    // Build Daily Timeline (past 7, 14, or 30 days)
-    const daysCount = range === '30d' ? 30 : (range === '14d' ? 14 : 7);
+    // Format daily data for past 7 days
     const dailyLabels = [];
     const dailyPageviews = [];
     const dailyUnique = [];
 
-    for (let i = daysCount - 1; i >= 0; i--) {
+    for (let i = 6; i >= 0; i--) {
         const d = new Date(now);
         d.setDate(d.getDate() - i);
         const dKey = d.toISOString().split('T')[0];
-        const dayLabel = `${d.getDate()}/${d.getMonth() + 1}`;
-        dailyLabels.push(dayLabel);
+        const label = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+        dailyLabels.push(label);
 
         const dData = data.daily[dKey] || { pageviews: 0, unique_visitors: 0 };
-        dailyPageviews.push(dData.pageviews);
-        dailyUnique.push(dData.unique_visitors);
+        dailyPageviews.push(dData.pageviews || 0);
+        dailyUnique.push(dData.unique_visitors || 0);
     }
 
-    // Top Pages sorted with percentage
-    const totalViews = data.summary.total_pageviews || 1;
+    // Top pages sorted
     const topPagesArray = Object.entries(data.top_pages || {})
         .sort((a, b) => b[1] - a[1])
-        .slice(0, 10)
-        .map(([pagePath, count]) => {
-            let label = pagePath;
-            if (pagePath === '/' || pagePath === '/index.html') label = 'Trang Chủ (Homepage)';
-            else if (pagePath.includes('explore-jobs')) label = 'Khám Phá Dự Án (Explore Jobs)';
-            else if (pagePath.includes('explore-freelancers')) label = 'Danh Sách Freelancer';
-            else if (pagePath.includes('how-it-works')) label = 'Quy Trình Hoạt Động (How it works)';
-            else if (pagePath.includes('login')) label = 'Trang Đăng Nhập (Login)';
-            else if (pagePath.includes('register')) label = 'Trang Đăng Ký (Register)';
-            else if (pagePath.includes('pricing')) label = 'Bảng Giá & Gói VIP (Pricing)';
-            else if (pagePath.includes('Admin')) label = 'Trung Tâm Quản Trị (Admin)';
-
-            return {
-                path: pagePath,
-                label,
-                views: count,
-                percentage: Math.round((count / totalViews) * 100)
-            };
-        });
-
-    // Device breakdown percentages
-    const totalDeviceViews = (data.devices.desktop || 0) + (data.devices.mobile || 0) + (data.devices.tablet || 0) || 1;
-    const devicePercentages = {
-        desktop: Math.round(((data.devices.desktop || 0) / totalDeviceViews) * 100),
-        mobile: Math.round(((data.devices.mobile || 0) / totalDeviceViews) * 100),
-        tablet: Math.round(((data.devices.tablet || 0) / totalDeviceViews) * 100)
-    };
+        .slice(0, 8)
+        .map(([path, views]) => ({ path, views }));
 
     return {
-        success: true,
         summary: {
-            live_visitors: liveCount,
-            today_pageviews: todayStats.pageviews,
-            today_unique_visitors: todayStats.unique_visitors,
-            today_growth_pv: pvGrowth,
-            today_growth_uv: uvGrowth,
-            yesterday_pageviews: yesterdayStats.pageviews,
-            total_pageviews: data.summary.total_pageviews,
-            total_unique_visitors: data.summary.total_unique_visitors,
-            avg_session_duration: '3m 42s',
-            bounce_rate: '28.4%'
+            live_visitors: activeUsersList.length,
+            today_pageviews: todayStats.pageviews || 0,
+            today_unique_visitors: todayStats.unique_visitors || 0,
+            total_pageviews: data.summary.total_pageviews || 0,
+            total_unique_visitors: data.summary.total_unique_visitors || 0
         },
-        hourly_chart: {
-            labels: hourlyLabels,
-            pageviews: hourlyPageviews,
-            unique_visitors: hourlyUnique
-        },
-        daily_chart: {
-            labels: dailyLabels,
-            pageviews: dailyPageviews,
-            unique_visitors: dailyUnique
+        active_users: activeUsersList, // Danh sách người dùng thật đang trực tuyến
+        charts: {
+            hourly: {
+                labels: hourlyLabels,
+                pageviews: hourlyPageviews,
+                unique: hourlyUnique
+            },
+            daily: {
+                labels: dailyLabels,
+                pageviews: dailyPageviews,
+                unique: dailyUnique
+            }
         },
         top_pages: topPagesArray,
-        devices: {
-            counts: data.devices,
-            percentages: devicePercentages
-        },
-        browsers: data.browsers,
-        referrers: data.referrers,
-        recent_visits: (data.recent_visits || []).slice(0, 30)
+        devices: data.devices || { desktop: 0, mobile: 0, tablet: 0 },
+        browsers: data.browsers || {},
+        referrers: data.referrers || {},
+        recent_visits: data.recent_visits || []
     };
 }
 
 module.exports = {
     recordVisit,
-    getAnalyticsOverview,
-    ensureDataFile
+    getAnalyticsOverview
 };

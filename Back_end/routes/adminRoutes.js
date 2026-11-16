@@ -33,7 +33,9 @@ router.get('/api/admin/stats', async (req, res) => {
         if (ledgers) {
             totalDeposits = ledgers.filter(l => l.type === 'DEPOSIT' || l.type === 'ADMIN_CREDIT').reduce((sum, l) => sum + parseFloat(l.amount || 0), 0);
             totalWithdrawn = ledgers.filter(l => l.type === 'WITHDRAW' || l.type === 'ADMIN_DEBIT').reduce((sum, l) => sum + parseFloat(l.amount || 0), 0);
-            totalPlatformProfit = ledgers.filter(l => l.type === 'SUBSCRIPTION_VIP' || l.type === 'JOB_BOOST' || l.receiver_id === '11111111-1111-1111-1111-111111111111').reduce((sum, l) => sum + parseFloat(l.amount || 0), 0);
+            // LOGIC CHUẨN: Lợi nhuận sàn CHỈ tính từ các gói nạp VIP, Tiện ích Đẩy Top và Phí dịch vụ sàn.
+            // Tiền Nạp và Rút là Dòng tiền hệ thống của User, TUYỆT ĐỐI không tính vào lợi nhuận sàn!
+            totalPlatformProfit = ledgers.filter(l => l.type === 'SUBSCRIPTION_VIP' || l.type === 'JOB_BOOST' || l.type === 'PLATFORM_FEE').reduce((sum, l) => sum + parseFloat(l.amount || 0), 0);
         }
 
         const { data: wallets } = await supabase.from('wallets').select('balance, locked_balance');
@@ -98,53 +100,84 @@ router.get('/api/admin/stats', async (req, res) => {
     }
 });
 
-// 1.1 API: Chi tiết Báo Cáo Doanh Thu & Lợi Nhuận Sàn dành cho Admin
+// 1.1 API: Chi tiết Báo Cáo Doanh Thu & Dòng Tiền Hệ Thống dành cho Admin
+// Phân tách hoàn toàn: Lợi Nhuận Sàn Thực Thu vs Dòng Tiền Vận Hành Hệ Thống của User
 router.get('/api/admin/revenue/overview', async (req, res) => {
     try {
+        // 1. CHỈ lấy các giao dịch doanh thu thực tế của Sàn (Gói VIP, Tiện ích Đẩy Top, Phí hoa hồng)
+        // TUYỆT ĐỐI không lấy lệnh Rút tiền (WITHDRAW) hay Nạp tiền (DEPOSIT) vào đây!
         const { data: ledgers, error: lErr } = await supabase
             .from('wallet_ledger')
             .select('*, sender:sender_id(id, full_name, email, role, avatar_url)')
-            .or('type.eq.SUBSCRIPTION_VIP,type.eq.JOB_BOOST,receiver_id.eq.11111111-1111-1111-1111-111111111111')
+            .in('type', ['SUBSCRIPTION_VIP', 'JOB_BOOST', 'PLATFORM_FEE'])
             .order('created_at', { ascending: false });
 
         if (lErr) throw lErr;
 
         let vipRevenue = 0;
         let boostRevenue = 0;
-        let otherRevenue = 0;
+        let feeRevenue = 0;
 
         const transactions = (ledgers || []).map(l => {
             const amt = parseFloat(l.amount || 0);
             if (l.type === 'SUBSCRIPTION_VIP') vipRevenue += amt;
             else if (l.type === 'JOB_BOOST') boostRevenue += amt;
-            else otherRevenue += amt;
+            else if (l.type === 'PLATFORM_FEE') feeRevenue += amt;
             return l;
         });
 
-        const totalRevenue = vipRevenue + boostRevenue + otherRevenue;
+        // TỔNG LỢI NHUẬN SÀN THỰC THU (Admin được tự do sử dụng)
+        const totalPlatformProfit = vipRevenue + boostRevenue + feeRevenue;
 
-        // Lấy Escrow đang khóa
-        const { data: wallets } = await supabase.from('wallets').select('locked_balance');
-        let totalLockedEscrow = 0;
-        if (wallets) {
-            wallets.forEach(w => totalLockedEscrow += parseFloat(w.locked_balance || 0));
+        // 2. Lấy DÒNG TIỀN HỆ THỐNG CỦA USER (Tiền nạp, rút, tiền trong ví user, tiền ký quỹ Escrow)
+        const { data: allLedgers } = await supabase.from('wallet_ledger').select('amount, type');
+        let totalDeposits = 0;
+        let totalWithdrawn = 0;
+        if (allLedgers) {
+            totalDeposits = allLedgers.filter(l => l.type === 'DEPOSIT' || l.type === 'ADMIN_CREDIT').reduce((sum, l) => sum + parseFloat(l.amount || 0), 0);
+            totalWithdrawn = allLedgers.filter(l => l.type === 'WITHDRAW' || l.type === 'ADMIN_DEBIT').reduce((sum, l) => sum + parseFloat(l.amount || 0), 0);
         }
 
-        // Lấy số dư Kho bạc sàn (Admin Treasury Wallet)
-        const { data: adminWallets } = await supabase.from('wallets').select('balance').eq('user_id', '11111111-1111-1111-1111-111111111111').limit(1);
-        const treasuryBalance = adminWallets && adminWallets.length > 0 ? (parseFloat(adminWallets[0].balance) || 0) : totalRevenue;
+        // Lấy số dư ví User và Escrow đang khóa
+        const { data: wallets } = await supabase.from('wallets').select('user_id, balance, locked_balance');
+        let userWalletsBalance = 0;
+        let totalLockedEscrow = 0;
+        let treasuryBalance = totalPlatformProfit;
+
+        if (wallets) {
+            wallets.forEach(w => {
+                if (w.user_id === '11111111-1111-1111-1111-111111111111') {
+                    treasuryBalance = parseFloat(w.balance || 0);
+                } else {
+                    userWalletsBalance += parseFloat(w.balance || 0);
+                    totalLockedEscrow += parseFloat(w.locked_balance || 0);
+                }
+            });
+        }
+
+        const totalUserFundsInSystem = userWalletsBalance + totalLockedEscrow;
 
         res.status(200).json({
             success: true,
             revenue: {
-                total_revenue: totalRevenue,
+                // Nhóm 1: LỢI NHUẬN SÀN THỰC THU (TIỀN LỜI TỰ DO DÙNG)
+                total_platform_profit: totalPlatformProfit,
                 vip_revenue: vipRevenue,
                 boost_revenue: boostRevenue,
-                other_revenue: otherRevenue,
+                fee_revenue: feeRevenue,
                 treasury_balance: treasuryBalance,
-                escrow_locked: totalLockedEscrow,
                 estimated_costs: 0,
-                net_profit: totalRevenue,
+                net_profit: totalPlatformProfit,
+
+                // Nhóm 2: DÒNG TIỀN VẬN HÀNH HỆ THỐNG (TIỀN CỦA KHÁCH HÀNG & FREELANCER)
+                system_flow: {
+                    total_deposits: totalDeposits,
+                    total_withdrawn: totalWithdrawn,
+                    user_wallets_balance: userWalletsBalance,
+                    escrow_locked: totalLockedEscrow,
+                    total_user_funds: totalUserFundsInSystem
+                },
+
                 transactions: transactions
             }
         });

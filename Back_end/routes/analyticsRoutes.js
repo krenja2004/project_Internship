@@ -11,7 +11,12 @@ router.post('/api/analytics/track', (req, res) => {
             referrer,
             visitor_id,
             session_id,
-            screen_width
+            screen_width,
+            user_id,
+            user_name,
+            user_email,
+            user_role,
+            user_avatar
         } = req.body || {};
 
         const userAgent = req.headers['user-agent'] || '';
@@ -30,7 +35,12 @@ router.post('/api/analytics/track', (req, res) => {
             ip,
             visitorId: visitor_id || '',
             sessionId: session_id || '',
-            screenWidth: parseInt(screen_width) || 1920
+            screenWidth: parseInt(screen_width) || 1920,
+            user_id: user_id || null,
+            user_name: user_name || 'Khách vãng lai',
+            user_email: user_email || '',
+            user_role: user_role || 'guest',
+            user_avatar: user_avatar || ''
         });
 
         // Trả về kết quả ngay lập tức (< 3ms)
@@ -67,7 +77,8 @@ router.get('/api/admin/analytics/live', (req, res) => {
             success: true,
             live_visitors: overview.summary.live_visitors,
             today_pageviews: overview.summary.today_pageviews,
-            today_unique_visitors: overview.summary.today_unique_visitors
+            today_unique_visitors: overview.summary.today_unique_visitors,
+            active_users: overview.active_users
         });
     } catch (error) {
         return res.status(500).json({ success: false });
@@ -92,6 +103,14 @@ router.post('/api/admin/analytics/simulate-visit', (req, res) => {
         const randomIp = sampleIps[Math.floor(Math.random() * sampleIps.length)];
         const randomDevice = sampleDevices[Math.floor(Math.random() * sampleDevices.length)];
 
+        const sampleUsers = [
+            { name: 'Nguyễn Văn Toàn', email: 'toan.dev@gmail.com', role: 'freelancer' },
+            { name: 'Công Ty TechVina', email: 'contact@techvina.vn', role: 'client' },
+            { name: 'Trần Thị Mai', email: 'maitran.uiux@gmail.com', role: 'freelancer' },
+            { name: 'Khách vãng lai (Tìm việc)', email: '', role: 'guest' }
+        ];
+        const randomUser = sampleUsers[Math.floor(Math.random() * sampleUsers.length)];
+
         const result = trafficService.recordVisit({
             path: randomPage.path,
             title: randomPage.title,
@@ -100,7 +119,11 @@ router.post('/api/admin/analytics/simulate-visit', (req, res) => {
             ip: randomIp,
             visitorId: 'sim_' + Math.random().toString(36).substring(2, 9),
             sessionId: 'sess_' + Math.random().toString(36).substring(2, 9),
-            screenWidth: randomDevice === 'mobile' ? 390 : 1920
+            screenWidth: randomDevice === 'mobile' ? 390 : 1920,
+            user_id: randomUser.role !== 'guest' ? 'usr_' + Math.random().toString(36).substring(2, 8) : null,
+            user_name: randomUser.name,
+            user_email: randomUser.email,
+            user_role: randomUser.role
         });
 
         return res.status(200).json({
