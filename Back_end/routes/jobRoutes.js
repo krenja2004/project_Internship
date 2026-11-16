@@ -337,17 +337,98 @@ router.get('/api/jobs', async (req, res) => {
     }
 });
 
-// 3. API: Freelancer ứng tuyển (Báo giá)
+// 3. API: Freelancer ứng tuyển (Báo giá & Kiểm soát Hạn Mức Chào Thầu Bids Hàng Ngày)
+router.get('/api/jobs/freelancer-bid-quota/:freelancer_id', async (req, res) => {
+    try {
+        const { freelancer_id } = req.params;
+        const quota = await subscriptionService.getFreelancerBidQuota(freelancer_id, supabase);
+        res.status(200).json(quota);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 router.post('/api/jobs/apply', async (req, res) => {
     const { job_id, freelancer_id, cover_letter, bid_amount } = req.body;
     try {
+        if (!job_id || !freelancer_id) {
+            return res.status(400).json({ error: 'Thiếu thông tin dự án hoặc chuyên gia ứng tuyển' });
+        }
+
+        const parsedBid = parseFloat(bid_amount);
+        if (isNaN(parsedBid) || parsedBid <= 0) {
+            return res.status(400).json({ error: 'Mức giá chào thầu không hợp lệ' });
+        }
+
+        // 1. Kiểm tra dự án có đang mở không
+        const { data: job, error: jobErr } = await supabase
+            .from('jobs')
+            .select('id, title, client_id, status, budget')
+            .eq('id', job_id)
+            .single();
+
+        if (jobErr || !job) {
+            return res.status(404).json({ error: 'Dự án không tồn tại hoặc đã bị xóa' });
+        }
+
+        if (job.status !== 'open') {
+            return res.status(400).json({ error: 'Dự án này đã đóng hoặc đang trong giai đoạn triển khai' });
+        }
+
+        if (job.client_id === freelancer_id) {
+            return res.status(400).json({ error: 'Bạn không thể tự chào thầu cho dự án do chính bạn đăng tuyển!' });
+        }
+
+        // 2. Kiểm tra xem Freelancer đã nộp hồ sơ cho dự án này chưa (tránh nộp trùng lặp lãng phí lượt)
+        const { data: existingApp } = await supabase
+            .from('job_applications')
+            .select('id, status')
+            .eq('job_id', job_id)
+            .eq('freelancer_id', freelancer_id)
+            .maybeSingle();
+
+        if (existingApp) {
+            return res.status(400).json({ error: 'Bạn đã nộp hồ sơ ứng tuyển cho dự án này rồi! Vui lòng chờ phản hồi từ phía khách hàng.' });
+        }
+
+        // 3. KIỂM TRA HẠN MỨC CHÀO THẦU (5 bids/ngày với Tân Binh, 25 bids/ngày với Pro, Không giới hạn với Agency, hoặc trừ extra_bids)
+        const bidCheck = await subscriptionService.checkAndConsumeFreelancerBid(freelancer_id, supabase);
+        if (!bidCheck.allowed) {
+            return res.status(403).json({
+                error: bidCheck.error,
+                quota: bidCheck.quota
+            });
+        }
+
+        // 4. Lưu hồ sơ ứng tuyển vào Cơ sở dữ liệu
         const { data, error } = await supabase
             .from('job_applications')
-            .insert([{ job_id, freelancer_id, cover_letter, bid_amount, status: 'pending' }])
+            .insert([{ job_id, freelancer_id, cover_letter, bid_amount: parsedBid, status: 'pending' }])
             .select();
         
         if (error) throw error;
-        res.status(201).json({ message: 'Ứng tuyển thành công!', application: data[0] });
+
+        // 5. Gửi thông báo đến Client có ứng viên mới
+        try {
+            await supabase.from('notifications').insert([{
+                user_id: job.client_id,
+                title: '📩 Có Freelancer mới gửi hồ sơ chào thầu!',
+                content: `Dự án "${job.title}" vừa nhận được báo giá ${parsedBid.toLocaleString('vi-VN')} Token. Hãy vào kiểm tra hồ sơ ứng viên ngay!`
+            }]);
+        } catch (nErr) {
+            console.warn('[Notification Warning]:', nErr.message);
+        }
+
+        const successMsg = bidCheck.consumed_extra
+            ? `Ứng tuyển thành công! (${bidCheck.message})`
+            : 'Ứng tuyển thành công! Hồ sơ của bạn đã được chuyển tới khách hàng.';
+
+        res.status(201).json({
+            message: successMsg,
+            application: data[0],
+            quota: bidCheck.quota,
+            consumed_extra: bidCheck.consumed_extra
+        });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }

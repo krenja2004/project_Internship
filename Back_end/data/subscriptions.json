@@ -8,7 +8,7 @@
         "price_annual": 0,
         "badge": "Miễn Phí",
         "features": [
-          "Đăng tối đa 2 dự án / tháng",
+          "Đăng tin dự án hoàn toàn Miễn Phí (Không giới hạn)",
           "Tiếp cận mạng lưới Freelancer tiêu chuẩn",
           "Ký quỹ Escrow bảo chứng 100%",
           "Hỗ trợ cộng đồng qua Ticket"
@@ -22,9 +22,9 @@
         "badge": "Phổ Biến Nhất",
         "popular": true,
         "features": [
-          "Đăng tối đa 10 dự án / tháng",
+          "Đăng tin không giới hạn (Ưu tiên tiếp cận Freelancer)",
           "Tặng 3 lượt Đẩy Top 1 bài đăng / tháng",
-          "Khung viền tin Xanh Ưu Tiên",
+          "Khung viền tin Xanh Nổi Bật & Ưu Tiên",
           "Mở khóa xem Zalo/SĐT 10 Senior Dev",
           "AI duyệt bài tức thì (<0.1s)",
           "Trọng tài phân xử ưu tiên trong 4h"
@@ -37,7 +37,7 @@
         "price_annual": 4790000,
         "badge": "Đẳng Cấp",
         "features": [
-          "Không giới hạn số lượng tin đăng",
+          "Đăng tin không giới hạn (Vị trí nổi bật & Ghim đầu)",
           "Tặng 10 lượt Đẩy Top + Ghim đầu 7 ngày",
           "Huy hiệu Vương Miện Doanh Nghiệp VIP",
           "Mở khóa xem thông tin trực tiếp 30 Dev",
@@ -54,10 +54,10 @@
         "price_annual": 0,
         "badge": "Miễn Phí",
         "features": [
-          "5 lượt chào thầu (bids) / tháng",
-          "Hồ sơ năng lực công khai",
+          "5 lượt chào thầu (bids) / ngày (Tự động làm mới mỗi ngày)",
+          "Hồ sơ năng lực công khai tiêu chuẩn",
           "Nhận tiền ví an toàn qua Escrow",
-          "Rút tiền thường miễn phí"
+          "Rút tiền thưởng miễn phí"
         ]
       },
       {
@@ -68,7 +68,7 @@
         "badge": "Khuyên Dùng",
         "popular": true,
         "features": [
-          "50 lượt chào thầu (bids) / tháng",
+          "25 lượt chào thầu (bids) / ngày (Gấp 5 lần Tân Binh)",
           "Huy hiệu Tích Xanh Verified Pro Dev",
           "Luôn xuất hiện đầu mục Chuyên Gia IT",
           "Nhận thông báo Job mới sớm hơn 15 phút",
@@ -128,9 +128,9 @@
       "started_at": "2026-11-15T15:48:17.628Z",
       "expires_at": "2026-12-15T15:48:17.627Z",
       "features": [
-        "Đăng tối đa 10 dự án / tháng",
+        "Đăng tin không giới hạn (Ưu tiên tiếp cận Freelancer)",
         "Tặng 3 lượt Đẩy Top 1 bài đăng / tháng",
-        "Khung viền tin Xanh Ưu Tiên",
+        "Khung viền tin Xanh Nổi Bật & Ưu Tiên",
         "Mở khóa xem Zalo/SĐT 10 Senior Dev",
         "AI duyệt bài tức thì (<0.1s)",
         "Trọng tài phân xử ưu tiên trong 4h"
@@ -145,7 +145,7 @@
       "started_at": "2026-11-15T15:48:18.222Z",
       "expires_at": "2026-12-15T15:48:18.222Z",
       "features": [
-        "50 lượt chào thầu (bids) / tháng",
+        "25 lượt chào thầu (bids) / ngày (Gấp 5 lần Tân Binh)",
         "Huy hiệu Tích Xanh Verified Pro Dev",
         "Luôn xuất hiện đầu mục Chuyên Gia IT",
         "Nhận thông báo Job mới sớm hơn 15 phút",
@@ -162,7 +162,7 @@
       "started_at": "2026-11-16T02:31:16.349Z",
       "expires_at": "2026-12-16T02:31:16.349Z",
       "features": [
-        "50 lượt chào thầu (bids) / tháng",
+        "25 lượt chào thầu (bids) / ngày (Gấp 5 lần Tân Binh)",
         "Huy hiệu Tích Xanh Verified Pro Dev",
         "Luôn xuất hiện đầu mục Chuyên Gia IT",
         "Nhận thông báo Job mới sớm hơn 15 phút",

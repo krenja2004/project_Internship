@@ -465,7 +465,7 @@
             if (btnF) btnF.style.display = 'inline-flex';
             currentTab = (defaultTab === 'addons') ? 'addons' : 'freelancer';
             if (titleEl) titleEl.innerText = 'Nâng Tầm Chuyên Gia IT & Bứt Phá Thu Nhập';
-            if (descEl) descEl.innerHTML = 'Mở khóa <span class="font-bold text-emerald-400">50+ lượt chào thầu</span>, gắn huy hiệu Tích Xanh uy tín và nhận thông báo dự án mới trước 15 phút.';
+            if (descEl) descEl.innerHTML = 'Mở khóa <span class="font-bold text-emerald-400">25 lượt chào thầu/ngày (làm mới mỗi ngày)</span>, gắn huy hiệu Tích Xanh uy tín và nhận thông báo dự án mới trước 15 phút.';
             if (badgeEl) badgeEl.innerText = '⚡ Gói Chuyên Gia IT';
         } else if (role === 'client') {
             // Trong Client Hub: Ẩn hẳn tab Freelancer

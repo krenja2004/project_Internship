@@ -13,11 +13,10 @@ const DEFAULT_DATA = {
                 price_annual: 0,
                 badge: 'Miễn Phí',
                 features: [
-                    'Đăng tối đa 2 dự án / tháng',
-                    'Ký quỹ Escrow bảo chứng an toàn 100%',
-                    'Nhận báo giá tự do từ các Freelancer',
-                    'Nhắn tin trao đổi 1-1 trực tiếp trên hệ thống',
-                    'Hỗ trợ tiêu chuẩn qua Ticket kỹ thuật (24h - 48h)'
+                    'Đăng tin dự án hoàn toàn Miễn Phí (Không giới hạn)',
+                    'Tiếp cận mạng lưới Freelancer tiêu chuẩn',
+                    'Ký quỹ Escrow bảo chứng 100%',
+                    'Hỗ trợ cộng đồng qua Ticket'
                 ]
             },
             {
@@ -28,13 +27,12 @@ const DEFAULT_DATA = {
                 badge: 'Phổ Biến Nhất',
                 popular: true,
                 features: [
-                    'Đăng tối đa 10 dự án / tháng',
-                    'Tặng 3 lượt Đẩy Top 1 bài đăng / tháng (Trị giá 75.000đ)',
-                    'Khung viền bài đăng Xanh Ưu Tiên nổi bật',
-                    'Mở khóa xem Zalo/SĐT trực tiếp 10 Senior Dev',
-                    'Hệ thống AI kiểm duyệt bài đăng tức thì (< 0.1s)',
-                    'Trọng tài can thiệp giải quyết tranh chấp ưu tiên trong 4h',
-                    'Báo cáo thống kê lượt tiếp cận và tương tác hồ sơ'
+                    'Đăng tin không giới hạn (Ưu tiên tiếp cận Freelancer)',
+                    'Tặng 3 lượt Đẩy Top 1 bài đăng / tháng',
+                    'Khung viền tin Xanh Nổi Bật & Ưu Tiên',
+                    'Mở khóa xem Zalo/SĐT 10 Senior Dev',
+                    'AI duyệt bài tức thì (<0.1s)',
+                    'Trọng tài phân xử ưu tiên trong 4h'
                 ]
             },
             {
@@ -42,16 +40,14 @@ const DEFAULT_DATA = {
                 name: 'Enterprise VIP',
                 price_monthly: 499000,
                 price_annual: 4790000,
-                badge: 'Siêu Cấp Doanh Nghiệp',
+                badge: 'Đẳng Cấp',
                 features: [
-                    'Không giới hạn số lượng tin đăng dự án',
-                    'Tặng 10 lượt Đẩy Top + Ghim đầu trang 7 ngày liên tục (Trị giá 350.000đ)',
-                    'Huy hiệu Vương Miện Doanh Nghiệp VIP mạ vàng trên sàn',
-                    'Mở khóa Zalo/SĐT KHÔNG GIỚI HẠN cho tất cả Freelancer',
-                    'Trợ lý AI Headhunter phân tích kỹ năng & gợi ý Freelancer chuẩn nhất',
-                    'Miễn phí 100% phí dịch vụ rút tiền hoàn cọc về ngân hàng (0đ)',
-                    'Hàng đợi Trọng tài Ưu tiên Cấp 1 (Giải quyết khiếu nại trong 1h)',
-                    'Xuất Báo Cáo Sao Kê & Kiểm Toán Chi Phí Dự Án (File PDF/Excel có mộc chứng thực số)'
+                    'Đăng tin không giới hạn (Vị trí nổi bật & Ghim đầu)',
+                    'Tặng 10 lượt Đẩy Top + Ghim đầu 7 ngày',
+                    'Huy hiệu Vương Miện Doanh Nghiệp VIP',
+                    'Mở khóa xem thông tin trực tiếp 30 Dev',
+                    'AI gợi ý Freelancer chính xác nhất',
+                    'Chuyên viên hỗ trợ 1-1 riêng'
                 ]
             }
         ],
@@ -63,11 +59,10 @@ const DEFAULT_DATA = {
                 price_annual: 0,
                 badge: 'Miễn Phí',
                 features: [
-                    '5 lượt chào thầu (bids) / tháng',
+                    '5 lượt chào thầu (bids) / ngày (Tự động làm mới mỗi ngày)',
                     'Hồ sơ năng lực công khai tiêu chuẩn',
                     'Nhận tiền ví an toàn qua Escrow',
-                    'Chat trao đổi 1-1 với khách hàng',
-                    'Rút tiền thường qua VietQR trong 24h'
+                    'Rút tiền thưởng miễn phí'
                 ]
             },
             {
@@ -78,30 +73,26 @@ const DEFAULT_DATA = {
                 badge: 'Khuyên Dùng',
                 popular: true,
                 features: [
-                    '50 lượt chào thầu (bids) / tháng (Gấp 10 lần)',
-                    'Huy hiệu Tích Xanh "Verified Pro Dev" tạo lòng tin',
-                    'Luôn xuất hiện ở đầu mục tìm kiếm Chuyên Gia IT',
-                    'Nhận thông báo Job mới sớm hơn 15 phút qua Telegram',
-                    'Hồ sơ ứng tuyển luôn nằm trong Top 3 đầu danh sách nộp',
-                    'Giảm 30% phí rút tiền siêu tốc',
-                    'Báo cáo phân tích số lượt Client xem và lưu hồ sơ'
+                    '25 lượt chào thầu (bids) / ngày (Gấp 5 lần Tân Binh)',
+                    'Huy hiệu Tích Xanh Verified Pro Dev',
+                    'Luôn xuất hiện đầu mục Chuyên Gia IT',
+                    'Nhận thông báo Job mới sớm hơn 15 phút',
+                    'Hồ sơ luôn nằm trong Top 3 khi nộp bài',
+                    'Ưu tiên giải ngân & rút tiền nhanh'
                 ]
             },
             {
                 id: 'freelancer_agency',
-                name: 'Đội Ngũ / Agency VIP',
+                name: 'Đội Ngũ / Agency',
                 price_monthly: 299000,
                 price_annual: 2870000,
-                badge: 'Đẳng Cấp Agency',
+                badge: 'Đội Ngũ Lớn',
                 features: [
-                    'Không giới hạn số lượt chào thầu (Unlimited Bids)',
-                    'Huy hiệu Vương Miện Vàng "Top Rated Agency / Master Dev"',
-                    'Được đặt tại Carousel "Đối Tác Chiến Lược" ngay tại Trang chủ',
-                    'Hồ sơ nộp bài luôn Ghim Top 1 kèm khung viền Neon nổi bật',
-                    'Miễn phí 100% Phí Rút Tiền Siêu Tốc (Tiền về sau 30 giây - 0đ)',
-                    'Gắn nhãn Hồ Sơ Năng Lực Doanh Nghiệp (Quy mô Đội nhóm 3 - 10 devs)',
-                    'Trợ lý AI tự động tối ưu hóa Cover Letter & Báo giá theo chuẩn IT (Tích hợp Llama 3.3)',
-                    'Bảo chứng Cam kết Giải ngân Tự động qua Smart Contract sau 72h hoàn thành'
+                    'Không giới hạn lượt chào thầu (Unlimited Bids)',
+                    'Vương Miện Vàng Top Rated Agency',
+                    'Nằm trong Carousel Đối tác chiến lược',
+                    'Đóng khung nổi bật hồ sơ đấu thầu',
+                    'Tích hợp nhóm làm việc nhiều thành viên'
                 ]
             }
         ],
@@ -714,6 +705,143 @@ function adminCancelSubscription(userId) {
     return sub;
 }
 
+// ==========================================
+// FREELANCER BID QUOTA MANAGEMENT (THỰC THI CHÀO THẦU HÀNG NGÀY & GÓI LẺ)
+// ==========================================
+
+/**
+ * Lấy hạn mức chào thầu hôm nay của Freelancer:
+ * - Gói Agency: Không giới hạn
+ * - Gói Pro: 25 lượt/ngày (reset mỗi 00:00)
+ * - Gói Tân Binh (Free): 5 lượt/ngày (reset mỗi 00:00)
+ * - Gói lẻ (extra_bids): Số lượt dự phòng dùng khi hết hạn mức ngày
+ */
+async function getFreelancerBidQuota(freelancerId, supabase) {
+    if (!freelancerId) {
+        return {
+            plan_id: 'newbie',
+            plan_name: 'Tân Binh (Newbie)',
+            daily_limit: 5,
+            numeric_daily_limit: 5,
+            used_today: 0,
+            remaining_today: 5,
+            numeric_remaining_today: 5,
+            extra_bids: 0,
+            total_available: 5,
+            numeric_total_available: 5,
+            unlimited: false
+        };
+    }
+
+    const sub = getUserSubscription(freelancerId);
+    const addons = getUserAddons(freelancerId);
+    const extraBids = addons.extra_bids || 0;
+
+    let dailyLimit = 5;
+    let planId = 'newbie';
+    let planName = 'Tân Binh (Newbie)';
+    let isUnlimited = false;
+
+    if (sub && sub.is_active) {
+        if (sub.plan_id === 'freelancer_agency') {
+            isUnlimited = true;
+            dailyLimit = 999999;
+            planId = sub.plan_id;
+            planName = sub.plan_name;
+        } else if (sub.plan_id === 'freelancer_pro') {
+            dailyLimit = 25;
+            planId = sub.plan_id;
+            planName = sub.plan_name;
+        }
+    }
+
+    // Đếm số đơn ứng tuyển đã nộp hôm nay (tính từ 00:00:00)
+    let usedToday = 0;
+    if (supabase) {
+        try {
+            const startOfDay = new Date();
+            startOfDay.setHours(0, 0, 0, 0);
+
+            const { count, error } = await supabase
+                .from('job_applications')
+                .select('*', { count: 'exact', head: true })
+                .eq('freelancer_id', freelancerId)
+                .gte('created_at', startOfDay.toISOString());
+
+            if (!error && count !== null) {
+                usedToday = count;
+            }
+        } catch (e) {
+            console.warn('[getFreelancerBidQuota] Error querying today applications:', e.message);
+        }
+    }
+
+    const remainingDaily = isUnlimited ? 999999 : Math.max(0, dailyLimit - usedToday);
+    const totalAvailable = isUnlimited ? 999999 : (remainingDaily + extraBids);
+
+    return {
+        plan_id: planId,
+        plan_name: planName,
+        daily_limit: isUnlimited ? 'Không giới hạn' : dailyLimit,
+        numeric_daily_limit: isUnlimited ? 999999 : dailyLimit,
+        used_today: usedToday,
+        remaining_today: isUnlimited ? 'Không giới hạn' : remainingDaily,
+        numeric_remaining_today: remainingDaily,
+        extra_bids: extraBids,
+        total_available: isUnlimited ? 'Không giới hạn' : totalAvailable,
+        numeric_total_available: totalAvailable,
+        unlimited: isUnlimited
+    };
+}
+
+/**
+ * Kiểm tra và trừ lượt chào thầu khi nộp đơn ứng tuyển:
+ * 1. Nếu Agency (Unlimited): Cho phép nộp
+ * 2. Nếu còn lượt trong ngày (> 0): Cho phép nộp
+ * 3. Nếu hết lượt ngày nhưng còn extra_bids: Trừ 1 extra_bids và cho phép nộp
+ * 4. Nếu hết cả hai: Chặn và trả về thông báo lỗi
+ */
+async function checkAndConsumeFreelancerBid(freelancerId, supabase) {
+    const quota = await getFreelancerBidQuota(freelancerId, supabase);
+
+    if (quota.unlimited) {
+        return { allowed: true, consumed_extra: false, quota };
+    }
+
+    if (quota.numeric_remaining_today > 0) {
+        return { allowed: true, consumed_extra: false, quota };
+    }
+
+    // Đã hết lượt ngày, kiểm tra gói mua lẻ dự phòng
+    if (quota.extra_bids > 0) {
+        const data = readData();
+        if (!data.user_addons) data.user_addons = {};
+        if (!data.user_addons[freelancerId]) {
+            data.user_addons[freelancerId] = { job_boost_credits: 0, urgent_tag_credits: 0, extra_bids: 0 };
+        }
+        data.user_addons[freelancerId].extra_bids = Math.max(0, (data.user_addons[freelancerId].extra_bids || 0) - 1);
+        writeData(data);
+
+        return {
+            allowed: true,
+            consumed_extra: true,
+            message: `Bạn đã sử dụng 1 lượt chào thầu dự phòng. Còn lại: ${data.user_addons[freelancerId].extra_bids} lượt.`,
+            quota: {
+                ...quota,
+                extra_bids: data.user_addons[freelancerId].extra_bids,
+                numeric_total_available: data.user_addons[freelancerId].extra_bids
+            }
+        };
+    }
+
+    // Hết lượt hoàn toàn
+    return {
+        allowed: false,
+        error: `Bạn đã sử dụng hết ${quota.daily_limit} lượt chào thầu hôm nay. Lượt chào thầu sẽ tự động làm mới vào 00:00 ngày mai. Bạn có thể mua thêm "Gói 5 Lượt Chào Thầu" (20.000 Token) hoặc nâng cấp gói Chuyên Gia Pro (25 lượt/ngày) để tiếp tục ứng tuyển ngay!`,
+        quota
+    };
+}
+
 module.exports = {
     getAllPlans,
     getUserSubscription,
@@ -735,5 +863,7 @@ module.exports = {
     getAllSubscribersWithUserInfo,
     getAllSubscriptionHistoryWithUserInfo,
     adminExtendSubscription,
-    adminCancelSubscription
+    adminCancelSubscription,
+    getFreelancerBidQuota,
+    checkAndConsumeFreelancerBid
 };

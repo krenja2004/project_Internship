@@ -1036,6 +1036,9 @@
             const vipCardEl = document.getElementById('clientVipCard');
             if (vipCardEl) {
                 if (data.is_vip) {
+                    const clientPerks = (data.subscription && data.subscription.features && data.subscription.features.length)
+                        ? data.subscription.features.slice(0, 4).join(' • ')
+                        : 'Đăng tin dự án không giới hạn • Tặng lượt Đẩy Top • Mở khóa Zalo/SĐT Senior Dev • Ưu tiên trọng tài 4h';
                     vipCardEl.innerHTML = `
                     <div class="bg-gradient-to-r from-amber-500/10 via-yellow-500/10 to-amber-500/5 dark:from-amber-950/40 dark:via-yellow-950/20 dark:to-stone-900 border-2 border-amber-400 dark:border-amber-500 rounded-2xl p-5 sm:p-6 shadow-md">
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -1053,7 +1056,7 @@
                                         <span class="text-xs font-normal text-gray-500 dark:text-gray-400 ml-1">(Hết hạn: ${new Date(data.vip_expires_at).toLocaleDateString('vi-VN')})</span>
                                     </h4>
                                     <p class="text-xs text-gray-600 dark:text-gray-300 mt-1">
-                                        Đặc quyền: Đăng tối đa 10 dự án/tháng • Tặng 3 lượt Đẩy Top 1 • Mở khóa xem Zalo/SĐT 10 Senior Dev • Ưu tiên trọng tài 4h
+                                        Đặc quyền: ${clientPerks}
                                     </p>
                                 </div>
                             </div>
