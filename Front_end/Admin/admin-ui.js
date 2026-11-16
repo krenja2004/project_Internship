@@ -35,6 +35,9 @@ document.addEventListener('DOMContentLoaded', () => {
             <a href="dashboard.html" class="nav-item flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-300 hover:bg-gray-800 hover:text-white font-semibold transition text-xs sm:text-sm">
                 <i class="fas fa-chart-pie w-5 text-indigo-400"></i> <span>Tổng quan & Sổ cái</span>
             </a>
+            <a href="traffic-analytics.html" class="nav-item flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-300 hover:bg-gray-800 hover:text-white font-semibold transition text-xs sm:text-sm">
+                <i class="fas fa-chart-line w-5 text-emerald-400"></i> <span>Lưu lượng & Analytics</span>
+            </a>
             <a href="users.html" class="nav-item flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-300 hover:bg-gray-800 hover:text-white font-semibold transition text-xs sm:text-sm">
                 <i class="fas fa-users-cog w-5 text-blue-400"></i> <span>Quản lý Người dùng</span>
             </a>
@@ -107,6 +110,9 @@ document.addEventListener('DOMContentLoaded', () => {
             <nav class="flex-1 p-3 space-y-1 overflow-y-auto text-xs">
                 <a href="dashboard.html" class="drawer-item flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-300 hover:bg-gray-800 font-semibold">
                     <i class="fas fa-chart-pie w-5 text-indigo-400"></i> <span>Tổng quan & Sổ cái</span>
+                </a>
+                <a href="traffic-analytics.html" class="drawer-item flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-300 hover:bg-gray-800 font-semibold">
+                    <i class="fas fa-chart-line w-5 text-emerald-400"></i> <span>Lưu lượng & Analytics</span>
                 </a>
                 <a href="users.html" class="drawer-item flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-300 hover:bg-gray-800 font-semibold">
                     <i class="fas fa-users-cog w-5 text-blue-400"></i> <span>Quản lý Người dùng</span>

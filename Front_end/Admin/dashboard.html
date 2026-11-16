@@ -148,7 +148,7 @@
                     </span>
                     <span class="text-[11px] text-gray-400 font-semibold hidden sm:inline-block">Cập nhật trực tiếp thời gian thực</span>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 sm:gap-4">
                     <!-- KPI 5: Người Dùng -->
                     <a href="users.html" class="bg-white dark:bg-gray-800 p-4 sm:p-5 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm hover:border-blue-400 hover:shadow-md transition-all duration-200 flex flex-col justify-between group">
                         <div class="flex justify-between items-center mb-3">
@@ -209,6 +209,22 @@
                             <p id="statDisputedJobs" class="text-2xl sm:text-[26px] font-black text-red-600 tracking-tight">0</p>
                             <span class="text-xs text-red-500 font-bold block mt-1 flex items-center">
                                 <i class="fas fa-balance-scale mr-1 text-[10px]"></i> Cần phán quyết
+                            </span>
+                        </div>
+                    </a>
+
+                    <!-- KPI 9: Lưu Lượng Truy Cập Thực Tế -->
+                    <a href="traffic-analytics.html" class="bg-gradient-to-br from-emerald-500/10 via-white to-white dark:from-emerald-950/30 dark:via-gray-800 dark:to-gray-800 p-4 sm:p-5 rounded-3xl border border-emerald-300 dark:border-emerald-700 shadow-sm hover:border-emerald-500 hover:shadow-md transition-all duration-200 flex flex-col justify-between group">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-[11px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-300 group-hover:text-emerald-500 transition-colors">Lưu Lượng Hôm Nay</span>
+                            <div class="w-9 h-9 rounded-2xl bg-emerald-500 text-white flex items-center justify-center text-sm font-bold shadow-sm animate-pulse">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <p id="statTodayViews" class="text-2xl sm:text-[26px] font-black text-emerald-600 dark:text-emerald-400 tracking-tight">0</p>
+                            <span id="statLiveUsersText" class="text-xs text-emerald-700 dark:text-emerald-300 font-bold block mt-1 flex items-center">
+                                <i class="fas fa-signal mr-1 text-[10px]"></i> Đang online: 1 • Chi tiết &rarr;
                             </span>
                         </div>
                     </a>
@@ -365,6 +381,16 @@
                     if(document.getElementById('statPendingWithdrawCount')) document.getElementById('statPendingWithdrawCount').innerText = s.pending_withdraw_count;
                     if(document.getElementById('statPendingWithdrawAmount')) document.getElementById('statPendingWithdrawAmount').innerText = `${(s.pending_withdraw_amount || 0).toLocaleString()} Token chờ duyệt`;
                     if(document.getElementById('statDisputedJobs')) document.getElementById('statDisputedJobs').innerText = s.disputed_jobs;
+                    
+                    // Cập nhật số liệu lưu lượng truy cập thực tế
+                    try {
+                        const trRes = await fetch(`${API_URL}/api/admin/analytics/live`);
+                        const trData = await trRes.json();
+                        if (trData.success) {
+                            if(document.getElementById('statTodayViews')) document.getElementById('statTodayViews').innerText = Number(trData.today_pageviews || 0).toLocaleString();
+                            if(document.getElementById('statLiveUsersText')) document.getElementById('statLiveUsersText').innerHTML = `<i class="fas fa-signal mr-1 text-[10px]"></i> Đang online: ${trData.live_visitors || 1} • Chi tiết &rarr;`;
+                        }
+                    } catch(e) {}
                 }
             } catch(e) {
                 console.error(e);
