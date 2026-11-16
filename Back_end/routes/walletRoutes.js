@@ -83,7 +83,20 @@ router.get('/api/wallet/:user_id/transactions', async (req, res) => {
             .limit(50);
             
         if (error) throw error;
-        res.status(200).json({ transactions: data });
+
+        // Chuẩn hóa mô tả thân thiện với User (Bỏ nhãn nội bộ [DOANH THU SÀN])
+        const userTransactions = (data || []).map(tx => {
+            let cleanNote = tx.note || '';
+            if (cleanNote.includes('[DOANH THU SÀN]')) {
+                cleanNote = cleanNote.replace(/\[DOANH THU SÀN\]\s*/gi, '').trim();
+            }
+            return {
+                ...tx,
+                note: cleanNote
+            };
+        });
+
+        res.status(200).json({ transactions: userTransactions });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }

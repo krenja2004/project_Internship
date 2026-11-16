@@ -712,6 +712,18 @@
                             <i class="fas fa-undo text-[10px]"></i> Hoàn tiền
                         </span>
                     `;
+                case 'subscription_vip':
+                    return `
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/70 dark:text-amber-300 dark:border-amber-800">
+                            <i class="fas fa-crown text-amber-500 text-[10px]"></i> Gói Hội Viên VIP
+                        </span>
+                    `;
+                case 'job_boost':
+                    return `
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-950/70 dark:text-indigo-300 dark:border-indigo-800">
+                            <i class="fas fa-rocket text-indigo-500 text-[10px]"></i> Tiện Ích Đẩy Top
+                        </span>
+                    `;
                 default:
                     return `
                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-700 border border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700">
@@ -735,6 +747,8 @@
                 case 'job_payment': return 'Thanh toán nghiệm thu Escrow';
                 case 'escrow_refund':
                 case 'refund': return 'Hoàn trả Token vào ví';
+                case 'subscription_vip': return 'Nâng cấp Gói VIP';
+                case 'job_boost': return 'Tiện ích Đẩy Top bài đăng';
                 default: return type;
             }
         }
@@ -822,7 +836,7 @@
                             ${amountSign}${formatTokenHTML(tx.amount)}
                         </td>
                         <td class="px-5 py-4 text-xs text-gray-700 dark:text-gray-300 font-medium">
-                            ${tx.note ? tx.note : '<span class="italic text-gray-400 dark:text-gray-500">Không có ghi chú</span>'}
+                            ${tx.note ? tx.note.replace(/\[DOANH THU SÀN\]\s*/gi, '') : '<span class="italic text-gray-400 dark:text-gray-500">Không có ghi chú</span>'}
                         </td>
                         <td class="px-5 py-4 text-center whitespace-nowrap">
                             <button onclick="printReceipt('${tx.id}', '${tx.type}', '${tx.amount}', '${dateStr}', '${(tx.note || '').replace(/'/g, "\\'")}')" class="bg-gray-900 hover:bg-black dark:bg-gray-700 dark:hover:bg-gray-600 text-white px-3 py-1.5 rounded-xl shadow-xs text-xs font-bold transition inline-flex items-center justify-center gap-1.5 cursor-pointer">

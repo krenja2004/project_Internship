@@ -26,12 +26,14 @@ router.get('/api/admin/stats', async (req, res) => {
         const completedJobs = jobs ? jobs.filter(j => j.status === 'completed').length : 0;
 
         // Wallets & Escrow stats
-        const { data: ledgers } = await supabase.from('wallet_ledger').select('amount, type');
+        const { data: ledgers } = await supabase.from('wallet_ledger').select('amount, type, receiver_id');
         let totalDeposits = 0;
         let totalWithdrawn = 0;
+        let totalPlatformProfit = 0;
         if (ledgers) {
             totalDeposits = ledgers.filter(l => l.type === 'DEPOSIT' || l.type === 'ADMIN_CREDIT').reduce((sum, l) => sum + parseFloat(l.amount || 0), 0);
             totalWithdrawn = ledgers.filter(l => l.type === 'WITHDRAW' || l.type === 'ADMIN_DEBIT').reduce((sum, l) => sum + parseFloat(l.amount || 0), 0);
+            totalPlatformProfit = ledgers.filter(l => l.type === 'SUBSCRIPTION_VIP' || l.type === 'JOB_BOOST' || l.receiver_id === '11111111-1111-1111-1111-111111111111').reduce((sum, l) => sum + parseFloat(l.amount || 0), 0);
         }
 
         const { data: wallets } = await supabase.from('wallets').select('balance, locked_balance');
@@ -87,12 +89,68 @@ router.get('/api/admin/stats', async (req, res) => {
                 pending_deposit_amount: pendingDepositAmount,
                 pending_support_count: pendingSupportCount,
                 pending_withdraw_amount: pendingWithdrawAmount,
-                total_platform_profit: (subscriptionService.getPlatformProfitStats().total_profit || 0)
+                total_platform_profit: totalPlatformProfit
             }
         });
     } catch (error) {
         console.error('Lỗi lấy admin stats:', error);
         res.status(500).json({ error: error.message });
+    }
+});
+
+// 1.1 API: Chi tiết Báo Cáo Doanh Thu & Lợi Nhuận Sàn dành cho Admin
+router.get('/api/admin/revenue/overview', async (req, res) => {
+    try {
+        const { data: ledgers, error: lErr } = await supabase
+            .from('wallet_ledger')
+            .select('*, sender:sender_id(id, full_name, email, role, avatar_url)')
+            .or('type.eq.SUBSCRIPTION_VIP,type.eq.JOB_BOOST,receiver_id.eq.11111111-1111-1111-1111-111111111111')
+            .order('created_at', { ascending: false });
+
+        if (lErr) throw lErr;
+
+        let vipRevenue = 0;
+        let boostRevenue = 0;
+        let otherRevenue = 0;
+
+        const transactions = (ledgers || []).map(l => {
+            const amt = parseFloat(l.amount || 0);
+            if (l.type === 'SUBSCRIPTION_VIP') vipRevenue += amt;
+            else if (l.type === 'JOB_BOOST') boostRevenue += amt;
+            else otherRevenue += amt;
+            return l;
+        });
+
+        const totalRevenue = vipRevenue + boostRevenue + otherRevenue;
+
+        // Lấy Escrow đang khóa
+        const { data: wallets } = await supabase.from('wallets').select('locked_balance');
+        let totalLockedEscrow = 0;
+        if (wallets) {
+            wallets.forEach(w => totalLockedEscrow += parseFloat(w.locked_balance || 0));
+        }
+
+        // Lấy số dư Kho bạc sàn (Admin Treasury Wallet)
+        const { data: adminWallets } = await supabase.from('wallets').select('balance').eq('user_id', '11111111-1111-1111-1111-111111111111').limit(1);
+        const treasuryBalance = adminWallets && adminWallets.length > 0 ? (parseFloat(adminWallets[0].balance) || 0) : totalRevenue;
+
+        res.status(200).json({
+            success: true,
+            revenue: {
+                total_revenue: totalRevenue,
+                vip_revenue: vipRevenue,
+                boost_revenue: boostRevenue,
+                other_revenue: otherRevenue,
+                treasury_balance: treasuryBalance,
+                escrow_locked: totalLockedEscrow,
+                estimated_costs: 0,
+                net_profit: totalRevenue,
+                transactions: transactions
+            }
+        });
+    } catch (err) {
+        console.error('Lỗi lấy báo cáo doanh thu admin:', err);
+        res.status(500).json({ success: false, error: err.message });
     }
 });
 

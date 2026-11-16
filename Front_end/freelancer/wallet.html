@@ -756,15 +756,22 @@
                             const isDeposit = tx.type === 'DEPOSIT' || tx.type === 'PAYOS_DEPOSIT';
                             const amountColor = (isReceiver || isDeposit) ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500';
                             const amountSign = (isReceiver || isDeposit) ? '+' : '-';
+                            const cleanNote = (tx.note || tx.type).replace(/\[DOANH THU SÀN\]\s*/gi, '').trim();
+                            let badgeHtml = '';
+                            if (tx.type === 'SUBSCRIPTION_VIP') {
+                                badgeHtml = '<span class="inline-flex items-center gap-1 text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800/60 px-1.5 py-0.5 rounded-md mr-1.5"><i class="fas fa-crown text-[9px]"></i> VIP</span>';
+                            } else if (tx.type === 'JOB_BOOST') {
+                                badgeHtml = '<span class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800/60 px-1.5 py-0.5 rounded-md mr-1.5"><i class="fas fa-rocket text-[9px]"></i> Boost</span>';
+                            }
                             return `
                                 <div class="p-3 bg-gray-50 dark:bg-gray-750 rounded-2xl border border-gray-100 dark:border-gray-700 flex justify-between items-center text-xs">
                                     <div>
-                                        <span class="font-bold text-gray-800 dark:text-white block">${tx.note || tx.type}</span>
+                                        <span class="font-bold text-gray-800 dark:text-white flex items-center">${badgeHtml}${cleanNote}</span>
                                         <span class="text-[10px] text-gray-400">${dateStr}</span>
                                     </div>
                                     <div class="text-right">
                                         <span class="font-black text-sm ${amountColor} block">${amountSign}${formatTokenHTML(tx.amount)}</span>
-                                        <button onclick="printReceipt('${tx.id}', '${tx.type}', '${tx.amount}', '${dateStr}', '${tx.note || ''}')" class="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold hover:underline cursor-pointer">
+                                        <button onclick="printReceipt('${tx.id}', '${tx.type}', '${tx.amount}', '${dateStr}', '${cleanNote.replace(/'/g, "\\'")}')" class="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold hover:underline cursor-pointer">
                                             Xuất PDF
                                         </button>
                                     </div>

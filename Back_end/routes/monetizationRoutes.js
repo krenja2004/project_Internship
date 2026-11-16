@@ -72,7 +72,7 @@ router.post('/api/monetization/subscribe', async (req, res) => {
             });
         }
 
-        // Trừ tiền trong ví
+        // Trừ tiền trong ví User
         const newBalance = currentBalance - price;
         const { error: updateErr } = await supabase
             .from('wallets')
@@ -81,7 +81,19 @@ router.post('/api/monetization/subscribe', async (req, res) => {
 
         if (updateErr) throw updateErr;
 
-        // Ghi Sổ cái (wallet_ledger) - Ghi rõ doanh thu thuộc về Kho bạc Sàn (Admin Treasury)
+        // CỘNG DOANH THU VÀO VÍ KHO BẠC SÀN (Admin Treasury)
+        try {
+            const { data: adminW } = await supabase.from('wallets').select('*').eq('user_id', '11111111-1111-1111-1111-111111111111').limit(1);
+            if (adminW && adminW.length > 0) {
+                await supabase.from('wallets').update({ balance: (parseFloat(adminW[0].balance) || 0) + price }).eq('id', adminW[0].id);
+            } else {
+                await supabase.from('wallets').insert([{ user_id: '11111111-1111-1111-1111-111111111111', balance: price, locked_balance: 0 }]);
+            }
+        } catch (admErr) {
+            console.warn('[Admin Treasury Credit Error]:', admErr.message);
+        }
+
+        // Ghi Sổ cái (wallet_ledger)
         try {
             await supabase.from('wallet_ledger').insert([{
                 sender_id: user_id,
@@ -89,7 +101,7 @@ router.post('/api/monetization/subscribe', async (req, res) => {
                 amount: price,
                 type: 'SUBSCRIPTION_VIP',
                 idempotency_key: `SUB_${user_id}_${Date.now()}`,
-                note: `[DOANH THU SÀN] Thanh toán nâng cấp gói VIP [${plan.name}] (${billing_cycle === 'annual' ? '1 Năm' : '1 Tháng'})`
+                note: `Nâng cấp Gói VIP [${plan.name}] (${billing_cycle === 'annual' ? '1 Năm' : '1 Tháng'})`
             }]);
         } catch (lErr) {
             console.warn('[Ledger Warning]:', lErr.message);
@@ -196,6 +208,18 @@ router.post('/api/monetization/boost-job', async (req, res) => {
             .update({ balance: newBalance })
             .eq('user_id', user_id);
 
+        // CỘNG DOANH THU VÀO VÍ KHO BẠC SÀN (Admin Treasury)
+        try {
+            const { data: adminW } = await supabase.from('wallets').select('*').eq('user_id', '11111111-1111-1111-1111-111111111111').limit(1);
+            if (adminW && adminW.length > 0) {
+                await supabase.from('wallets').update({ balance: (parseFloat(adminW[0].balance) || 0) + price }).eq('id', adminW[0].id);
+            } else {
+                await supabase.from('wallets').insert([{ user_id: '11111111-1111-1111-1111-111111111111', balance: price, locked_balance: 0 }]);
+            }
+        } catch (admErr) {
+            console.warn('[Admin Treasury Credit Error]:', admErr.message);
+        }
+
         // Ghi Sổ cái - Doanh thu dịch vụ của Admin
         try {
             await supabase.from('wallet_ledger').insert([{
@@ -204,7 +228,7 @@ router.post('/api/monetization/boost-job', async (req, res) => {
                 amount: price,
                 type: 'JOB_BOOST',
                 idempotency_key: `BOOST_${job_id}_${Date.now()}`,
-                note: `[DOANH THU SÀN] Tiện ích [${addon.name}] cho bài đăng: "${job.title}"`
+                note: `Tiện ích [${addon.name}] cho bài đăng: "${job.title}"`
             }]);
         } catch (lErr) {
             console.warn('[Ledger Warning]:', lErr.message);

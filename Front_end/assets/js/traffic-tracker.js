@@ -4,6 +4,8 @@
  */
 (function() {
     'use strict';
+    if (window.__trafficBeaconInitialized) return;
+    window.__trafficBeaconInitialized = true;
 
     try {
         // 1. Xác định API Backend URL
