@@ -319,7 +319,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 6. Logout
     const handleLogout = () => {
+        if (typeof window.__kgsSendPresenceLeave === 'function') {
+            try { window.__kgsSendPresenceLeave(); } catch(e) {}
+        }
         localStorage.removeItem('user');
+        sessionStorage.removeItem('__kgs_tab_sid');
         window.location.href = '../sharedFolder/login.html';
     };
 

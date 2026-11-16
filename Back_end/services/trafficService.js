@@ -156,11 +156,14 @@ function recordVisit({
     const hourKey = `${dateKey}T${String(now.getHours()).padStart(2, '0')}`;
 
     // ĐỊNH DANH SESSION NGƯỜI DÙNG THỰC TẾ
-    // Nếu có user_id: phân biệt chính xác từng tài khoản (ví dụ user_9d323da5... vs user_5f79cd46...)
-    const activeKey = user_id ? `user_${user_id}` : (sessionId || `guest_${visitorId || maskedIp}`);
+    // Kết hợp user_id và session_id để phân biệt độc lập từng thiết bị (ví dụ iPhone vs Máy tính)
+    const activeKey = sessionId 
+        ? (user_id ? `usr_${user_id}_${sessionId}` : `guest_${sessionId}`)
+        : (user_id ? `usr_${user_id}_${maskedIp}` : `guest_${visitorId || maskedIp}`);
 
     activeUsers.set(activeKey, {
         session_id: activeKey,
+        raw_session_id: sessionId || '',
         user_id: user_id || null,
         user_name: user_name || 'Khách vãng lai',
         user_email: user_email || '',
@@ -176,10 +179,10 @@ function recordVisit({
         last_seen: Date.now()
     });
 
-    // Tự động dọn dẹp các session không hoạt động quá 3 phút (180 giây)
-    const threeMinutesAgo = Date.now() - 3 * 60 * 1000;
+    // Tự động dọn dẹp các session không hoạt động quá 45 giây (chống tình trạng tắt tab vẫn còn online)
+    const cutoffTime = Date.now() - 45 * 1000;
     for (const [key, session] of activeUsers.entries()) {
-        if (session.last_seen < threeMinutesAgo) {
+        if (session.last_seen < cutoffTime) {
             activeUsers.delete(key);
         }
     }
@@ -266,16 +269,39 @@ function recordVisit({
 }
 
 /**
+ * Xóa session ngay lập tức khi user Đăng xuất hoặc đóng tab
+ */
+function removeVisit({ sessionId = '', user_id = null }) {
+    if (sessionId) {
+        for (const [key, session] of activeUsers.entries()) {
+            if (key.includes(sessionId) || session.raw_session_id === sessionId) {
+                activeUsers.delete(key);
+            }
+        }
+    } else if (user_id) {
+        for (const [key, session] of activeUsers.entries()) {
+            if (session.user_id === user_id) {
+                activeUsers.delete(key);
+            }
+        }
+    }
+    return {
+        success: true,
+        active_live_users: activeUsers.size
+    };
+}
+
+/**
  * Get full analytics report for Admin UI
  */
 function getAnalyticsOverview(range = '24h') {
     ensureDataFile();
     const data = readData();
 
-    // Dọn dẹp active users cũ
-    const threeMinutesAgo = Date.now() - 3 * 60 * 1000;
+    // Dọn dẹp active users cũ (sau 45 giây không có heartbeat)
+    const cutoffTime = Date.now() - 45 * 1000;
     for (const [key, session] of activeUsers.entries()) {
-        if (session.last_seen < threeMinutesAgo) {
+        if (session.last_seen < cutoffTime) {
             activeUsers.delete(key);
         }
     }
@@ -356,5 +382,6 @@ function getAnalyticsOverview(range = '24h') {
 
 module.exports = {
     recordVisit,
+    removeVisit,
     getAnalyticsOverview
 };

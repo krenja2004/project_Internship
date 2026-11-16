@@ -16,6 +16,7 @@ const handleTrackerCors = (req, res, next) => {
 router.options('/api/analytics/track', handleTrackerCors);
 router.options('/api/presence/ping', handleTrackerCors);
 router.options('/api/presence/heartbeat', handleTrackerCors);
+router.options('/api/presence/leave', handleTrackerCors);
 
 // Hàm dùng chung ghi nhận phiên hoạt động & lưu lượng
 const processPresencePing = (req, res) => {
@@ -83,6 +84,25 @@ const processPresencePing = (req, res) => {
 router.post('/api/presence/ping', handleTrackerCors, processPresencePing);
 router.post('/api/presence/heartbeat', handleTrackerCors, processPresencePing);
 router.post('/api/analytics/track', handleTrackerCors, processPresencePing);
+
+// 1.1 Endpoint thoát phiên tức thì (khi User Đăng xuất hoặc Đóng tab)
+router.post('/api/presence/leave', handleTrackerCors, (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept');
+
+    try {
+        let payload = req.body;
+        if (typeof payload === 'string') {
+            try { payload = JSON.parse(payload); } catch(e) {}
+        }
+        const { session_id, user_id } = payload || {};
+        const result = trafficService.removeVisit({ sessionId: session_id, user_id });
+        return res.status(200).json(result);
+    } catch(err) {
+        return res.status(200).json({ success: false });
+    }
+});
 
 // 2. Endpoint lấy toàn bộ báo cáo tổng quan dành cho Admin (Biểu đồ ngày, giờ, Top trang, thiết bị)
 router.get('/api/admin/analytics/overview', (req, res) => {

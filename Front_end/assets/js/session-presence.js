@@ -1,6 +1,6 @@
 /**
- * KGS Work - Real-time Presence & Active User Session Tracker
- * Non-blocking, CORS-compliant, adblock-resilient presence engine
+ * KGS Work - Real-time Presence & Active User Session Tracker (v6)
+ * Multi-tab, multi-device, instant leave on logout/close, adblock-immune
  */
 (function() {
     'use strict';
@@ -23,7 +23,13 @@
             return null;
         }
 
-        // 3. Quản lý Visitor ID & Session ID phân biệt chính xác từng tài khoản
+        // 3. Mỗi Tab / Thiết bị có một Session ID độc lập tuyệt đối (iPhone, iPad, PC không bao giờ bị đè)
+        let tabSessionId = sessionStorage.getItem('__kgs_tab_sid');
+        if (!tabSessionId) {
+            tabSessionId = 'tab_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now().toString(36);
+            sessionStorage.setItem('__kgs_tab_sid', tabSessionId);
+        }
+
         let visitorId = localStorage.getItem('__kgs_vid');
         if (!visitorId) {
             visitorId = 'vid_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 8);
@@ -33,22 +39,13 @@
         // 4. Hàm gửi tín hiệu hiện diện (Presence Ping - Stealth & CORS-safe)
         function sendPresencePing(isHeartbeat = false) {
             const user = getCurrentUser();
-            
-            // Nếu đã đăng nhập: Phân định session theo user_id để nhận diện chính xác 2 tài khoản khác nhau trên cùng 1 máy
-            const sessionId = user && user.id 
-                ? `user_${user.id}` 
-                : (sessionStorage.getItem('__kgs_sid') || ('guest_' + visitorId));
-            
-            if (!user && !sessionStorage.getItem('__kgs_sid')) {
-                sessionStorage.setItem('__kgs_sid', sessionId);
-            }
 
             const payload = {
                 path: window.location.pathname || '/',
                 title: document.title || 'KGS Work',
                 referrer: document.referrer || '',
                 visitor_id: visitorId,
-                session_id: sessionId,
+                session_id: tabSessionId,
                 is_heartbeat: isHeartbeat,
                 screen_width: window.innerWidth || (window.screen ? window.screen.width : 1920),
                 
@@ -62,35 +59,49 @@
 
             const jsonBody = JSON.stringify(payload);
 
-            // Dùng Fetch chuẩn với mode 'cors' và keepalive: true (Chống lỗi preflight của sendBeacon)
-            // Ưu tiên endpoint stealth '/api/presence/ping' (Không bị AdBlocker chặn)
-            const primaryEndpoint = `${API_BASE}/api/presence/ping`;
-            const fallbackEndpoint = `${API_BASE}/api/analytics/track`;
-
-            fetch(primaryEndpoint, {
+            // Gửi duy nhất đến endpoint tàng hình '/api/presence/ping' (Không bị AdBlock chặn, không sinh lỗi đỏ)
+            fetch(`${API_BASE}/api/presence/ping`, {
                 method: 'POST',
                 mode: 'cors',
                 headers: { 'Content-Type': 'application/json' },
                 body: jsonBody,
                 keepalive: true
-            }).catch(() => {
-                // Fallback nếu primary endpoint gặp sự cố
-                fetch(fallbackEndpoint, {
-                    method: 'POST',
-                    mode: 'cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: jsonBody,
-                    keepalive: true
-                }).catch(() => {});
+            }).catch(() => {});
+        }
+
+        // 5. Hàm báo rời phiên ngay lập tức (khi Đăng xuất hoặc Đóng tab)
+        function sendPresenceLeave() {
+            const user = getCurrentUser();
+            const leavePayload = JSON.stringify({
+                session_id: tabSessionId,
+                user_id: user ? user.id : null
             });
+
+            // text/plain blob an toàn 100% khi sendBeacon lúc tắt tab
+            if (navigator.sendBeacon) {
+                try {
+                    const blob = new Blob([leavePayload], { type: 'text/plain' });
+                    navigator.sendBeacon(`${API_BASE}/api/presence/leave`, blob);
+                    return;
+                } catch(e) {}
+            }
+
+            fetch(`${API_BASE}/api/presence/leave`, {
+                method: 'POST',
+                mode: 'cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: leavePayload,
+                keepalive: true
+            }).catch(() => {});
         }
 
         window.__kgsSendPresencePing = sendPresencePing;
+        window.__kgsSendPresenceLeave = sendPresenceLeave;
 
-        // 5. Gửi ping ngay lập tức khi file script vừa nạp xong
+        // 6. Gửi ping ngay lập tức khi file vừa nạp xong
         sendPresencePing(false);
 
-        // 6. Gửi ping khi trang tải hoàn tất
+        // 7. Gửi ping khi trang tải hoàn tất
         if (document.readyState === 'complete') {
             sendPresencePing(false);
         } else {
@@ -98,19 +109,23 @@
             document.addEventListener('DOMContentLoaded', () => sendPresencePing(false));
         }
 
-        // 7. Gửi ping khi user chuyển tab quay lại trang
+        // 8. Bắt sự kiện chuyển tab (quay lại trang -> gửi ping; ẩn đi -> không tốn tài nguyên)
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden) {
                 sendPresencePing(true);
             }
         });
 
-        // 8. Duy trì trạng thái trực tuyến (Heartbeat mỗi 15 giây)
+        // 9. Bắt sự kiện đóng tab / tắt trình duyệt -> Xóa ngay khỏi Radar
+        window.addEventListener('beforeunload', sendPresenceLeave);
+        window.addEventListener('pagehide', sendPresenceLeave);
+
+        // 10. Duy trì trạng thái trực tuyến mỗi 10 giây
         setInterval(() => {
             if (!document.hidden) {
                 sendPresencePing(true);
             }
-        }, 15000);
+        }, 10000);
 
     } catch (err) {
         console.warn('[PresenceTracker] Init bypassed:', err);

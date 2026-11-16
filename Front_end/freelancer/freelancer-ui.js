@@ -5,7 +5,7 @@
     if (!window.__kgsTrafficTracked) {
         window.__kgsTrafficTracked = true;
         const s = document.createElement('script');
-        s.src = '../assets/js/session-presence.js?v=20261116_v5';
+        s.src = '../assets/js/session-presence.js?v=20261116_v6';
         s.async = true;
         document.head.appendChild(s);
     }
@@ -343,7 +343,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const handleLogout = () => {
+        if (typeof window.__kgsSendPresenceLeave === 'function') {
+            try { window.__kgsSendPresenceLeave(); } catch(e) {}
+        }
         localStorage.removeItem('user');
+        sessionStorage.removeItem('__kgs_tab_sid');
         window.location.href = '../sharedFolder/login.html';
     };
 
