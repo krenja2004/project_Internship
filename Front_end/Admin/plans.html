@@ -236,6 +236,95 @@
                     </div>
                 </div>
 
+                <!-- THANH TÌM KIẾM & BỘ LỌC ĐA NĂNG -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 p-3.5 sm:p-4 shadow-xs">
+                    <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+                        <!-- Ô tìm kiếm realtime -->
+                        <div class="relative flex-1">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                                <i class="fas fa-search text-xs"></i>
+                            </span>
+                            <input 
+                                type="text" 
+                                id="filterSearchInput" 
+                                oninput="applyFiltersAndRender()" 
+                                placeholder="Tìm kiếm theo mã GD, tên người dùng, email, gói dịch vụ..." 
+                                class="w-full pl-9 pr-9 py-2.5 bg-gray-50 dark:bg-gray-750 border border-gray-200 dark:border-gray-700 rounded-xl text-xs text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white dark:focus:bg-gray-800 transition"
+                            >
+                            <button 
+                                type="button" 
+                                id="btnClearSearch" 
+                                onclick="clearSearch()" 
+                                class="hidden absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-pointer"
+                                title="Xóa từ khóa tìm kiếm"
+                            >
+                                <i class="fas fa-times text-xs"></i>
+                            </button>
+                        </div>
+
+                        <!-- Các bộ lọc theo dropdown -->
+                        <div class="flex items-center flex-wrap gap-2.5">
+                            <!-- Bộ lọc 1: Phân loại / Vai trò -->
+                            <div class="min-w-[150px]">
+                                <select 
+                                    id="filterCategoryOrRole" 
+                                    onchange="applyFiltersAndRender()" 
+                                    class="w-full py-2.5 px-3 bg-gray-50 dark:bg-gray-750 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500 cursor-pointer"
+                                >
+                                    <option value="all">Tất cả hình thức</option>
+                                </select>
+                            </div>
+
+                            <!-- Bộ lọc 2: Trạng thái / Thời gian -->
+                            <div class="min-w-[150px]">
+                                <select 
+                                    id="filterStatusOrTime" 
+                                    onchange="applyFiltersAndRender()" 
+                                    class="w-full py-2.5 px-3 bg-gray-50 dark:bg-gray-750 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500 cursor-pointer"
+                                >
+                                    <option value="all">Tất cả trạng thái</option>
+                                </select>
+                            </div>
+
+                            <!-- Bộ lọc 3: Sắp xếp -->
+                            <div class="min-w-[150px]">
+                                <select 
+                                    id="filterSortOrder" 
+                                    onchange="applyFiltersAndRender()" 
+                                    class="w-full py-2.5 px-3 bg-gray-50 dark:bg-gray-750 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500 cursor-pointer"
+                                >
+                                    <option value="newest">Mới nhất trước</option>
+                                    <option value="oldest">Cũ nhất trước</option>
+                                    <option value="price_desc">Token cao nhất</option>
+                                    <option value="price_asc">Token thấp nhất</option>
+                                </select>
+                            </div>
+
+                            <!-- Nút Đặt lại bộ lọc -->
+                            <button 
+                                onclick="resetAllFilters()" 
+                                title="Đặt lại bộ lọc về mặc định" 
+                                class="px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 text-xs font-bold transition flex items-center space-x-1.5 cursor-pointer shrink-0"
+                            >
+                                <i class="fas fa-undo-alt text-[10px]"></i>
+                                <span>Đặt lại</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Dòng thống kê số lượng kết quả lọc -->
+                    <div class="flex items-center justify-between mt-2.5 pt-2.5 border-t border-gray-100 dark:border-gray-700/60 text-[11px] text-gray-500 dark:text-gray-400">
+                        <div class="flex items-center space-x-2">
+                            <span>Kết quả:</span>
+                            <span id="filterResultCountBadge" class="font-bold text-gray-900 dark:text-white px-2.5 py-0.5 rounded-md bg-gray-100 dark:bg-gray-700">0</span>
+                            <span id="filterActiveNotice" class="text-indigo-600 dark:text-indigo-400 font-bold"></span>
+                        </div>
+                        <div id="filterTotalSum" class="font-bold text-amber-600 dark:text-amber-400 hidden">
+                            <!-- Tổng Token cho tab History -->
+                        </div>
+                    </div>
+                </div>
+
                 <!-- BẢNG DỮ LIỆU ĐỘNG THEO TAB -->
                 <div class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700/70 shadow-sm overflow-hidden">
                     <div class="overflow-x-auto">
@@ -466,26 +555,288 @@
                 noticeEl.innerHTML = '<i class="fas fa-receipt text-amber-300 mr-1"></i><span>Toàn bộ lịch sử các giao dịch thanh toán nâng cấp gói và tiện ích lẻ trên sàn.</span>';
             }
 
-            renderCurrentTable();
+            // Cập nhật bộ lọc phù hợp với ngữ cảnh tab và lọc lại
+            updateFilterControlsForTab();
+            applyFiltersAndRender();
         }
 
-        // 3. Render bảng động theo Tab
-        function renderCurrentTable() {
-            const thead = document.getElementById('plansTableHead');
-            const tbody = document.getElementById('plansTableBody');
-            if (!thead || !tbody) return;
+        // Cấu hình các tùy chọn bộ lọc động theo từng Tab
+        function updateFilterControlsForTab() {
+            const selCat = document.getElementById('filterCategoryOrRole');
+            const selStatus = document.getElementById('filterStatusOrTime');
+            const selSort = document.getElementById('filterSortOrder');
+            const searchInput = document.getElementById('filterSearchInput');
 
-            if (currentTab === 'subscribers') {
-                renderSubscribersTable(thead, tbody);
-            } else if (currentTab === 'history') {
-                renderHistoryTable(thead, tbody);
+            if (!selCat || !selStatus || !selSort) return;
+
+            if (currentTab === 'history') {
+                if (searchInput) searchInput.placeholder = "Tìm theo mã GD (REV-...), tên người mua, email, gói dịch vụ...";
+                selCat.innerHTML = `
+                    <option value="all">Tất cả hình thức</option>
+                    <option value="vip">👑 Gói Hội Viên VIP</option>
+                    <option value="addon">⚡ Tiện Ích Mua Lẻ</option>
+                `;
+                selStatus.innerHTML = `
+                    <option value="all">Tất cả thời gian</option>
+                    <option value="today">Hôm nay</option>
+                    <option value="7days">7 ngày qua</option>
+                    <option value="30days">30 ngày qua</option>
+                `;
+                selSort.innerHTML = `
+                    <option value="newest">Mới nhất trước</option>
+                    <option value="oldest">Cũ nhất trước</option>
+                    <option value="price_desc">Token cao nhất</option>
+                    <option value="price_asc">Token thấp nhất</option>
+                `;
+            } else if (currentTab === 'subscribers') {
+                if (searchInput) searchInput.placeholder = "Tìm theo tên hội viên, email, SĐT, mã gói...";
+                selCat.innerHTML = `
+                    <option value="all">Tất cả vai trò</option>
+                    <option value="client">🏢 Khách Hàng (Client)</option>
+                    <option value="freelancer">💻 Freelancer</option>
+                `;
+                selStatus.innerHTML = `
+                    <option value="all">Tất cả trạng thái</option>
+                    <option value="active">Đang hoạt động</option>
+                    <option value="expiring_soon">Sắp hết hạn (≤ 7 ngày)</option>
+                    <option value="expired">Đã hết hạn</option>
+                `;
+                selSort.innerHTML = `
+                    <option value="days_asc">Hết hạn sớm nhất</option>
+                    <option value="days_desc">Còn nhiều ngày nhất</option>
+                    <option value="name_asc">Tên người dùng A &rarr; Z</option>
+                    <option value="name_desc">Tên người dùng Z &rarr; A</option>
+                `;
             } else {
-                renderPlansConfigTable(thead, tbody);
+                const tabTitle = currentTab === 'client' ? 'Doanh Nghiệp' : (currentTab === 'freelancer' ? 'Freelancer' : 'Tiện Ích');
+                if (searchInput) searchInput.placeholder = `Tìm kiếm trong danh mục gói ${tabTitle}...`;
+                selCat.innerHTML = `
+                    <option value="all">Tất cả mức giá</option>
+                    <option value="free">Gói Miễn Phí</option>
+                    <option value="paid">Gói Trả Phí</option>
+                    <option value="popular">⭐ Gói Phổ Biến</option>
+                `;
+                selStatus.innerHTML = `
+                    <option value="all">Tất cả trạng thái</option>
+                    <option value="system">Gói Mặc Định Hệ Thống</option>
+                    <option value="custom">Gói Tùy Biến Sàn</option>
+                `;
+                selSort.innerHTML = `
+                    <option value="price_asc">Giá tăng dần</option>
+                    <option value="price_desc">Giá giảm dần</option>
+                    <option value="name_asc">Tên gói A &rarr; Z</option>
+                `;
             }
         }
 
+        // Áp dụng tìm kiếm và các bộ lọc realtime
+        function applyFiltersAndRender() {
+            const searchVal = (document.getElementById('filterSearchInput')?.value || '').trim().toLowerCase();
+            const catVal = document.getElementById('filterCategoryOrRole')?.value || 'all';
+            const statusVal = document.getElementById('filterStatusOrTime')?.value || 'all';
+            const sortVal = document.getElementById('filterSortOrder')?.value || 'newest';
+
+            const btnClear = document.getElementById('btnClearSearch');
+            if (btnClear) {
+                if (searchVal) btnClear.classList.remove('hidden');
+                else btnClear.classList.add('hidden');
+            }
+
+            const thead = document.getElementById('plansTableHead');
+            const tbody = document.getElementById('plansTableBody');
+            const badgeEl = document.getElementById('filterResultCountBadge');
+            const totalSumEl = document.getElementById('filterTotalSum');
+            const activeNotice = document.getElementById('filterActiveNotice');
+
+            let totalItems = 0;
+            let filteredCount = 0;
+
+            if (currentTab === 'history') {
+                totalItems = historyList.length;
+                let list = [...historyList];
+
+                // 1. Tìm kiếm
+                if (searchVal) {
+                    list = list.filter(item => {
+                        const id = (item.id || '').toLowerCase();
+                        const name = (item.user_name || '').toLowerCase();
+                        const email = (item.user_email || '').toLowerCase();
+                        const service = (item.service || '').toLowerCase();
+                        return id.includes(searchVal) || name.includes(searchVal) || email.includes(searchVal) || service.includes(searchVal);
+                    });
+                }
+
+                // 2. Lọc theo hình thức (Gói VIP hay Tiện ích)
+                if (catVal === 'vip') {
+                    list = list.filter(item => !(item.service && (item.service.includes('Tiện ích') || item.service.includes('Đẩy Top') || item.service.includes('Tuyển Gấp') || item.service.includes('job_boost') || item.service.includes('urgent_tag') || item.service.includes('bid_pack'))));
+                } else if (catVal === 'addon') {
+                    list = list.filter(item => item.service && (item.service.includes('Tiện ích') || item.service.includes('Đẩy Top') || item.service.includes('Tuyển Gấp') || item.service.includes('job_boost') || item.service.includes('urgent_tag') || item.service.includes('bid_pack')));
+                }
+
+                // 3. Lọc theo thời gian
+                if (statusVal !== 'all') {
+                    const now = new Date();
+                    if (statusVal === 'today') {
+                        const todayStr = now.toISOString().slice(0, 10);
+                        list = list.filter(item => (item.created_at || '').startsWith(todayStr));
+                    } else if (statusVal === '7days') {
+                        const past7 = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                        list = list.filter(item => new Date(item.created_at || 0) >= past7);
+                    } else if (statusVal === '30days') {
+                        const past30 = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                        list = list.filter(item => new Date(item.created_at || 0) >= past30);
+                    }
+                }
+
+                // 4. Sắp xếp
+                if (sortVal === 'newest') {
+                    list.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+                } else if (sortVal === 'oldest') {
+                    list.sort((a, b) => new Date(a.created_at || 0) - new Date(b.created_at || 0));
+                } else if (sortVal === 'price_desc') {
+                    list.sort((a, b) => (parseFloat(b.amount) || 0) - (parseFloat(a.amount) || 0));
+                } else if (sortVal === 'price_asc') {
+                    list.sort((a, b) => (parseFloat(a.amount) || 0) - (parseFloat(b.amount) || 0));
+                }
+
+                filteredCount = list.length;
+                const totalAmount = list.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+                if (totalSumEl) {
+                    totalSumEl.classList.remove('hidden');
+                    totalSumEl.innerHTML = `Doanh thu trong bộ lọc: <span class="text-amber-500 font-black">+${totalAmount.toLocaleString('vi-VN')} Token</span>`;
+                }
+
+                renderHistoryTable(thead, tbody, list);
+
+            } else if (currentTab === 'subscribers') {
+                totalItems = subscribersList.length;
+                let list = [...subscribersList];
+
+                // 1. Tìm kiếm
+                if (searchVal) {
+                    list = list.filter(item => {
+                        const name = (item.user_name || '').toLowerCase();
+                        const email = (item.user_email || '').toLowerCase();
+                        const phone = (item.user_phone || '').toLowerCase();
+                        const planName = (item.plan_name || '').toLowerCase();
+                        const planId = (item.plan_id || '').toLowerCase();
+                        return name.includes(searchVal) || email.includes(searchVal) || phone.includes(searchVal) || planName.includes(searchVal) || planId.includes(searchVal);
+                    });
+                }
+
+                // 2. Lọc vai trò
+                if (catVal === 'client') {
+                    list = list.filter(item => item.role === 'client');
+                } else if (catVal === 'freelancer') {
+                    list = list.filter(item => item.role === 'freelancer');
+                }
+
+                // 3. Lọc trạng thái
+                if (statusVal === 'active') {
+                    list = list.filter(item => item.is_active);
+                } else if (statusVal === 'expiring_soon') {
+                    list = list.filter(item => item.is_active && (item.days_remaining || 0) <= 7);
+                } else if (statusVal === 'expired') {
+                    list = list.filter(item => !item.is_active || item.is_expired);
+                }
+
+                // 4. Sắp xếp
+                if (sortVal === 'days_asc') {
+                    list.sort((a, b) => (a.days_remaining || 0) - (b.days_remaining || 0));
+                } else if (sortVal === 'days_desc') {
+                    list.sort((a, b) => (b.days_remaining || 0) - (a.days_remaining || 0));
+                } else if (sortVal === 'name_asc') {
+                    list.sort((a, b) => (a.user_name || '').localeCompare(b.user_name || ''));
+                } else if (sortVal === 'name_desc') {
+                    list.sort((a, b) => (b.user_name || '').localeCompare(a.user_name || ''));
+                }
+
+                filteredCount = list.length;
+                if (totalSumEl) totalSumEl.classList.add('hidden');
+
+                renderSubscribersTable(thead, tbody, list);
+
+            } else {
+                // Plans config: client / freelancer / addons
+                const origList = (allPlansData && allPlansData[currentTab]) || [];
+                totalItems = origList.length;
+                let list = [...origList];
+
+                // 1. Tìm kiếm
+                if (searchVal) {
+                    list = list.filter(item => {
+                        const name = (item.name || '').toLowerCase();
+                        const id = (item.id || '').toLowerCase();
+                        const desc = (item.desc || '').toLowerCase();
+                        const feats = (item.features || []).join(' ').toLowerCase();
+                        return name.includes(searchVal) || id.includes(searchVal) || desc.includes(searchVal) || feats.includes(searchVal);
+                    });
+                }
+
+                // 2. Lọc mức giá
+                if (catVal === 'free') {
+                    list = list.filter(item => (item.price_monthly || 0) === 0 && (item.price || 0) === 0);
+                } else if (catVal === 'paid') {
+                    list = list.filter(item => (item.price_monthly || 0) > 0 || (item.price || 0) > 0);
+                } else if (catVal === 'popular') {
+                    list = list.filter(item => item.popular);
+                }
+
+                // 3. Lọc hệ thống / tùy biến
+                if (statusVal === 'system') {
+                    list = list.filter(item => ['starter', 'newbie'].includes(item.id));
+                } else if (statusVal === 'custom') {
+                    list = list.filter(item => !['starter', 'newbie'].includes(item.id));
+                }
+
+                // 4. Sắp xếp
+                if (sortVal === 'price_asc') {
+                    list.sort((a, b) => (a.price_monthly || a.price || 0) - (b.price_monthly || b.price || 0));
+                } else if (sortVal === 'price_desc') {
+                    list.sort((a, b) => (b.price_monthly || b.price || 0) - (a.price_monthly || a.price || 0));
+                } else if (sortVal === 'name_asc') {
+                    list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+                }
+
+                filteredCount = list.length;
+                if (totalSumEl) totalSumEl.classList.add('hidden');
+
+                renderPlansConfigTable(thead, tbody, list);
+            }
+
+            if (badgeEl) {
+                badgeEl.innerText = `${filteredCount} / ${totalItems}`;
+            }
+            if (activeNotice) {
+                const isFiltering = searchVal || catVal !== 'all' || statusVal !== 'all';
+                activeNotice.innerText = isFiltering ? '(Đã lọc)' : '';
+            }
+        }
+
+        function clearSearch() {
+            const inp = document.getElementById('filterSearchInput');
+            if (inp) inp.value = '';
+            applyFiltersAndRender();
+        }
+
+        function resetAllFilters() {
+            const inp = document.getElementById('filterSearchInput');
+            if (inp) inp.value = '';
+            const selCat = document.getElementById('filterCategoryOrRole');
+            if (selCat) selCat.value = 'all';
+            const selStatus = document.getElementById('filterStatusOrTime');
+            if (selStatus) selStatus.value = 'all';
+            const selSort = document.getElementById('filterSortOrder');
+            if (selSort) {
+                if (currentTab === 'subscribers') selSort.value = 'days_asc';
+                else if (currentTab === 'history') selSort.value = 'newest';
+                else selSort.value = 'price_asc';
+            }
+            applyFiltersAndRender();
+        }
+
         // 3a. Bảng 1: Danh sách Hội Viên Đang Sử Dụng Gói VIP
-        function renderSubscribersTable(thead, tbody) {
+        function renderSubscribersTable(thead, tbody, list = subscribersList) {
             thead.innerHTML = `
                 <tr>
                     <th class="py-3.5 px-4">Người Dùng</th>
@@ -498,13 +849,16 @@
                 </tr>
             `;
 
-            if (subscribersList.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="py-12 text-center text-gray-400">Hiện tại chưa có người dùng nào đăng ký gói VIP.</td></tr>`;
+            if (list.length === 0) {
+                const emptyMsg = subscribersList.length === 0 
+                    ? 'Hiện tại chưa có người dùng nào đăng ký gói VIP.' 
+                    : '<i class="fas fa-search text-gray-300 dark:text-gray-600 text-xl mb-1.5 block"></i>Không tìm thấy hội viên nào khớp với điều kiện lọc.';
+                tbody.innerHTML = `<tr><td colspan="7" class="py-12 text-center text-gray-400 font-medium">${emptyMsg}</td></tr>`;
                 return;
             }
 
             let html = '';
-            subscribersList.forEach(sub => {
+            list.forEach(sub => {
                 const defaultAvatar = sub.role === 'client' ? '../assets/images/default-client.png' : '../assets/images/default-freelancer.png';
                 const avatar = sub.user_avatar || defaultAvatar;
                 const isClient = sub.role === 'client';
@@ -579,13 +933,13 @@
                     <td class="py-3.5 px-4 text-center">
                         <div class="flex items-center justify-center space-x-2">
                             <!-- Nút Gia hạn thêm 30 ngày -->
-                            <button onclick="extendUserSubPrompt('${sub.user_id}', '${escapeHtml(sub.user_name)}', 30)" class="px-2.5 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 font-bold text-[11px] border border-emerald-300 dark:border-emerald-700 transition flex items-center space-x-1" title="Cộng thêm 30 ngày sử dụng">
+                            <button onclick="extendUserSubPrompt('${sub.user_id}', '${escapeHtml(sub.user_name)}', 30)" class="px-2.5 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 font-bold text-[11px] border border-emerald-300 dark:border-emerald-700 transition flex items-center space-x-1 cursor-pointer" title="Cộng thêm 30 ngày sử dụng">
                                 <i class="fas fa-plus-circle text-xs"></i> <span>+30 Ngày</span>
                             </button>
 
                             <!-- Nút Hủy gói -->
                             ${sub.is_active ? `
-                                <button onclick="cancelUserSubPrompt('${sub.user_id}', '${escapeHtml(sub.user_name)}')" class="px-2.5 py-1.5 rounded-xl bg-red-50 dark:bg-red-950/60 hover:bg-red-100 text-red-600 dark:text-red-400 font-bold text-[11px] border border-red-200 dark:border-red-800 transition" title="Hủy gói VIP này">
+                                <button onclick="cancelUserSubPrompt('${sub.user_id}', '${escapeHtml(sub.user_name)}')" class="px-2.5 py-1.5 rounded-xl bg-red-50 dark:bg-red-950/60 hover:bg-red-100 text-red-600 dark:text-red-400 font-bold text-[11px] border border-red-200 dark:border-red-800 transition cursor-pointer" title="Hủy gói VIP này">
                                     <i class="fas fa-times-circle"></i>
                                 </button>
                             ` : ''}
@@ -598,7 +952,7 @@
         }
 
         // 3b. Bảng 2: Toàn Bộ Lịch Sử Giao Dịch Mua Gói & Tiện Ích
-        function renderHistoryTable(thead, tbody) {
+        function renderHistoryTable(thead, tbody, list = historyList) {
             thead.innerHTML = `
                 <tr>
                     <th class="py-3.5 px-4">Mã Giao Dịch / Thời Gian</th>
@@ -610,15 +964,18 @@
                 </tr>
             `;
 
-            if (historyList.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="py-12 text-center text-gray-400">Chưa có giao dịch mua gói nào được ghi nhận.</td></tr>`;
+            if (list.length === 0) {
+                const emptyMsg = historyList.length === 0 
+                    ? 'Chưa có giao dịch mua gói nào được ghi nhận.' 
+                    : '<i class="fas fa-search text-gray-300 dark:text-gray-600 text-xl mb-1.5 block"></i>Không tìm thấy giao dịch nào khớp với điều kiện lọc.';
+                tbody.innerHTML = `<tr><td colspan="6" class="py-12 text-center text-gray-400 font-medium">${emptyMsg}</td></tr>`;
                 return;
             }
 
             let html = '';
-            historyList.forEach(t => {
+            list.forEach(t => {
                 const dateStr = new Date(t.created_at).toLocaleString('vi-VN');
-                const isAddon = t.service && (t.service.includes('Tiện ích') || t.service.includes('Đẩy Top') || t.service.includes('Tuyển Gấp'));
+                const isAddon = t.service && (t.service.includes('Tiện ích') || t.service.includes('Đẩy Top') || t.service.includes('Tuyển Gấp') || t.service.includes('job_boost') || t.service.includes('urgent_tag') || t.service.includes('bid_pack'));
 
                 html += `
                 <tr class="hover:bg-gray-50/80 dark:hover:bg-gray-750/50 transition">
@@ -663,7 +1020,7 @@
         }
 
         // 3c. Bảng 3: Cấu hình Gói Dịch Vụ (Client, Freelancer, Addons)
-        function renderPlansConfigTable(thead, tbody) {
+        function renderPlansConfigTable(thead, tbody, list = null) {
             thead.innerHTML = `
                 <tr>
                     <th class="py-3.5 px-4">Tên Gói / Mã ID</th>
@@ -674,15 +1031,19 @@
                 </tr>
             `;
 
-            if (!allPlansData) return;
-            const list = allPlansData[currentTab] || [];
-            if (list.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="py-10 text-center text-gray-400">Chưa có gói nào trong danh mục này. Bấm "+ Thêm Gói Mới" để tạo.</td></tr>`;
+            const origList = (allPlansData && allPlansData[currentTab]) || [];
+            const dataList = list !== null ? list : origList;
+
+            if (dataList.length === 0) {
+                const emptyMsg = origList.length === 0
+                    ? 'Chưa có gói nào trong danh mục này. Bấm "+ Thêm Gói Mới" để tạo.'
+                    : '<i class="fas fa-search text-gray-300 dark:text-gray-600 text-xl mb-1.5 block"></i>Không tìm thấy gói nào khớp với điều kiện lọc.';
+                tbody.innerHTML = `<tr><td colspan="5" class="py-10 text-center text-gray-400 font-medium">${emptyMsg}</td></tr>`;
                 return;
             }
 
             let html = '';
-            list.forEach(p => {
+            dataList.forEach(p => {
                 const isDefault = ['starter', 'newbie'].includes(p.id);
                 let priceHtml = '';
 
@@ -728,11 +1089,11 @@
                     </td>
                     <td class="py-4 px-4 text-center">
                         <div class="flex items-center justify-center space-x-2">
-                            <button onclick="openEditPlanModal('${p.id}')" class="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 hover:bg-blue-100 transition flex items-center justify-center text-xs" title="Chỉnh sửa gói">
+                            <button onclick="openEditPlanModal('${p.id}')" class="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 hover:bg-blue-100 transition flex items-center justify-center text-xs cursor-pointer" title="Chỉnh sửa gói">
                                 <i class="fas fa-edit"></i>
                             </button>
                             ${!isDefault ? `
-                                <button onclick="deletePlanConfirm('${p.id}', '${p.name}')" class="w-8 h-8 rounded-xl bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400 hover:bg-red-100 transition flex items-center justify-center text-xs" title="Xóa gói">
+                                <button onclick="deletePlanConfirm('${p.id}', '${p.name}')" class="w-8 h-8 rounded-xl bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400 hover:bg-red-100 transition flex items-center justify-center text-xs cursor-pointer" title="Xóa gói">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
                             ` : `
@@ -1000,50 +1361,6 @@
                 loadAllPlansData();
             } catch (err) {
                 alert('❌ Lỗi xóa gói: ' + err.message);
-            }
-        }
-
-        async function extendUserSubPrompt(userId, userName, extraDays = 30) {
-            if (!confirm(`👑 Xác nhận gia hạn gói VIP cho hội viên [${userName}] thêm ${extraDays} ngày?`)) {
-                return;
-            }
-            try {
-                const res = await fetch(`${API_URL}/api/admin/monetization/extend-subscription`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_id: userId, extra_days: extraDays })
-                });
-                const json = await res.json();
-                if (res.ok && json.success) {
-                    alert('🎉 ' + json.message);
-                    loadAllPlansData();
-                } else {
-                    throw new Error(json.error || 'Gia hạn gói thất bại');
-                }
-            } catch (err) {
-                alert('❌ Lỗi gia hạn: ' + err.message);
-            }
-        }
-
-        async function cancelUserSubPrompt(userId, userName) {
-            if (!confirm(`⚠️ CẢNH BÁO: Bạn có chắc chắn muốn HỦY GÓI VIP của hội viên [${userName}] ngay lập tức?\n\nNgười dùng này sẽ bị mất các đặc quyền VIP.`)) {
-                return;
-            }
-            try {
-                const res = await fetch(`${API_URL}/api/admin/monetization/cancel-subscription`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_id: userId })
-                });
-                const json = await res.json();
-                if (res.ok && json.success) {
-                    alert('✅ ' + json.message);
-                    loadAllPlansData();
-                } else {
-                    throw new Error(json.error || 'Hủy gói thất bại');
-                }
-            } catch (err) {
-                alert('❌ Lỗi hủy gói: ' + err.message);
             }
         }
 
