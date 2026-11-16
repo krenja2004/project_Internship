@@ -82,34 +82,46 @@ router.post('/api/monetization/subscribe', async (req, res) => {
         if (updateErr) throw updateErr;
 
         // Ghi Sổ cái (wallet_ledger) - Ghi rõ doanh thu thuộc về Kho bạc Sàn (Admin Treasury)
-        await supabase.from('wallet_ledger').insert([{
-            sender_id: user_id,
-            receiver_id: '00000000-0000-0000-0000-000000000000',
-            amount: price,
-            transaction_type: 'subscription_payment',
-            status: 'completed',
-            description: `[DOANH THU SÀN] Thanh toán nâng cấp gói VIP [${plan.name}] (${billing_cycle === 'annual' ? '1 Năm' : '1 Tháng'})`
-        }]);
+        try {
+            await supabase.from('wallet_ledger').insert([{
+                sender_id: user_id,
+                receiver_id: '11111111-1111-1111-1111-111111111111',
+                amount: price,
+                type: 'SUBSCRIPTION_VIP',
+                idempotency_key: `SUB_${user_id}_${Date.now()}`,
+                note: `[DOANH THU SÀN] Thanh toán nâng cấp gói VIP [${plan.name}] (${billing_cycle === 'annual' ? '1 Năm' : '1 Tháng'})`
+            }]);
+        } catch (lErr) {
+            console.warn('[Ledger Warning]:', lErr.message);
+        }
 
         // Kích hoạt gói trong service & ghi nhận Lợi nhuận sàn
         const sub = subscriptionService.subscribeUser(user_id, plan_id, billing_cycle, role, price);
 
         // Gửi thông báo cho User
-        await supabase.from('notifications').insert([{
-            user_id: user_id,
-            title: '🎉 Nâng cấp Hội viên thành công!',
-            content: `Bạn đã nâng cấp thành công gói "${plan.name}". Thời hạn sử dụng đến ngày ${new Date(sub.expires_at).toLocaleDateString('vi-VN')}. Tận hưởng ngay các đặc quyền VIP!`
-        }]);
+        try {
+            await supabase.from('notifications').insert([{
+                user_id: user_id,
+                title: '🎉 Nâng cấp Hội viên thành công!',
+                content: `Bạn đã nâng cấp thành công gói "${plan.name}". Thời hạn sử dụng đến ngày ${new Date(sub.expires_at).toLocaleDateString('vi-VN')}. Tận hưởng ngay các đặc quyền VIP!`
+            }]);
+        } catch(notiErr) {
+            console.warn('[Notification Warning]:', notiErr.message);
+        }
 
         // Log kiểm toán
-        await logEvent({
-            module: 'MONETIZATION',
-            action: 'USER_SUBSCRIBE_PLAN',
-            level: 'INFO',
-            details: `User #${user_id} đã thanh toán ${price} Token để đăng ký gói ${plan.name} (${billing_cycle})`,
-            user_id: user_id,
-            metadata: { plan_id, billing_cycle, price, expires_at: sub.expires_at }
-        });
+        try {
+            await logEvent({
+                module: 'MONETIZATION',
+                action: 'USER_SUBSCRIBE_PLAN',
+                level: 'INFO',
+                details: `User #${user_id} đã thanh toán ${price} Token để đăng ký gói ${plan.name} (${billing_cycle})`,
+                user_id: user_id,
+                metadata: { plan_id, billing_cycle, price, expires_at: sub.expires_at }
+            });
+        } catch(logErr) {
+            console.warn('[LogEvent Warning]:', logErr.message);
+        }
 
         res.status(200).json({
             success: true,
@@ -185,14 +197,18 @@ router.post('/api/monetization/boost-job', async (req, res) => {
             .eq('user_id', user_id);
 
         // Ghi Sổ cái - Doanh thu dịch vụ của Admin
-        await supabase.from('wallet_ledger').insert([{
-            sender_id: user_id,
-            receiver_id: '00000000-0000-0000-0000-000000000000',
-            amount: price,
-            transaction_type: 'job_boost',
-            status: 'completed',
-            description: `[DOANH THU SÀN] Tiện ích [${addon.name}] cho bài đăng: "${job.title}"`
-        }]);
+        try {
+            await supabase.from('wallet_ledger').insert([{
+                sender_id: user_id,
+                receiver_id: '11111111-1111-1111-1111-111111111111',
+                amount: price,
+                type: 'JOB_BOOST',
+                idempotency_key: `BOOST_${job_id}_${Date.now()}`,
+                note: `[DOANH THU SÀN] Tiện ích [${addon.name}] cho bài đăng: "${job.title}"`
+            }]);
+        } catch (lErr) {
+            console.warn('[Ledger Warning]:', lErr.message);
+        }
 
         // Kích hoạt Boost & ghi nhận Lợi nhuận sàn
         const boostRecord = subscriptionService.boostJob(job_id, boost_type, price, user_id);

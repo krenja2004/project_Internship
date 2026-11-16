@@ -170,7 +170,7 @@ async function logEvent({
                 user_email: logEntry.user_email,
                 metadata: logEntry.metadata,
                 created_at: timestamp
-            }]).catch(() => {});
+            }]);
         }
     } catch (dbErr) {
         // Silent catch

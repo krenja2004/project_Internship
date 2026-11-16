@@ -474,7 +474,13 @@
                 })
             });
 
-            const result = await res.json();
+            let result = {};
+            try {
+                result = await res.json();
+            } catch(jsonErr) {
+                result = { error: `Máy chủ phản hồi mã ${res.status}. Vui lòng thử lại sau giây lát.` };
+            }
+
             if (!res.ok || result.error) {
                 throw new Error(result.error || 'Thanh toán thất bại');
             }
@@ -540,7 +546,12 @@
                 })
             });
 
-            const result = await res.json();
+            let result = {};
+            try {
+                result = await res.json();
+            } catch(jsonErr) {
+                result = { error: `Máy chủ phản hồi mã ${res.status}. Vui lòng thử lại.` };
+            }
             if (!res.ok || result.error) throw new Error(result.error || 'Không thể đẩy bài');
 
             alert(`🚀 Thành công! Dự án "${jobTitle}" đã được đưa lên Top 1 trong 24 giờ tới.`);

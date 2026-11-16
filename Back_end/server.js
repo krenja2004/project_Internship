@@ -51,7 +51,15 @@ app.use(require('./routes/monetizationRoutes'));
 app.use(require('./routes/analyticsRoutes'));
 app.use(require('./routes/testRoutes'));
 
-// 4. Khởi chạy Server (Tích hợp AI Groq Llama 3.3 & Telegram OTP Bot)
+// 4. Bảo vệ tiến trình Server chống sập ngoài ý muốn
+process.on('uncaughtException', (err) => {
+    console.error('❌ [Global Uncaught Exception]:', err);
+});
+process.on('unhandledRejection', (reason, promise) => {
+    console.warn('⚠️ [Global Unhandled Rejection]:', reason);
+});
+
+// 5. Khởi chạy Server (Tích hợp AI Groq Llama 3.3 & Telegram OTP Bot)
 const { initTelegramBot } = require('./services/telegramService');
 
 const PORT = process.env.PORT || 5000;

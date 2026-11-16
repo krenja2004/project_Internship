@@ -1,5 +1,41 @@
 [
   {
+    "id": "log_1794796276475_1bspk",
+    "timestamp": "2026-11-16T02:31:16.475Z",
+    "module": "MONETIZATION",
+    "action": "USER_SUBSCRIBE_PLAN",
+    "level": "INFO",
+    "details": "User #5f79cd46-e8e4-4db3-80d7-250c54199b6a đã thanh toán 99000 Token để đăng ký gói Chuyên Gia Pro (monthly)",
+    "user_id": "5f79cd46-e8e4-4db3-80d7-250c54199b6a",
+    "user_email": "User:5f79cd46",
+    "user_role": "system",
+    "ip": "127.0.0.1",
+    "metadata": {
+      "plan_id": "freelancer_pro",
+      "billing_cycle": "monthly",
+      "price": 99000,
+      "expires_at": "2026-12-16T02:31:16.349Z"
+    }
+  },
+  {
+    "id": "log_1794795941228_euyj3",
+    "timestamp": "2026-11-16T02:25:41.228Z",
+    "module": "MONETIZATION",
+    "action": "USER_SUBSCRIBE_PLAN",
+    "level": "INFO",
+    "details": "User #5f79cd46-e8e4-4db3-80d7-250c54199b6a đã thanh toán 99000 Token để đăng ký gói Chuyên Gia Pro (monthly)",
+    "user_id": "5f79cd46-e8e4-4db3-80d7-250c54199b6a",
+    "user_email": "User:5f79cd46",
+    "user_role": "system",
+    "ip": "127.0.0.1",
+    "metadata": {
+      "plan_id": "freelancer_pro",
+      "billing_cycle": "monthly",
+      "price": 99000,
+      "expires_at": "2026-12-16T02:25:41.069Z"
+    }
+  },
+  {
     "id": "log_1794281717705_e7n3u",
     "timestamp": "2026-11-10T03:35:17.689Z",
     "module": "SYSTEM",
